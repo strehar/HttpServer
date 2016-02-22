@@ -54,7 +54,7 @@ namespace WebserverDemo
             _ws.RefreshFileList();
 
             _ws.AuthenticationRequired = true;
-            _ws.AddUser("Miha", "Miha1");
+            _ws.AddUser("User", "password");
 
             //_ws.AddPath("/demoLED.html", ProcessDemoLED);
             //_ws.AddPath("/demoTemperature.html", ProcessTemperature);
