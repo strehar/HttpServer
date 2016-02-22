@@ -1,0 +1,17 @@
+﻿<!DOCTYPE html>
+
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="utf-8" />
+    <title>Kontrola timerja</title>
+</head>
+<body>
+    <h1>Vklop in izklop timerja, utripanje LED diode na pinu 4.</h1>
+    <hr />
+    <form action="demoTimer.html" method="GET">
+        <input type="radio" name="state" value="on" @#TIMERON onclick="this.form.submit()"> On<br>
+        <input type="radio" name="state" value="off" @#TIMEROFF onclick="this.form.submit()"> Off
+    </form>
+    <p><a href="index.html">Nazaj</a></p>
+</body>
+</html>
