@@ -74,9 +74,9 @@ namespace WebserverDemo
             _ws.AuthenticationRequired = true;
             _ws.AddUser("user", "password");
 
-            //_ws.AddPath("/demoLED.html", ProcessDemoLED);
-            //_ws.AddPath("/demoTemperature.html", ProcessTemperature);
-            //_ws.AddPath("/demoTimer.html", ProcessTimer);
+            _ws.AddPath("/demoLED.html", ProcessDemoLED);
+            _ws.AddPath("/demoTemperature.html", ProcessTemperature);
+            _ws.AddPath("/demoTimer.html", ProcessTimer);
             _ws.AddPath("/demoCookieSet.html", ProcessCookieSet);
             _ws.AddPath("/demoCookieRead.html", ProcessCookieRead);
             _ws.AddPath("/demoCookieRemove.html", ProcessCookieRemove);
@@ -89,7 +89,7 @@ namespace WebserverDemo
             _ws.SetRootPath("PublicHtml", "/index.html");
             _ws.Start();
 
-            //_ws.AddTimer("TestTimer", 10000, TimerDemo);
+            _ws.AddTimer("TestTimer", 10000, TimerDemo);
 
             _json.AddData("Timer", "Off");
             _json.AddData("Led", "Off");

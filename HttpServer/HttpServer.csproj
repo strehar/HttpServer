@@ -121,9 +121,9 @@
     <Compile Include="Http\MimeTypes.cs" />
     <Compile Include="Http\Session.cs" />
     <Compile Include="Http\SessionManager.cs" />
+    <Compile Include="Parts\Exceptions\I2CControllerException.cs" />
     <Compile Include="Parts\PortExpander\PCF8574.cs" />
     <Compile Include="Parts\Thermometer\DS1621.cs" />
-    <Compile Include="Parts\Exceptions\I2CControllerException.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Http\Json\SimpleJsonListener.cs" />
     <Compile Include="Http\Template\SimpleTemplate.cs" />
