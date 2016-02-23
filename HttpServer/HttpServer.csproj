@@ -131,7 +131,7 @@
     <Compile Include="Parts\I2C\RealTimeClock\DS1307.cs" />
     <Compile Include="Parts\I2C\Thermometer\DS1621.cs" />
     <Compile Include="Parts\Exceptions\I2CControllerException.cs" />
-    <Compile Include="Parts\OneWire\DS18B20.cs" />
+    <Compile Include="Parts\OneWire\Thermometer\DS18B20.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Http\Json\SimpleJsonListener.cs" />
     <Compile Include="Http\Template\SimpleTemplate.cs" />
