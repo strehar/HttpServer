@@ -155,6 +155,24 @@ namespace Feri.MS.Http
 
         }
 
+        /// <summary>
+        /// this method just creates new StreamSocketListener and registers listener for new conenctions recived and then binds this listener to port specified by user.
+        /// Must be called before server starts to listen to requests.
+        /// </summary>
+        public void Start(string serviceName)
+        {
+            if (string.IsNullOrEmpty(serviceName))
+            {
+                throw new InvalidDataException("Invalid service name in Start(string)");
+            }
+            listener = new StreamSocketListener();
+            listener.ConnectionReceived += (sender, args) => ProcessRequestAsync(args.Socket);
+#pragma warning disable CS4014
+            listener.BindServiceNameAsync(serviceName);
+#pragma warning restore CS4014
+
+        }
+
         #region Request processing
         /// <summary>
         /// Main listener for requests. It creates new task for each request, to enshure that they are served as fast as possible (each task is run in thread from thread pool. Might be same, might be different)
