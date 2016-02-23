@@ -22,7 +22,7 @@ using System.Threading.Tasks;
 using Windows.Devices.Enumeration;
 using Windows.Devices.I2c;
 
-namespace Feri.MS.Parts.Thermometer
+namespace Feri.MS.Parts.I2C.Thermometer
 {
     // DS1621 digitalni termometer na i2c vodil
     public class DS1621 : IDisposable

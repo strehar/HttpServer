@@ -24,7 +24,7 @@ using System.Threading.Tasks;
 using Windows.Devices.Enumeration;
 using Windows.Devices.I2c;
 
-namespace Feri.MS.Parts.PortExpander
+namespace Feri.MS.Parts.I2C.PortExpander
 {
     public enum PortNumber
     {

@@ -142,24 +142,11 @@ namespace Feri.MS.Http
         }
 
         /// <summary>
-        /// this method just creates new StreamSocketListener and registers listener for new conenctions recived and then binds this listener to port 8000.
-        /// Must be called before server starts to listen to requests.
-        /// </summary>
-        public void Start()
-        {
-            listener = new StreamSocketListener();
-            listener.ConnectionReceived += (sender, args) => ProcessRequestAsync(args.Socket);
-#pragma warning disable CS4014
-            listener.BindServiceNameAsync("8000");
-#pragma warning restore CS4014
-
-        }
-
-        /// <summary>
         /// this method just creates new StreamSocketListener and registers listener for new conenctions recived and then binds this listener to port specified by user.
+        /// If you call the method without arguments, it defaults to port 8000.
         /// Must be called before server starts to listen to requests.
         /// </summary>
-        public void Start(string serviceName)
+        public void Start(string serviceName = "8000")
         {
             if (string.IsNullOrEmpty(serviceName))
             {

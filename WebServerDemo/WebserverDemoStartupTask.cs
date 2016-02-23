@@ -26,9 +26,9 @@ using WebResources;
 using Feri.MS.Http;
 using Feri.MS.Http.Template;
 using Feri.MS.Http.Json;
-using Feri.MS.Parts.Thermometer;
+using Feri.MS.Parts.I2C.Thermometer;
 using System.Text;
-using Feri.MS.Parts.PortExpander;
+using Feri.MS.Parts.I2C.PortExpander;
 
 namespace WebserverDemo
 {
