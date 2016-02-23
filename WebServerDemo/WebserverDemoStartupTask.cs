@@ -126,6 +126,7 @@ namespace WebserverDemo
             _termometer.HighPrecision = true;
             _termometer.Initialize();
 
+            _ports._debug = true;
             _ports.Initialize();
         }
 

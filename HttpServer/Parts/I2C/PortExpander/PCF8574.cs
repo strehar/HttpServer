@@ -42,6 +42,7 @@ namespace Feri.MS.Parts.I2C.PortExpander
     {
         private I2cDevice _i2cController;
         private bool _isDisposed = false;
+        public bool _debug = false;
 
         public bool OneShotMode { get; set; }
         private bool IsInitialized { get; set; }
@@ -52,7 +53,7 @@ namespace Feri.MS.Parts.I2C.PortExpander
         private DeviceInformationCollection FindI2cControllers()
         {
             string advancedQuerySyntaxString = I2cDevice.GetDeviceSelector();
-            Task<DeviceInformationCollection> initTask = Task<DeviceInformationCollection>.Run(async () => await DeviceInformation.FindAllAsync(advancedQuerySyntaxString));
+            Task<DeviceInformationCollection> initTask = Task.Run(async () => await DeviceInformation.FindAllAsync(advancedQuerySyntaxString));
             DeviceInformationCollection controllerDeviceIds = initTask.Result;
             if (controllerDeviceIds == null || controllerDeviceIds.Count == 0)
             {
@@ -144,7 +145,7 @@ namespace Feri.MS.Parts.I2C.PortExpander
 
             _i2cController.Write(writeBuffer);
 
-            Debug.WriteLine("Pin " + pin + " na " + writeBuffer[0]);
+            Debug.WriteLineIf(_debug, "Pin " + pin + " na " + writeBuffer[0]);
 
         }
 
