@@ -1,5 +1,4 @@
-# HttpServer
-##Simple HTTP Server library for windows IoT devices.
+#Simple HTTP Server library for windows IoT devices.
 
 There is limited HTTP server support functionality in Windows IoT, but some projects could really benifit from embedded HTTP Server. It specially makes it easy to display data to the clients or controll the IoT device itself.
 
