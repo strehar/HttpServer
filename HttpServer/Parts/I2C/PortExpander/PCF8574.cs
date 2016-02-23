@@ -79,7 +79,7 @@ namespace Feri.MS.Parts.I2C.PortExpander
             I2cConnectionSettings i2cSettings = new I2cConnectionSettings(Address);
             i2cSettings.BusSpeed = I2cBusSpeed.StandardMode;
 
-            Task<I2cDevice> controlerInitTask = Task<I2cDevice>.Run(async () => await I2cDevice.FromIdAsync(i2cControllerDeviceId, i2cSettings));
+            Task<I2cDevice> controlerInitTask = Task.Run(async () => await I2cDevice.FromIdAsync(i2cControllerDeviceId, i2cSettings));
             _i2cController = controlerInitTask.Result;
 
             IsInitialized = true;
@@ -173,6 +173,7 @@ namespace Feri.MS.Parts.I2C.PortExpander
             return bits[(int)pin];
         }
 
+        #region IDisposable Support
         public void Dispose()
         {
             if (_i2cController != null)
@@ -183,5 +184,6 @@ namespace Feri.MS.Parts.I2C.PortExpander
             _isDisposed = true;
             //GC.SuppressFinalize(this);
         }
+        #endregion
     }
 }

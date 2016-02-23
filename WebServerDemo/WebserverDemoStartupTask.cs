@@ -271,7 +271,6 @@ namespace WebserverDemo
                 if (request.Parameters.ContainsKey("niz"))
                 {
                     response.AddCookie(new HttpCookie("DemoCookie", request.Parameters["niz"], (DateTime.Now).AddHours(1)));
-                    //response.AddCookie(new HttpCookie("Demo", "Ime=Vrednost&Ime1=Vrednost1&Ime2=Vredost2"));
 
                     response.Write(_ws.ReadEmbededToByte(_privatePath + "/cookieSetPotrdi.html"), _ws.GetMimeType.GetMimeFromFile("/cookieSetPotrdi.html"));
                 }
@@ -411,7 +410,7 @@ namespace WebserverDemo
             {
                 byte[] _temp = _termometer.TemperatureRead();
                 StringBuilder temp = new StringBuilder();
-                if (_temp[0] > 125)  // Termometer gre do 125, če je več, potem pomeni da je negativna temperatura.
+                if (_temp[0] > 125)  // Termometer gre do 125, če je več, potem pomeni da je negativna temperatura. (Thermometer reads up to 125C, everything above it is negative)
                     temp.Append((_temp[0] - 256).ToString());
                 else
                     temp.Append(_temp[0].ToString());

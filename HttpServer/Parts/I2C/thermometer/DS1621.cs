@@ -24,7 +24,7 @@ using Windows.Devices.I2c;
 
 namespace Feri.MS.Parts.I2C.Thermometer
 {
-    // DS1621 digitalni termometer na i2c vodil
+    // DS1621 digitalni termometer na i2c vodilu
     public class DS1621 : IDisposable
     {
         // Deklaracije:
@@ -58,7 +58,7 @@ namespace Feri.MS.Parts.I2C.Thermometer
         private DeviceInformationCollection FindI2cControllers()
         {
             string advancedQuerySyntaxString = I2cDevice.GetDeviceSelector();
-            Task<DeviceInformationCollection> initTask = Task<DeviceInformationCollection>.Run(async () => await DeviceInformation.FindAllAsync(advancedQuerySyntaxString));
+            Task<DeviceInformationCollection> initTask = Task.Run(async () => await DeviceInformation.FindAllAsync(advancedQuerySyntaxString));
             DeviceInformationCollection controllerDeviceIds = initTask.Result;
             if (controllerDeviceIds == null || controllerDeviceIds.Count == 0)
             {
@@ -70,6 +70,7 @@ namespace Feri.MS.Parts.I2C.Thermometer
         public void Initialize()
         {
             Initialize(FindI2cControllers()[0].Id);
+            throw new NotImplementedException();
         }
 
         public void Initialize(string i2cControllerDeviceId)
@@ -84,7 +85,7 @@ namespace Feri.MS.Parts.I2C.Thermometer
             I2cConnectionSettings i2cSettings = new I2cConnectionSettings(Address);
             i2cSettings.BusSpeed = I2cBusSpeed.StandardMode;
 
-            Task<I2cDevice> controlerInitTask = Task<I2cDevice>.Run(async () => await I2cDevice.FromIdAsync(i2cControllerDeviceId, i2cSettings));
+            Task<I2cDevice> controlerInitTask = Task.Run(async () => await I2cDevice.FromIdAsync(i2cControllerDeviceId, i2cSettings));
             _i2cController = controlerInitTask.Result;
 
             IsInitialized = true;
@@ -209,8 +210,6 @@ namespace Feri.MS.Parts.I2C.Thermometer
 
             _temperature = (_temperatureRead - 0.25) + ((_count_per_c - _count_remain) / _count_per_c);
 
-            //byte[] rezultat = BitConverter.GetBytes(_temperature);
-
             int whole = (int)_temperature;
             // Natančnost (v spodnji formuli *100 je na dve decimalki, *10 je na eno)
             int precision = (int)Math.Abs((_temperature - whole) * 10);
@@ -298,6 +297,7 @@ namespace Feri.MS.Parts.I2C.Thermometer
 
         }
 
+        #region IDisposable Support
         public void Dispose()
         {
             if (_i2cController != null)
@@ -308,5 +308,6 @@ namespace Feri.MS.Parts.I2C.Thermometer
             _isDisposed = true;
             //GC.SuppressFinalize(this);
         }
+        #endregion
     }
 }
