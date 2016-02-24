@@ -24,9 +24,18 @@ using System.Reflection;
 using System.Threading.Tasks;
 using Windows.Networking.Sockets;
 using Feri.MS.Http.Timer;
+using Windows.Networking;
+using System.Net;
+using System.Linq;
 
 namespace Feri.MS.Http
 {
+    class IpNumber
+    {
+        internal byte[] IPAddress { get; set; }
+        internal byte[] IPAddressUpper { get; set; }
+        internal byte[] IPAddressLower { get; set; }
+    }
     /// <summary>
     /// Class is min HTTP server class. It handles reciving conenctions, creating Tasks (and indirectly threads from thread pool), creating HttpRequest and HttpResponse objects, 
     /// adding and removing users, handling authentications, trigegring events based on the client requests, processing request errors, handling timers,
@@ -52,6 +61,9 @@ namespace Feri.MS.Http
         Dictionary<string, HttpTimer> _timerji = new Dictionary<string, HttpTimer>();                            // registrirani timerji, ki so na sistemu in se prožijo
         Dictionary<string, string> _users = new Dictionary<string, string>();                            // Registriranu userji z gesli, ki imajo dostop do sistema
 
+        Dictionary<string, IpNumber> _blackList = new Dictionary<string, IpNumber>();
+        Dictionary<string, IpNumber> _whiteList = new Dictionary<string, IpNumber>();
+
         Assembly _sistemskiAssembly = null;               // asembly od tega dll-a, da se lahko sklicujemo na sistemske vire
 
         //private const int BufferSize = 8192;            // Prevzeta največja velikost predpomnilnika za obdelavo HTTP zahtev.
@@ -67,6 +79,7 @@ namespace Feri.MS.Http
         string _serverRootFile = "serverDefault.html";    // Preveta datoteka za prikaz
         private bool _debug = false;                      // Ali se naj izpisujejo debug informacije iz metod (precej spama)
         private bool _authenticationRequired = false;     // Ali server zahteva avtentikacijo za dostop do HTTP vmesnika. prevzeto je ne.
+        private bool _ipFilter = false;
 
         private SessionManager _sessionManager = new SessionManager(); // Skrbi za seje. Poda se kot referenca novim HttRequest in HttpResponse objektom.
 
@@ -75,6 +88,19 @@ namespace Feri.MS.Http
         #endregion
 
         #region Properties
+        public bool IPFilterEnabled
+        {
+            get
+            {
+                return _ipFilter;
+            }
+
+            set
+            {
+                _ipFilter = value;
+            }
+        }
+
         public bool AuthenticationRequired
         {
             get
@@ -188,6 +214,19 @@ namespace Feri.MS.Http
         {
             //try
             //{
+            // Access management
+            if (!_ipFilter)
+            {
+                // We do ip filtering before anyting, if access is denied, there is no point in processing data.
+                if (ProcessIPFilter(socket))
+                {
+                    HttpResponse _error = new HttpResponse(socket.OutputStream.AsStreamForWrite());
+                    byte[] _dataArray = ReadEmbededToByte("SystemHtml/403.html");
+                    _error.Write(_dataArray, _mimeType.GetMimeFromFile("/403.html"), "403 Forbidden");
+                    return;
+                }
+            }
+
             HttpRequest _hrequest = new HttpRequest();
             _hrequest._debug = _debug;
 
@@ -238,6 +277,9 @@ namespace Feri.MS.Http
             //    Debug.WriteLine(e);
             //}
         }
+
+
+
 
         /// <summary>
         /// Heler method for processing server or request errors-
@@ -392,6 +434,215 @@ namespace Feri.MS.Http
             //    Debug.WriteLine(e.Message);
             //    Debug.WriteLine(e.StackTrace);
             //}
+        }
+        #endregion
+
+        #region IP Filtering
+        /// <summary>
+        /// Check if IP of remote user matches any of the lists.
+        /// If it exists in blacklist or does not exist in whitelist access is denied.
+        /// BlackList allways override the whitelist!
+        /// 
+        /// WhiteList: If no record exist, it's ignored. If atleast one record exists, then we check against the list, else set result to false. If it is found, the return is set to false, else it's set to true.
+        /// BlackList: If no record exist do not modify whitelist result. Else, check the IP against the list. If it exists in the list, set the result to true, overriding whatever was result from whitelist.
+        /// </summary>
+        /// <param name="socket">connectiong socket. we get remote IP address from this.</param>
+        /// <returns>True if user should be blocked or false, if access should be granted. Note that this does not override user access verification in any way.</returns>
+        private bool ProcessIPFilter(StreamSocket socket)
+        {
+            // Get remote IP
+            HostName remoteHost = socket.Information.RemoteAddress;
+            string[] _remoteHostString = remoteHost.ToString().Split('.');
+            if (_remoteHostString.Length < 4)
+            {
+                // IP ni ok. nekaj je treba narediti...
+            }
+            byte[] _remoteIP = new byte[4];
+            for (int i = 0; i < _remoteIP.Length; i++)
+            {
+                if (!byte.TryParse(_remoteHostString[i], out _remoteIP[i]))
+                {
+                    // konverzija ni uspela, spet je treba nekaj naredit.
+                }
+            }
+
+            // process each IP from black and white list. if remote IP is not any of the black lists and if on atleast one white list then return ok, else return true for blocked.
+            // 1st check whitelist, then blacklist, so blackist can override whitelist
+            bool _result = true;
+            if (_whiteList.Count > 0)
+            {
+                foreach (KeyValuePair<string, IpNumber> key in _whiteList)
+                {
+                    if (IpInRange(_remoteIP, key.Value))
+                        _result = false;
+                }
+            }
+            else
+                _result = false;
+
+            foreach (KeyValuePair<string, IpNumber> key in _blackList)
+            {
+                if (IpInRange(_remoteIP, key.Value))
+                    _result = true;
+            }
+
+            return _result;
+
+        }
+
+        /// <summary>
+        /// Internal helper method to check if provided ip is in range of provided filter.
+        /// </summary>
+        /// <param name="ip">IP address we are checking in byte format.</param>
+        /// <param name="filter">Ip filter (IP range) we are checking against</param>
+        /// <returns>true if ip is in range, false if it is not.</returns>
+        private bool IpInRange(byte[] ip, IpNumber filter)
+        {
+            bool _result = true;
+            for (int i = 0; i < ip.Length; i++)
+            {
+                if ((ip[i] >= filter.IPAddressLower[i]) && (ip[i] <= filter.IPAddressUpper[i]))
+                {
+                    //
+                }
+                else
+                {
+                    _result = false;
+                }
+            }
+            return _result;
+        }
+
+        /// <summary>
+        /// Method adds provided IP address and range to the blacklist
+        /// </summary>
+        /// <param name="ip">IP address we are adding to the blacklist</param>
+        /// <param name="bits">network bits of the address. This is used to calculate upper and lower IP address of the range.</param>
+        /// <returns>true if ip was added, false if it allready exist in the blacklist</returns>
+        public bool AddBlackList(IPAddress ip, int bits)
+        {
+            IpNumber _IP = GetIpRangeFromIpAddress(ip, bits);
+
+            if (!_blackList.ContainsKey(ip.ToString()))
+            {
+                _blackList.Add(ip.ToString(), _IP);
+                return true;
+            }
+            return false;
+        }
+
+        /// <summary>
+        /// method removes provided ip from the blacklist
+        /// </summary>
+        /// <param name="ip">IP to remove from blacklist.</param>
+        /// <returns>true if ip was removed or else if it did not exist in blacklist</returns>
+        public bool RemoveBlackList(IPAddress ip)
+        {
+            if (!_blackList.ContainsKey(ip.ToString()))
+            {
+                _blackList.Remove(ip.ToString());
+                return true;
+            }
+            return false;
+        }
+
+        /// <summary>
+        /// Method checks if provided ip exist in blacklist.
+        /// </summary>
+        /// <param name="ip">IP we are checking for in blacklist</param>
+        /// <returns>true if it exist or false if it does not exist in blacklist</returns>
+        public bool IsBlackListed(IPAddress ip)
+        {
+            if (!_blackList.ContainsKey(ip.ToString()))
+            {
+                return true;
+            }
+            return false;
+        }
+
+        /// <summary>
+        /// Method adds provided IP address and range to the whitelist
+        /// </summary>
+        /// <param name="ip">IP address we are adding to the whitelist</param>
+        /// <param name="bits">network bits of the address. This is used to calculate upper and lower IP address of the range.</param>
+        /// <returns>true if ip was added, false if it allready exist in the whitelist</returns>
+        public bool AddWhiteList(IPAddress ip, int bits)
+        {
+            IpNumber _IP = GetIpRangeFromIpAddress(ip, bits);
+
+            if (!_whiteList.ContainsKey(ip.ToString()))
+            {
+                _whiteList.Add(ip.ToString(), _IP);
+                return true;
+            }
+            return false;
+        }
+
+        /// <summary>
+        /// method removes provided ip from the whitelist
+        /// </summary>
+        /// <param name="ip">IP to remove from whitelist.</param>
+        /// <returns>true if ip was removed or else if it did not exist in whitelist</returns>
+        public bool RemoveWhiteList(IPAddress ip)
+        {
+            if (!_whiteList.ContainsKey(ip.ToString()))
+            {
+                _blackList.Remove(ip.ToString());
+                return true;
+            }
+            return false;
+        }
+
+        /// <summary>
+        /// Method checks if provided ip exist in whitelist.
+        /// </summary>
+        /// <param name="ip">IP we are checking for in whitelist</param>
+        /// <returns>true if it exist or false if it does not exist in whitelist</returns>
+        public bool IsWhiteListed(IPAddress ip)
+        {
+            if (!_whiteList.ContainsKey(ip.ToString()))
+            {
+                return true;
+            }
+            return false;
+        }
+
+        /// <summary>
+        /// internal helper method that calculates upper and lower ip address of ip range, from provided IP address and nework bit mask.
+        /// ip if provided as IPAddress class and mask is provided as bits (for example: 0, 8, 16, 24, 32, ...)
+        /// </summary>
+        /// <param name="ip">IP to be used for range caclulation</param>
+        /// <param name="bits">Network bits to be used for range calculation</param>
+        /// <returns>IPNumber filter object contain provided ip address and upper and lowe ranges of the network</returns>
+        private IpNumber GetIpRangeFromIpAddress(IPAddress ip, int bits)
+        {
+            uint _IPMask;
+            if (bits != 32)
+                _IPMask = ~(uint.MaxValue >> bits);
+            else
+                _IPMask = uint.MaxValue;
+
+            byte[] _ipBytes = ip.GetAddressBytes();
+
+            byte[] _maskBytes;
+            if (BitConverter.IsLittleEndian)
+                _maskBytes = BitConverter.GetBytes(_IPMask).Reverse().ToArray();
+            else
+                _maskBytes = BitConverter.GetBytes(_IPMask).ToArray();
+
+            byte[] _lowerIPBytes = new byte[_ipBytes.Length];
+            byte[] _upperIPBytes = new byte[_ipBytes.Length];
+            for (int i = 0; i < _ipBytes.Length; i++)
+            {
+                _lowerIPBytes[i] = (byte)(_ipBytes[i] & _maskBytes[i]);
+                _upperIPBytes[i] = (byte)(_ipBytes[i] | ~_maskBytes[i]);
+            }
+
+            IpNumber _IP = new IpNumber();
+            _IP.IPAddress = _ipBytes;
+            _IP.IPAddressLower = _lowerIPBytes;
+            _IP.IPAddressUpper = _upperIPBytes;
+            return _IP;
         }
         #endregion
 

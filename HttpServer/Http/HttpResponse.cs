@@ -65,6 +65,15 @@ namespace Feri.MS.Http
             _stream = _request.Output;
         }
 
+        /// <summary>
+        /// For internal use, to display error before any processing is done.
+        /// </summary>
+        /// <param name="stream"></param>
+        internal HttpResponse(Stream stream)
+        {
+            _stream = stream;
+        }
+
 
         /// <summary>
         /// Metod formates HTTP Response and adds user data to it.
@@ -94,14 +103,15 @@ namespace Feri.MS.Http
                 {
                     _header.Append(par.Key + ": " + par.Value + _eol);
                 }
-            if (_request.SessionUpdated)
-            {
-                HttpCookie _sessionCookie = _request.GetCookie("SessionID");
-                if (_sessionCookie != null)
+            if (_request != null)
+                if (_request.SessionUpdated)
                 {
-                    _cookies.Add("SessionID", _sessionCookie);
+                    HttpCookie _sessionCookie = _request.GetCookie("SessionID");
+                    if (_sessionCookie != null)
+                    {
+                        _cookies.Add("SessionID", _sessionCookie);
+                    }
                 }
-            }
             if (_cookies.Count > 0) // Obdelamo cookije...
             {
                 //_header.Append("Set-Cookie: ");

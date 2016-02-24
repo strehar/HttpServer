@@ -70,7 +70,6 @@ namespace Feri.MS.Parts.I2C.Thermometer
         public void Initialize()
         {
             Initialize(FindI2cControllers()[0].Id);
-            throw new NotImplementedException();
         }
 
         public void Initialize(string i2cControllerDeviceId)

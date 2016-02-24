@@ -116,7 +116,7 @@
     <EmbeddedResource Include="Properties\WebResources.rd.xml" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="PublicHtml\billboard_blank_3.jpg" />
+    <EmbeddedResource Include="PublicHtml\billboard_blank_3.jpg" />
   </ItemGroup>
   <PropertyGroup Condition=" '$(VisualStudioVersion)' == '' or '$(VisualStudioVersion)' &lt; '14.0' ">
     <VisualStudioVersion>14.0</VisualStudioVersion>

@@ -10,7 +10,7 @@ namespace WebResources
     {
         public WebHolder()
         {
-            throw new NotImplementedException("This is just placeholder");
+            //throw new NotImplementedException("This is just placeholder");
         }
     }
 }

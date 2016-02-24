@@ -29,6 +29,7 @@ using Feri.MS.Http.Json;
 using Feri.MS.Parts.I2C.Thermometer;
 using System.Text;
 using Feri.MS.Parts.I2C.PortExpander;
+using System.Net;
 
 namespace WebserverDemo
 {
@@ -64,7 +65,7 @@ namespace WebserverDemo
         public void Start()
         {
             //InitGPIO();
-            _ws.SetDebug = false;
+            _ws.SetDebug = true;
 
             _ws.RegisterAssembly(this.GetType());
             _ws.RegisterAssembly(_wh.GetType());
@@ -87,6 +88,11 @@ namespace WebserverDemo
             _ws.AddPath("/data.json", _json.Listen);
 
             _ws.SetRootPath("PublicHtml", "/index.html");
+
+            // IP Filtering
+            _ws.AddBlackList(new IPAddress(new byte[] { 192, 168, 1, 64 }), 24);
+            _ws.AddWhiteList(new IPAddress(new byte[] { 192, 168, 2, 64 }), 32);
+
             _ws.Start();
 
             _ws.AddTimer("TestTimer", 10000, TimerDemo);
