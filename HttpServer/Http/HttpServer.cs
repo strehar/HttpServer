@@ -215,7 +215,7 @@ namespace Feri.MS.Http
             //try
             //{
             // Access management
-            if (!_ipFilter)
+            if (_ipFilter)
             {
                 // We do ip filtering before anyting, if access is denied, there is no point in processing data.
                 if (ProcessIPFilter(socket))
