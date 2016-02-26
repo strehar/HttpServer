@@ -38,6 +38,7 @@ namespace WebserverDemo
 
         //GpioController gpio;
         //GpioPin pin;
+        //GpioPin pin2;
 
         HttpServer _ws = new HttpServer();
         WebHolder _wh = new WebHolder();
@@ -65,7 +66,7 @@ namespace WebserverDemo
         public void Start()
         {
             //InitGPIO();
-            _ws.SetDebug = true;
+            _ws.SetDebug = false;
 
             _ws.RegisterAssembly(this.GetType());
             _ws.RegisterAssembly(_wh.GetType());
@@ -86,6 +87,7 @@ namespace WebserverDemo
             _ws.AddPath("/demoSessionRemove.html", ProcessSessionRemove);
             _ws.AddPath("/template.html", VrniTemplate);
             _ws.AddPath("/data.json", _json.Listen);
+            _ws.AddPath("/demoRedirect.html", ProcessDemoRedirect);
 
             _ws.SetRootPath("PublicHtml", "/index.html");
 
@@ -137,6 +139,11 @@ namespace WebserverDemo
             _ports.Initialize();
         }
 
+        private void ProcessDemoRedirect(HttpRequest request, HttpResponse response)
+        {
+            response.Redirect("/redirectTarget.html");
+        }
+
         //private void InitGPIO()
         //{
         //    gpio = GpioController.GetDefault();
@@ -145,6 +152,10 @@ namespace WebserverDemo
         //    pin = gpio.OpenPin(4);
         //    pin.Write(GpioPinValue.Low);
         //    pin.SetDriveMode(GpioPinDriveMode.Output);
+        //    pin2 = gpio.OpenPin(5);
+        //    pin2.Write(GpioPinValue.Low);
+        //    pin2.SetDriveMode(GpioPinDriveMode.Output);
+
         //}
 
         public void TimerDemo()
@@ -154,7 +165,6 @@ namespace WebserverDemo
                 if (state.Equals("on", StringComparison.OrdinalIgnoreCase))
                 {
                     //pin.Write(GpioPinValue.Low);
-                    //_ports.Write(0);
                     _ports.WritePin(PortNumber.PORT_ONE, false);
                     _json.UpdateData("Led", "Off");
                     _templateDemo.UpdateAction("led", "Off");
@@ -163,7 +173,6 @@ namespace WebserverDemo
                 else
                 {
                     //pin.Write(GpioPinValue.High);
-                    //_ports.Write(1);
                     _ports.WritePin(PortNumber.PORT_ONE, true);
                     _json.UpdateData("Led", "On");
                     _templateDemo.UpdateAction("led", "On");
@@ -191,7 +200,7 @@ namespace WebserverDemo
                         stateLed = "On";
                         _json.UpdateData("MaualLed", "On");
                         _templateDemo.UpdateAction("maualLed", "On");
-                        //pin.Write(GpioPinValue.High);
+                        //pin2.Write(GpioPinValue.High);
                         _ports.WritePin(PortNumber.PORT_TWO, true);
                     }
                     else if (request.Parameters["state"].Equals("Off", StringComparison.OrdinalIgnoreCase))
@@ -199,7 +208,7 @@ namespace WebserverDemo
                         stateLed = "Off";
                         _json.UpdateData("MaualLed", "Off");
                         _templateDemo.UpdateAction("maualLed", "Off");
-                        //pin.Write(GpioPinValue.Low);
+                        //pin2.Write(GpioPinValue.Low);
                         _ports.WritePin(PortNumber.PORT_TWO, false);
                     }
                     Debug.WriteLineIf(_debug, "State changed to: " + state);
@@ -313,7 +322,7 @@ namespace WebserverDemo
                 }
                 else
                 {
-                    _cookieTemplate.UpdateAction("cookie", "ni podatkov.");
+                    _cookieTemplate.UpdateAction("cookie", "no data.");
                 }
                 _cookieTemplate.ProcessAction();
                 response.Write(_cookieTemplate.GetByte(), _ws.GetMimeType.GetMimeFromFile("/teplateCookieRead.html"));
@@ -384,7 +393,7 @@ namespace WebserverDemo
                 }
                 else
                 {
-                    _sessionTemplate.UpdateAction("session", "ni podatkov.");
+                    _sessionTemplate.UpdateAction("session", "no data.");
                 }
                 _sessionTemplate.ProcessAction();
                 response.Write(_sessionTemplate.GetByte(), _ws.GetMimeType.GetMimeFromFile("/teplateSessionRead.html"));
@@ -402,7 +411,7 @@ namespace WebserverDemo
             try
             {
                 request.RemoveSession();
-                response.Write(_ws.ReadEmbededToByte(_privatePath + "/cookieRemove.html"), _ws.GetMimeType.GetMimeFromFile("/cookieRemove.html"));
+                response.Write(_ws.ReadEmbededToByte(_privatePath + "/sessionRemove.html"), _ws.GetMimeType.GetMimeFromFile("/sessionRemove.html"));
             }
             catch (Exception e)
             {
@@ -442,6 +451,7 @@ namespace WebserverDemo
         public void Dispose()
         {
             //pin.Dispose();
+            //pin2.Dispose();
             _ports.Dispose();
             _termometer.Dispose();
         }

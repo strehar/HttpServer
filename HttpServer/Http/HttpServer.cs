@@ -220,6 +220,7 @@ namespace Feri.MS.Http
                 // We do ip filtering before anyting, if access is denied, there is no point in processing data.
                 if (ProcessIPFilter(socket))
                 {
+                    _log.WriteLine("Blocked IP:" + DateTime.Now.ToString("R") + ": " + socket.Information.RemoteAddress.ToString() + ": " + socket.Information.LocalAddress.ToString());
                     HttpResponse _error = new HttpResponse(socket.OutputStream.AsStreamForWrite());
                     byte[] _dataArray = ReadEmbededToByte("SystemHtml/403.html");
                     _error.Write(_dataArray, _mimeType.GetMimeFromFile("/403.html"), "403 Forbidden");

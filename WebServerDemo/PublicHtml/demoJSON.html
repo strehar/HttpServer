@@ -7,12 +7,12 @@ Copyright (c) 2016 by Miha Strehar
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width">
-    <title>JSon primer</title>
+    <title>HTML page with JS and JSON</title>
 </head>
 <body>
-    <h1>Primer Json klica, ki prikaže stanje timerja in LED diode.</h1>
+    <h1>HTML page with JS and JSON.</h1>
     <hr />
-    Stanje LED diode in timerja je:
+    States of LED diodes and TIMER are:
     <div id="id01"></div>
     <script>
         getData();
@@ -41,19 +41,19 @@ Copyright (c) 2016 by Miha Strehar
             var i;
             for (i = 0; i < arr.length; i++) {
                 if (arr[i].Key == "Led") {
-                    out += "<li>LED je " + arr[i].Value + "</li>";
+                    out += "<li>Timer controleld LED is " + arr[i].Value + "</li>";
                 } else if (arr[i].Key == "Timer") {
-                    out += "<li>Timer je " + arr[i].Value + "</li>";
+                    out += "<li>TIMER is " + arr[i].Value + "</li>";
                 } else if (arr[i].Key == "MaualLed") {
-                    out += "<li>Ročna LED je " + arr[i].Value + "</li>";
+                    out += "<li>Manual LED is " + arr[i].Value + "</li>";
                 } else {
-                    out += '<li>Neznan: ' + arr[i].Key + ' z vrednostjo ' + arr[i].Value + '</li>';
+                    out += '<li>Unknown parameter: ' + arr[i].Key + ' with value: ' + arr[i].Value + '</li>';
                 }
             }
             out += "</ul>";
             document.getElementById("id01").innerHTML = out;
         }
     </script>
-    <p><a href="index.html">Nazaj</a></p>
+    <p><a href="index.html">Back</a></p>
 </body>
 </html>

@@ -337,5 +337,31 @@ namespace Feri.MS.Http
             //    return null;
             //}
         }
+
+        /// <summary>
+        /// Method performs temporary redirect (307) to the specified location.
+        /// </summary>
+        /// <param name="location"></param>
+        public void Redirect(string location)
+        {
+            if (!string.IsNullOrEmpty(location))
+            {
+                AddHeader("Location", location);
+                Write(new byte[] { (byte)'\r' }, "text/html", "307 Temporary Redirect");
+            }
+        }
+
+        /// <summary>
+        /// Method performs permanent redirect (301) to the specified location.
+        /// </summary>
+        /// <param name="location"></param>
+        public void PermanentRedirect(string location)
+        {
+            if (!string.IsNullOrEmpty(location))
+            {
+                AddHeader("Location", location);
+                Write(new byte[] { (byte)'\r' }, "text/html", "301 Moved Permanently");
+            }
+        }
     }
 }

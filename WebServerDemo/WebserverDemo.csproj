@@ -110,6 +110,7 @@
     <None Include="TestWebServer_TemporaryKey.pfx" />
   </ItemGroup>
   <ItemGroup>
+    <EmbeddedResource Include="PublicHtml\redirectTarget.html" />
     <EmbeddedResource Include="AppHtml\templateCookieRead.html" />
     <EmbeddedResource Include="AppHtml\templateCookieSet.html" />
     <EmbeddedResource Include="AppHtml\cookieSetPotrdi.html" />
