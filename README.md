@@ -100,5 +100,23 @@ server.start();
 ```
 To avoid accidentally leaking pages to blocked ip addresses, you should set the filter before calling start() method.
 
+Redirecting request to different address can be done from HttpResponse class. Class supports temporary and permanent redirects.
+Example of temporary redirect would be:
+
+```
+using feri.MS.Http;
+
+...
+
+HttpServer server = new HttpServer();
+server.AddPath("/addressThatWillRedirect.html", ProcessDemoRedirect);
+
+...
+
+private void ProcessDemoRedirect(HttpRequest request, HttpResponse response)
+{
+   response.Redirect("/targetWeWillRedirectTo.html");
+}
+```
 
 For more information and example of use, please view the included demo project. It shows how to use tings like simple templating engine, JSON, classes for some electronic parts, ability to define server root path to serve static content, using JavaScript to display JSON data, ...
