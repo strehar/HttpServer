@@ -167,6 +167,10 @@
       <Project>{483fa17c-a355-4828-bbe2-ce44cffa241a}</Project>
       <Name>HttpServer</Name>
     </ProjectReference>
+    <ProjectReference Include="..\PartsLibrary\PartsLibrary.csproj">
+      <Project>{218eef3d-7b99-433a-8692-46b4e29de617}</Project>
+      <Name>PartsLibrary</Name>
+    </ProjectReference>
     <ProjectReference Include="..\WebResources\WebResources.csproj">
       <Project>{ff72bdbf-48c6-403e-bc01-be62a0e08c0f}</Project>
       <Name>WebResources</Name>

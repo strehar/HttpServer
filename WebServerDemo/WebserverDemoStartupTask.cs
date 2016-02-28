@@ -92,7 +92,7 @@ namespace WebserverDemo
             _ws.SetRootPath("PublicHtml", "/index.html");
 
             // IP Filtering
-            _ws.IPFilterEnabled = true;
+            _ws.IPFilterEnabled = false;  // Change this to true to enable IP filter!
             _ws.AddBlackList(new IPAddress(new byte[] { 192, 168, 1, 64 }), 24);
             _ws.AddWhiteList(new IPAddress(new byte[] { 192, 168, 2, 64 }), 32);
 
