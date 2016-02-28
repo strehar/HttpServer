@@ -1,4 +1,4 @@
-Simple HTTP Server library for windows IoT devices.
+##Simple HTTP Server library for windows IoT devices.
 
 There is limited HTTP server support functionality in Windows IoT, but some projects could really benifit from embedded HTTP Server. It specially makes it easy to display data to the clients or controll the IoT device itself.
 
@@ -6,18 +6,22 @@ This HTTP server library can be embedded in any project and is simple to use. Us
 
 For example, to embed simple HelloWorld style web page in your application, you would add following code:
 
+```
 using feri.MS.Http;
 
 ...
 
 HttpServer server = new HttpServer();
 server.start();
+```
+
 This will start http server on port 8000 and display "It works!" page to user.
 
 To add some functionality to the server, you would have to write and register listener function. When registring listener, you need to provide URL that will tell the server when to trigger event.
 
 Code could look something like this:
 
+```
 using feri.MS.Http;
 
 ...
@@ -31,12 +35,15 @@ server.start();
 public void HelloWorldListener(HttpRequest request, HttpResponse response) {
     // Do some work here
 }
+```
+
 The listener method is provided HttpRequest and HttpResponse objects.
 
 HttpRequest contains all information about user request (from where connection came, what method it was, what was url, what were parameters, what were http headers, cookies, session related to the user, what was data, ...). HttpResponse takes care of sending data back to user (sending data, headers, cookies).
 
 If you wish to limit access to server to some users, server supports Basic HTTP authentication.
 
+```
 using feri.MS.Http;
 
 ...
@@ -48,9 +55,10 @@ server.AddPath("/HelloWorld.html", HelloWorldListener);
 server.start();
 
 ...
-
+```
 Sometimes you need some periodic data, for example reading temperature from sensors. To do this you could register new timer, that will get called periodically.
 
+```
 using feri.MS.Http;
 
 ...
@@ -64,10 +72,13 @@ AddTimer("TimerName", 10000, TimerListener);
 public void TimerListener() {
     // Do some work
 }
+```
+
 Timers are not passed any information, since they are not related to any HTTP request or response.
 
 If you wish to limit access to the server for certain IP subnet, you can use IP Blacklist or Whitelist functionality. To use ip blacklist you need to enable filtering and add ip's with network mask to the correct list. Network mask is provided in CIDR notation (for example 32)
 
+```
 using feri.MS.Http;
 
 ...
@@ -80,10 +91,13 @@ server.AddWhiteList(new IPAddress(new byte[] { 192, 168, 2, 64 }), 32);
 ...
 
 server.start();
+```
+
 To avoid accidentally leaking pages to blocked ip addresses, you should set the filter before calling start() method.
 
 Redirecting request to different address can be done from HttpResponse class. Class supports temporary and permanent redirects. Example of temporary redirect would be:
 
+```
 using feri.MS.Http;
 
 ...
@@ -97,4 +111,6 @@ private void ProcessDemoRedirect(HttpRequest request, HttpResponse response)
 {
    response.Redirect("/targetWeWillRedirectTo.html");
 }
+```
+
 For more information and example of use, please view the included demo project. It shows how to use tings like simple templating engine, JSON, classes for some electronic parts, ability to define server root path to serve static content, using JavaScript to display JSON data, ...
