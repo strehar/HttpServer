@@ -80,43 +80,4 @@ public void TimerListener() {
 
 Timers are not passed any information, since they are not related to any HTTP request or response.
 
-If you wish to limit access to the server for certain IP subnet, you can use IP Blacklist or Whitelist functionality.
-To use ip blacklist you need to enable filtering and add ip's with network mask to the correct list.
-Network mask is provided in CIDR notation (for example 32) 
-
-```
-using feri.MS.Http;
-
-...
-
-HttpServer server = new HttpServer();
-server.IPFilterEnabled = true;
-server.AddBlackList(new IPAddress(new byte[] { 192, 168, 1, 64 }), 24);
-server.AddWhiteList(new IPAddress(new byte[] { 192, 168, 2, 64 }), 32);
-
-...
-
-server.start();
-```
-To avoid accidentally leaking pages to blocked ip addresses, you should set the filter before calling start() method.
-
-Redirecting request to different address can be done from HttpResponse class. Class supports temporary and permanent redirects.
-Example of temporary redirect would be:
-
-```
-using feri.MS.Http;
-
-...
-
-HttpServer server = new HttpServer();
-server.AddPath("/addressThatWillRedirect.html", ProcessDemoRedirect);
-
-...
-
-private void ProcessDemoRedirect(HttpRequest request, HttpResponse response)
-{
-   response.Redirect("/targetWeWillRedirectTo.html");
-}
-```
-
 For more information and example of use, please view the included demo project. It shows how to use tings like simple templating engine, JSON, classes for some electronic parts, ability to define server root path to serve static content, using JavaScript to display JSON data, ...
