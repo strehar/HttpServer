@@ -20,12 +20,9 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
-using System.Reflection;
 using System.Threading.Tasks;
 using Windows.Networking.Sockets;
 using Feri.MS.Http.Timer;
-using Windows.Networking;
-using System.Net;
 using System.Linq;
 
 namespace Feri.MS.Http
@@ -37,9 +34,13 @@ namespace Feri.MS.Http
         internal byte[] IPAddressLower { get; set; }
     }
     /// <summary>
-    /// Class is min HTTP server class. It handles reciving conenctions, creating Tasks (and indirectly threads from thread pool), creating HttpRequest and HttpResponse objects, 
+    /// Class is main HTTP server class. It handles reciving conenctions, creating Tasks (and indirectly threads from thread pool), creating HttpRequest and HttpResponse objects, 
     /// adding and removing users, handling authentications, trigegring events based on the client requests, processing request errors, handling timers,
     /// registing and removing assemblies in which to look for embeded content, registing embedded content for reading.
+    /// 
+    /// IP filter is implemented in IPFilter class, user can replace it with custom class.
+    /// User authentication and management is impleneted in UserManager class, user can replace it with custom class.
+    /// Management of embedded content is managed by EmbeddedContent class.
     /// 
     /// Basic usage:
     /// HttpServer server = new HttpServer();
@@ -54,7 +55,6 @@ namespace Feri.MS.Http
     public class HttpServer : IDisposable
     {
         #region Definitions
-
         Dictionary<string, serverPath> _serverPath = new Dictionary<string, serverPath>();               // Registrirane http poti (url) in metode ki se kličejo za obdelavo te zahteve
         Dictionary<string, HttpTimer> _timerji = new Dictionary<string, HttpTimer>();                            // registrirani timerji, ki so na sistemu in se prožijo
 
@@ -84,7 +84,6 @@ namespace Feri.MS.Http
         private IIPFilter _IPFilter;
 
         private EmbeddedContent _embeddedContent;
-
         #endregion
 
         #region Properties
@@ -360,9 +359,6 @@ namespace Feri.MS.Http
             }
         }
 
-
-
-
         /// <summary>
         /// Heler method for processing server or request errors-
         /// </summary>
@@ -546,9 +542,5 @@ namespace Feri.MS.Http
             _serverRoot = metoda;
         }
         #endregion
-
-
-
-
     }
 }
