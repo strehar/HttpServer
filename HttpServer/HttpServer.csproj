@@ -123,6 +123,7 @@
     <Compile Include="Http\HttpRequest.cs" />
     <Compile Include="Http\HttpResponse.cs" />
     <Compile Include="Http\IIPFilter.cs" />
+    <Compile Include="Http\IpNumber.cs" />
     <Compile Include="Http\IUserManager.cs" />
     <Compile Include="Http\Json\Json.cs" />
     <Compile Include="Http\HttpLog.cs" />

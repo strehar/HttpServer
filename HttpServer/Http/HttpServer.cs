@@ -27,12 +27,6 @@ using System.Linq;
 
 namespace Feri.MS.Http
 {
-    class IpNumber
-    {
-        internal byte[] IPAddress { get; set; }
-        internal byte[] IPAddressUpper { get; set; }
-        internal byte[] IPAddressLower { get; set; }
-    }
     /// <summary>
     /// Class is main HTTP server class. It handles reciving conenctions, creating Tasks (and indirectly threads from thread pool), creating HttpRequest and HttpResponse objects, 
     /// adding and removing users, handling authentications, trigegring events based on the client requests, processing request errors, handling timers,
