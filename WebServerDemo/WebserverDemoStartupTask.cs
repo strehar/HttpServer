@@ -68,13 +68,13 @@ namespace WebserverDemo
             //InitGPIO();
             _ws.SetDebug = false;
 
-            _ws.RegisterAssembly(this.GetType());
-            _ws.RegisterAssembly(_wh.GetType());
+            _ws.EmbeddedContent.RegisterAssembly(this.GetType());
+            _ws.EmbeddedContent.RegisterAssembly(_wh.GetType());
 
-            _ws.RefreshFileList();
+            _ws.EmbeddedContent.RefreshFileList();
 
             _ws.AuthenticationRequired = true;
-            _ws.AddUser("user", "password");
+            _ws.UserManager.AddUser("user", "password");
 
             _ws.AddPath("/demoLED.html", ProcessDemoLED);
             _ws.AddPath("/demoTemperature.html", ProcessTemperature);
@@ -93,8 +93,8 @@ namespace WebserverDemo
 
             // IP Filtering
             _ws.IPFilterEnabled = false;  // Change this to true to enable IP filter!
-            _ws.AddBlackList(new IPAddress(new byte[] { 192, 168, 1, 64 }), 24);
-            _ws.AddWhiteList(new IPAddress(new byte[] { 192, 168, 2, 64 }), 32);
+            _ws.IPFilter.AddBlackList(new IPAddress(new byte[] { 192, 168, 1, 64 }), 24);
+            _ws.IPFilter.AddWhiteList(new IPAddress(new byte[] { 192, 168, 2, 64 }), 32);
 
             _ws.Start();
 
@@ -104,32 +104,32 @@ namespace WebserverDemo
             _json.AddData("Led", "Off");
             _json.AddData("MaualLed", "Off");
 
-            _templateDemo.LoadString(_ws.ReadEmbededToByte(_privatePath + "/templateDemo.html"));
+            _templateDemo.LoadString(_ws.EmbeddedContent.ReadEmbededToByte(_privatePath + "/templateDemo.html"));
             _templateDemo.AddAction("led", "LED", "Off");
             _templateDemo.AddAction("maualLed", "MANUALLED", "Off");
             _templateDemo.AddAction("timer", "TIMER", "Off");
 
-            _LEDControl.LoadString(_ws.ReadEmbededToByte(_privatePath + "/templateLED.html"));
+            _LEDControl.LoadString(_ws.EmbeddedContent.ReadEmbededToByte(_privatePath + "/templateLED.html"));
             _LEDControl.AddAction("ledOn", "LEDON", "");
             _LEDControl.AddAction("ledOff", "LEDOFF", "");
 
-            _timerControl.LoadString(_ws.ReadEmbededToByte(_privatePath + "/templateTimer.html"));
+            _timerControl.LoadString(_ws.EmbeddedContent.ReadEmbededToByte(_privatePath + "/templateTimer.html"));
             _timerControl.AddAction("timerOn", "TIMERON", "");
             _timerControl.AddAction("timerOff", "TIMEROFF", "");
 
-            _cookieTemplate.LoadString(_ws.ReadEmbededToByte(_privatePath + "/templateCookieRead.html"));
+            _cookieTemplate.LoadString(_ws.EmbeddedContent.ReadEmbededToByte(_privatePath + "/templateCookieRead.html"));
             _cookieTemplate.AddAction("cookie", "COOKIE", "");
 
-            _cookieSetTemplate.LoadString(_ws.ReadEmbededToByte(_privatePath + "/templateCookieSet.html"));
+            _cookieSetTemplate.LoadString(_ws.EmbeddedContent.ReadEmbededToByte(_privatePath + "/templateCookieSet.html"));
             _cookieSetTemplate.AddAction("cookie", "COOKIE", "");
 
-            _sessionTemplate.LoadString(_ws.ReadEmbededToByte(_privatePath + "/templateSessionRead.html"));
+            _sessionTemplate.LoadString(_ws.EmbeddedContent.ReadEmbededToByte(_privatePath + "/templateSessionRead.html"));
             _sessionTemplate.AddAction("session", "SESSION", "");
 
-            _sessionSetTemplate.LoadString(_ws.ReadEmbededToByte(_privatePath + "/templateSessionSet.html"));
+            _sessionSetTemplate.LoadString(_ws.EmbeddedContent.ReadEmbededToByte(_privatePath + "/templateSessionSet.html"));
             _sessionSetTemplate.AddAction("session", "SESSION", "");
 
-            _temperatureTemplate.LoadString(_ws.ReadEmbededToByte(_privatePath + "/templateTermometer.html"));
+            _temperatureTemplate.LoadString(_ws.EmbeddedContent.ReadEmbededToByte(_privatePath + "/templateTermometer.html"));
             _temperatureTemplate.AddAction("temperature", "TEMP", "");
 
             _termometer.HighPrecision = true;
@@ -288,7 +288,7 @@ namespace WebserverDemo
                 {
                     response.AddCookie(new HttpCookie("DemoCookie", request.Parameters["niz"], (DateTime.Now).AddHours(1)));
 
-                    response.Write(_ws.ReadEmbededToByte(_privatePath + "/cookieSetPotrdi.html"), _ws.GetMimeType.GetMimeFromFile("/cookieSetPotrdi.html"));
+                    response.Write(_ws.EmbeddedContent.ReadEmbededToByte(_privatePath + "/cookieSetPotrdi.html"), _ws.GetMimeType.GetMimeFromFile("/cookieSetPotrdi.html"));
                 }
                 else
                 {
@@ -341,7 +341,7 @@ namespace WebserverDemo
             {
                 
                 response.AddCookie(new HttpCookie("DemoCookie", "", DateTime.MinValue));
-                response.Write(_ws.ReadEmbededToByte(_privatePath + "/sessionRemove.html"), _ws.GetMimeType.GetMimeFromFile("/sessionRemove.html"));
+                response.Write(_ws.EmbeddedContent.ReadEmbededToByte(_privatePath + "/sessionRemove.html"), _ws.GetMimeType.GetMimeFromFile("/sessionRemove.html"));
             }
             catch (Exception e)
             {
@@ -357,7 +357,7 @@ namespace WebserverDemo
                 if (request.Parameters.ContainsKey("niz"))
                 {
                     string niz = (request.GetSession()["Demo"] = request.Parameters["niz"]) as string;
-                    response.Write(_ws.ReadEmbededToByte(_privatePath + "/sessionSetPotrdi.html"), _ws.GetMimeType.GetMimeFromFile("/sessionSetPotrdi.html"));
+                    response.Write(_ws.EmbeddedContent.ReadEmbededToByte(_privatePath + "/sessionSetPotrdi.html"), _ws.GetMimeType.GetMimeFromFile("/sessionSetPotrdi.html"));
                 }
                 else
                 {
@@ -411,7 +411,7 @@ namespace WebserverDemo
             try
             {
                 request.RemoveSession();
-                response.Write(_ws.ReadEmbededToByte(_privatePath + "/sessionRemove.html"), _ws.GetMimeType.GetMimeFromFile("/sessionRemove.html"));
+                response.Write(_ws.EmbeddedContent.ReadEmbededToByte(_privatePath + "/sessionRemove.html"), _ws.GetMimeType.GetMimeFromFile("/sessionRemove.html"));
             }
             catch (Exception e)
             {

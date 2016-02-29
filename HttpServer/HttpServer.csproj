@@ -117,15 +117,20 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Http\AssemblyData.cs" />
+    <Compile Include="Http\EmbeddedContent.cs" />
     <Compile Include="Http\HttpCookie.cs" />
     <Compile Include="Http\HttpConnection.cs" />
     <Compile Include="Http\HttpRequest.cs" />
     <Compile Include="Http\HttpResponse.cs" />
+    <Compile Include="Http\IIPFilter.cs" />
+    <Compile Include="Http\IUserManager.cs" />
     <Compile Include="Http\Json\Json.cs" />
     <Compile Include="Http\HttpLog.cs" />
     <Compile Include="Http\MimeTypes.cs" />
+    <Compile Include="Http\IPFilter.cs" />
     <Compile Include="Http\Session.cs" />
     <Compile Include="Http\SessionManager.cs" />
+    <Compile Include="Http\UserManager.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Http\Json\SimpleJsonListener.cs" />
     <Compile Include="Http\Template\SimpleTemplate.cs" />
