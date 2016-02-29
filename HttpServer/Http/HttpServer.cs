@@ -78,12 +78,12 @@ namespace Feri.MS.Http
 
         private SessionManager _sessionManager = new SessionManager(); // Skrbi za seje. Poda se kot referenca novim HttRequest in HttpResponse objektom.
 
-        private HttpLog _log = new HttpLog();
+        private HttpLog _log = new HttpLog();             // Glavni razred, ki skrbi za logiranje dogodkov preko http protokola.
 
-        private IUserManager _userManager;
-        private IIPFilter _IPFilter;
+        private IUserManager _userManager;                // Razred skrbi za dodajanje, odvzemanje in avtentikacijo uporabnikov
+        private IIPFilter _IPFilter;                      // Razred skrbi za preverjanje IP naslovov uporabnikov in vzdrženje White in Black list
 
-        private EmbeddedContent _embeddedContent;
+        private EmbeddedContent _embeddedContent;         // Razred skrbi za dostop do virov, ki so vključeni v aplikacijo.
         #endregion
 
         #region Properties
@@ -98,8 +98,8 @@ namespace Feri.MS.Http
             {
                 _ipFilterEnabled = value;
                 if (_ipFilterEnabled)
-                    IPFilter = null;     // forces IP filter to initialize default manager class. If we disable it, we don't care about class.
-
+                    if (_IPFilter == null)
+                        IPFilter = new IPFilter();  // If it's null, we call thru IPFilter property, to perform lifecycle management.
             }
         }
 
@@ -114,7 +114,8 @@ namespace Feri.MS.Http
             {
                 _authenticationRequired = value;
                 if (_authenticationRequired)
-                    UserManager = null;    // forces IP filter to initialize default manager class. If we disable it, we don't care about class.
+                    if (_userManager == null)
+                        UserManager = new UserManager();  // If it's null, we call thru UserManager property, to perform lifeclycle management.
             }
         }
 
@@ -165,7 +166,6 @@ namespace Feri.MS.Http
                     _userManager = value;
                     _userManager.Start();
                 }
-
             }
         }
 
