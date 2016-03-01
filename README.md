@@ -41,7 +41,7 @@ The listener method is provided HttpRequest and HttpResponse objects.
 
 HttpRequest contains all information about user request (from where connection came, what method it was, what was url, what were parameters, what were http headers, cookies, session related to the user, what was data, ...). HttpResponse takes care of sending data back to user (sending data, headers, cookies).
 
-If you wish to limit access to server to some users, server supports Basic HTTP authentication.
+If you wish to limit access to server to some users, server supports Basic HTTP authentication. 
 
 ```
 using feri.MS.Http;
@@ -49,14 +49,23 @@ using feri.MS.Http;
 ...
 
 HttpServer server = new HttpServer();
-server.AddUser("user","password");
+server.UserManager.AddUser("user","password");
 server.AuthenticationRequired = true;
 server.AddPath("/HelloWorld.html", HelloWorldListener);
 server.start();
 
 ...
 ```
-Sometimes you need some periodic data, for example reading temperature from sensors. To do this you could register new timer, that will get called periodically.
+
+If user needs different authentication provider, they can replace default UserManager class at runtime, by custom class that implements IUserManager interface.
+
+```
+server.UserManager = new CustomUserManager();
+```
+
+When HttpServer class calls registred UserManager class it will first call Start() method and when UserManager gets destroyed for whatever reason, it will call Stop() method, helping with object lifecycle management.
+
+Sometimes you need periodic data, for example reading temperature from sensors or updating display. To do this you could register new timer, that will get called periodically.
 
 ```
 using feri.MS.Http;
@@ -65,7 +74,7 @@ using feri.MS.Http;
 
 HttpServer server = new HttpServer();
 ...
-AddTimer("TimerName", 10000, TimerListener);
+server.AddTimer("TimerName", 10000, TimerListener);
 
 ...
 
@@ -94,6 +103,14 @@ server.start();
 ```
 
 To avoid accidentally leaking pages to blocked ip addresses, you should set the filter before calling start() method.
+
+If user needs different IP filter provider, they can replace default one at runtime by implementing implementing IIPFilter interface and registring it with server class.
+
+```
+server.IPFilter = new CustomIPFilter();
+```
+
+When HttpServer class calls registred IPFilter class it will first call Start() method and when IPFilter gets destroyed for whatever reason, it will call Stop() method, helping with object lifecycle management.
 
 Redirecting request to different address can be done from HttpResponse class. Class supports temporary and permanent redirects. Example of temporary redirect would be:
 
