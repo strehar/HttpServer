@@ -16,6 +16,7 @@
 */
 #endregion
 
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Net;
@@ -187,6 +188,31 @@ namespace Feri.MS.Http
             //    Debug.WriteLine(e.StackTrace);
             //}
 
+        }
+
+        /// <summary>
+        /// Method formats exception stack trace as HTMl block and displays it to the end user.
+        /// </summary>
+        /// <param name="e">Exception to dispaly as HTML page</param>
+        public void Write(Exception e)
+        {
+            StringBuilder _exceptionText = new StringBuilder();
+            string[] _exception = e.ToString().Split('\n');
+            _exceptionText.Append("<!DOCTYPE html>\n<html lang=\"en\" xmlns=\"http://www.w3.org/1999/xhtml\">\n<head>\n<meta charset=\"utf-8\" />\n<title>Internal server error</title>\n</head>\n<body>\n<h1>Internal server error</h1>\n<hr />\n");
+            foreach (string s in _exception)
+            {
+                if (s.StartsWith("   "))
+                {
+                    _exceptionText.Append("&nbsp;&nbsp;&nbsp;"+s.TrimStart()+ "</br>\n");
+                }
+                else
+                {
+                    _exceptionText.Append(s + "</br>\n");
+                }
+            }
+            _exceptionText.Append("</body>\n</html>\n");
+            byte[] _exceptionArray = System.Text.Encoding.UTF8.GetBytes(_exceptionText.ToString());
+            Write(_exceptionArray, "text/html", "500 Internal Server Error");
         }
 
         /// <summary>
