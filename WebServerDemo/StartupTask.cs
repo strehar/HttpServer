@@ -30,12 +30,12 @@ namespace WebServerDemo
     public sealed class StartupTask : IBackgroundTask
     {
         BackgroundTaskDeferral _serviceDeferral;
-        WebServerDemo server;
+        StartDemo server;
         public void Run(IBackgroundTaskInstance taskInstance)
         {
             taskInstance.Canceled += OnCanceled;
             _serviceDeferral = taskInstance.GetDeferral();
-            server = new WebServerDemo();
+            server = new StartDemo();
             IAsyncAction asyncAction = ThreadPool.RunAsync((workItem) =>
             {
                 server.Start();

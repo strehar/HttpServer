@@ -105,7 +105,7 @@
     <Compile Include="TemperatureDemo.cs" />
     <Compile Include="TemplateDemo.cs" />
     <Compile Include="TimerDemo.cs" />
-    <Compile Include="WebServerDemo.cs" />
+    <Compile Include="StartDemo.cs" />
   </ItemGroup>
   <ItemGroup>
     <AppxManifest Include="Package.appxmanifest">
