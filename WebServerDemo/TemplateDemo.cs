@@ -37,10 +37,12 @@ namespace WebServerDemo
             _templateDemo = template;
             _ws.AddPath("/template.html", VrniTemplate);
             _templateDemo.LoadString(_ws.EmbeddedContent.ReadEmbededToByte(_privatePath + "/templateDemo.html"));
+            _templateDemo.AddAction("userName", "USERNAME", "");
         }
 
         private void VrniTemplate(HttpRequest reqiest, HttpResponse response)
         {
+            _templateDemo.UpdateAction("userName", reqiest.AuthenticatedUser);
             _templateDemo.ProcessAction();
             byte[] rezultat = _templateDemo.GetByte();
             response.Write(rezultat, _ws.GetMimeType.GetMimeFromFile(_privatePath + "/templateDemo.html"));

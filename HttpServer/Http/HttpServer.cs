@@ -314,7 +314,8 @@ namespace Feri.MS.Http
             // Authentication management
             if (_authenticationRequired)
             {
-                if (!_userManager.AuthenticateUser(_hrequest))    // Authentication failed for some reason, request that user authenticates.
+                string loggedInUser = _userManager.AuthenticateUser(_hrequest);
+                if (string.IsNullOrEmpty(loggedInUser))    // Authentication failed for some reason, request that user authenticates.
                 {
                     // user authentication failed, display authentication request:
                     byte[] _dataArray = _embeddedContent.ReadEmbededToByte("SystemHtml/401.html");
@@ -323,6 +324,11 @@ namespace Feri.MS.Http
                     _headers.Add("WWW-Authenticate", "Basic realm=\"PI2 Web Access\"");
                     string _StatusCode = "401 Unauthorized";
                     _hresponse.Write(_dataArray, _mimeType.GetMimeFromFile("/401.html"), _StatusCode, _headers);
+                }
+                else
+                {
+                    // User is logged in, set the username property in HttpRequest object
+                    _hrequest.AuthenticatedUser = loggedInUser;
                 }
             }
 

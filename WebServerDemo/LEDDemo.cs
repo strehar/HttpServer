@@ -34,7 +34,7 @@ namespace WebServerDemo
         string _privatePath = "AppHtml";
 
         SimpleTemplate _LEDControl = new SimpleTemplate();
-        PCF8574 _ports = new PCF8574();
+        PCF8574 _ports = PCF8574.Create();
 
         SimpleJsonListener _json;
         SimpleTemplate _templateDemo;
@@ -59,7 +59,6 @@ namespace WebServerDemo
             _json.AddData("MaualLed", "Off");
 
             _ports._debug = true;
-            _ports.Initialize();
         }
 
         private void ProcessDemoLED(HttpRequest request, HttpResponse response)

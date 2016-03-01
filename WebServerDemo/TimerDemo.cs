@@ -36,7 +36,7 @@ namespace WebServerDemo
         string _privatePath = "AppHtml";
 
         SimpleTemplate _timerControl = new SimpleTemplate();
-        PCF8574 _ports = new PCF8574();
+        PCF8574 _ports = PCF8574.Create();
 
         SimpleJsonListener _json;
         SimpleTemplate _templateDemo;
@@ -67,7 +67,6 @@ namespace WebServerDemo
             _ws.AddTimer("TestTimer", 10000, TimerEvent);
 
             _ports._debug = true;
-            _ports.Initialize();
         }
 
         public void TimerEvent()

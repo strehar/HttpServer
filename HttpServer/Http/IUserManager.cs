@@ -27,7 +27,7 @@ namespace Feri.MS.Http
         void Start();
         void Stop();
         bool AddUser(string username, string password);
-        bool AuthenticateUser(HttpRequest request);
+        string AuthenticateUser(HttpRequest request);
         bool RemoveUser(string username);
     }
 }

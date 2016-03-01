@@ -195,6 +195,8 @@ namespace Feri.MS.Http
         {
             return _requestString;
         }
+
+        public string AuthenticatedUser { get; internal set; }
         #endregion
 
         /// <summary>

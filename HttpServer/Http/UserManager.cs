@@ -92,11 +92,11 @@ namespace Feri.MS.Http
         /// <param name="username">Provided username</param>
         /// <param name="password">Provided password</param>
         /// <returns>true if information matches and lase if it does not.</returns>
-        public bool AuthenticateUser(HttpRequest request)
+        public string AuthenticateUser(HttpRequest request)
         {
             // Preveri kaj je user vnesel...
             if (!request.Headers.ContainsKey("Authorization"))
-                return false;
+                return null;
 
             string _encoded = request.Headers["Authorization"].Split(' ')[1].Trim();
             string _Vnos = System.Text.Encoding.UTF8.GetString(Convert.FromBase64String(_encoded));
@@ -107,11 +107,11 @@ namespace Feri.MS.Http
             string _username = _user[0].Trim().ToLower();
             if (_users.ContainsKey(_username))
                 if (_users[_username].Equals(_user[1].Trim()))
-                    return true;
+                    return _username;
                 else
-                    return false;
+                    return null;
             else
-                return false;
+                return null;
         }
         #endregion
 
