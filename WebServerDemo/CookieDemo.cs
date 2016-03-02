@@ -26,7 +26,7 @@ namespace WebServerDemo
     /// <summary>
     /// This class shows how to use cokies in your project.
     /// </summary>
-    class CookieDemo
+    class CookieDemo : IDisposable
     {
         HttpServer _ws;
         string _privatePath = "AppHtml";
@@ -121,5 +121,14 @@ namespace WebServerDemo
                 response.Write(e);
             }
         }
+
+        #region Disposable support
+        public void Dispose()
+        {
+            _ws.RemovePath("/demoCookieSet.html");
+            _ws.RemovePath("/demoCookieRead.html");
+            _ws.RemovePath("/demoCookieRemove.html");
+        }
+        #endregion
     }
 }

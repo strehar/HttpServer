@@ -17,13 +17,14 @@
 #endregion
 
 using Feri.MS.Http;
+using System;
 
 namespace WebServerDemo
 {
     /// <summary>
     /// This class shows how to redirect user request to a different address.
     /// </summary>
-    class RedirectDemo
+    class RedirectDemo : IDisposable
     {
         HttpServer _ws;
 
@@ -38,5 +39,13 @@ namespace WebServerDemo
         {
             response.Redirect("/redirectTarget.html");
         }
+
+        #region IDisposable Support
+        // This code added to correctly implement the disposable pattern.
+        public void Dispose()
+        {
+            _ws.RemovePath("/demoRedirect.html");
+        }
+        #endregion
     }
 }

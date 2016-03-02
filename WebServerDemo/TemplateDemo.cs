@@ -18,13 +18,14 @@
 
 using Feri.MS.Http;
 using Feri.MS.Http.Template;
+using System;
 
 namespace WebServerDemo
 {
     /// <summary>
     /// This is SimpleTemplate demo. Since other classes display data on this template, we recive template instance from SimpleWebServer class.
     /// </summary>
-    class TemplateDemo
+    class TemplateDemo : IDisposable
     {
         HttpServer _ws;
         SimpleTemplate _templateDemo;
@@ -47,5 +48,13 @@ namespace WebServerDemo
             byte[] rezultat = _templateDemo.GetByte();
             response.Write(rezultat, _ws.GetMimeType.GetMimeFromFile(_privatePath + "/templateDemo.html"));
         }
+
+        #region IDisposable Support
+        // This code added to correctly implement the disposable pattern.
+        public void Dispose()
+        {
+            _ws.RemovePath("/template.html");
+        }
+        #endregion
     }
 }

@@ -81,6 +81,7 @@ namespace WebServerDemo
         // This code added to correctly implement the disposable pattern.
         public void Dispose()
         {
+            _ws.RemovePath("/demoTemperature.html");
             _termometer.Dispose();
         }
         #endregion

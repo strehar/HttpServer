@@ -26,7 +26,7 @@ namespace WebServerDemo
     /// <summary>
     /// Demo of session object in the HttpServer.
     /// </summary>
-    class SessionDemo
+    class SessionDemo : IDisposable
     {
         HttpServer _ws;
         string _privatePath = "AppHtml";
@@ -122,5 +122,14 @@ namespace WebServerDemo
                 response.Write(e);
             }
         }
+
+        #region Disposable support
+        public void Dispose()
+        {
+            _ws.RemovePath("/demoSessionSet.html");
+            _ws.RemovePath("/demoSessionRead.html");
+            _ws.RemovePath("/demoSessionRemove.html");
+        }
+        #endregion
     }
 }

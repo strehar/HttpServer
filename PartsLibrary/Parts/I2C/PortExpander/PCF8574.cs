@@ -43,6 +43,7 @@ namespace Feri.MS.Parts.I2C.PortExpander
         internal I2cDevice I2cController { get; set; }
         internal PCF8574 Part { get; set; }
         internal int Address { get; set; }
+        internal int ReferenceCount { get; set; } = 0;
     }
     public class PCF8574 : IDisposable
     {
@@ -90,7 +91,7 @@ namespace Feri.MS.Parts.I2C.PortExpander
             {
                 _part = _initialized[address].Part;
             }
-
+            _initialized[address].ReferenceCount++;
             return _part;
         }
 
@@ -185,15 +186,21 @@ namespace Feri.MS.Parts.I2C.PortExpander
         #region IDisposable Support
         public void Dispose()
         {
-            if (_initialized.Count!=0)
+            // Clean up. If there is reference to the key, and there are more then one, reduce reference. if it's the last one, remove from the static directory of parts.
+            if (_initialized.ContainsKey(Address))
             {
-                foreach (KeyValuePair<int, PCF8574Helper> pair in _initialized)
+                if (_initialized[Address].ReferenceCount > 1)
                 {
-                    pair.Value.Part.Dispose();
+                    _initialized[Address].ReferenceCount--;
                 }
-                _initialized.Clear();
+                else
+                {
+                    _initialized[Address].I2cController.Dispose();
+                    _initialized.Remove(Address);
+                }
             }
             _isDisposed = true;
+            Debug.WriteLineIf(_debug, "Disposing of part with address: " + Address);
             //GC.SuppressFinalize(this);
         }
         #endregion
