@@ -71,25 +71,31 @@ namespace WebServerDemo
 
         public void TimerEvent()
         {
-            if (enableBlink)
+            try {
+                if (enableBlink)
+                {
+                    if (state.Equals("on", StringComparison.OrdinalIgnoreCase))
+                    {
+                        _json.UpdateData("Led", "Off");
+                        _templateDemo.UpdateAction("led", "Off");
+                        state = "Off";
+                        //pin.Write(GpioPinValue.Low);
+                        _ports.WritePin(PortNumber.PORT_ONE, false);
+                    }
+                    else
+                    {
+                        _json.UpdateData("Led", "On");
+                        _templateDemo.UpdateAction("led", "On");
+                        state = "On";
+                        //pin.Write(GpioPinValue.High);
+                        _ports.WritePin(PortNumber.PORT_ONE, true);
+                    }
+                    Debug.WriteLineIf(_debug, "State changed to: " + state);
+                }
+            }
+            catch (Exception e)
             {
-                if (state.Equals("on", StringComparison.OrdinalIgnoreCase))
-                {
-                    //pin.Write(GpioPinValue.Low);
-                    _ports.WritePin(PortNumber.PORT_ONE, false);
-                    _json.UpdateData("Led", "Off");
-                    _templateDemo.UpdateAction("led", "Off");
-                    state = "Off";
-                }
-                else
-                {
-                    //pin.Write(GpioPinValue.High);
-                    _ports.WritePin(PortNumber.PORT_ONE, true);
-                    _json.UpdateData("Led", "On");
-                    _templateDemo.UpdateAction("led", "On");
-                    state = "On";
-                }
-                Debug.WriteLineIf(_debug, "State changed to: " + state);
+                Debug.WriteLine(e);
             }
         }
 
@@ -132,8 +138,7 @@ namespace WebServerDemo
             }
             catch (Exception e)
             {
-                Debug.WriteLine(e.Message);
-                Debug.WriteLine(e.StackTrace);
+                Debug.WriteLine(e);
                 response.Write(e);
             }
         }
