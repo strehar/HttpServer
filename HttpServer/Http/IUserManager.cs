@@ -24,10 +24,32 @@ namespace Feri.MS.Http
     /// </summary>
     public interface IUserManager
     {
+        /// <summary>
+        /// 
+        /// </summary>
         void Start();
+        /// <summary>
+        /// 
+        /// </summary>
         void Stop();
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="username"></param>
+        /// <param name="password"></param>
+        /// <returns></returns>
         bool AddUser(string username, string password);
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="request"></param>
+        /// <returns></returns>
         string AuthenticateUser(HttpRequest request);
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="username"></param>
+        /// <returns></returns>
         bool RemoveUser(string username);
     }
 }

@@ -59,6 +59,11 @@ namespace Feri.MS.Http
 
         MimeTypes _mimeType = new MimeTypes();            // Interna instanca razreda MimeTypes za pretvorbo tipov. Rabi se v processroot, sicer pa služi kot helper class za uporabnika
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="request"></param>
+        /// <param name="response"></param>
         public delegate void serverPath(HttpRequest request, HttpResponse response);    // delegat za obdelavo http zahtev
 
         serverPath _serverRoot;                           // Delegat za prevzeto pot, v primeru da se zahteva url, ki ga ne obdeluje nobena registrirana funkcija
@@ -81,6 +86,9 @@ namespace Feri.MS.Http
         #endregion
 
         #region Properties
+        /// <summary>
+        /// 
+        /// </summary>
         public bool IPFilterEnabled
         {
             get
@@ -97,6 +105,9 @@ namespace Feri.MS.Http
             }
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
         public bool AuthenticationRequired
         {
             get
@@ -113,6 +124,9 @@ namespace Feri.MS.Http
             }
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
         public MimeTypes GetMimeType
         {
             get
@@ -121,6 +135,9 @@ namespace Feri.MS.Http
             }
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
         public bool SetDebug
         {
             get
@@ -134,6 +151,9 @@ namespace Feri.MS.Http
             }
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
         public IUserManager UserManager
         {
             get
@@ -163,6 +183,9 @@ namespace Feri.MS.Http
             }
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
         public IIPFilter IPFilter
         {
             get
@@ -192,6 +215,9 @@ namespace Feri.MS.Http
             }
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
         public EmbeddedContent EmbeddedContent
         {
             get
@@ -204,6 +230,9 @@ namespace Feri.MS.Http
 
         #region IDisposable Support
         // To se kliče ob dispose, da se pravilno počisti listener.
+        /// <summary>
+        /// 
+        /// </summary>
         public void Dispose()
         {
             listener.Dispose();

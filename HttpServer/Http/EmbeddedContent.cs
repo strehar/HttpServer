@@ -24,6 +24,9 @@ using System.Reflection;
 
 namespace Feri.MS.Http
 {
+    /// <summary>
+    /// 
+    /// </summary>
     public class EmbeddedContent
     {
         Dictionary<string, AssemblyData> _RegistriraniAssebly = new Dictionary<string, AssemblyData>();  // Asembliji (dll-i) po katerih iščemo embeded vire, ki jih lahko prikažemo uporabnikom. Rabi se za reflection
@@ -33,6 +36,9 @@ namespace Feri.MS.Http
 
         private bool _debug = false;                      // Ali se naj izpisujejo debug informacije iz metod (precej spama)
 
+        /// <summary>
+        /// 
+        /// </summary>
         public bool EnableDebug
         {
             get

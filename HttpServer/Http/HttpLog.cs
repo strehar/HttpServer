@@ -25,21 +25,41 @@ namespace Feri.MS.Http
     /// </summary>
     public class HttpLog
     {
+        /// <summary>
+        /// 
+        /// </summary>
         public string Pot { get; set; }
+
+        /// <summary>
+        /// 
+        /// </summary>
         public bool InMemory { get; set; }
 
+        /// <summary>
+        /// 
+        /// </summary>
         public bool _debug = false;
 
+        /// <summary>
+        /// 
+        /// </summary>
         public void Open()
         {
             return;
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
         public void Close()
         {
             return;
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="niz"></param>
         public void WriteLine(string niz)
         {
             Debug.WriteLineIf(_debug, niz);

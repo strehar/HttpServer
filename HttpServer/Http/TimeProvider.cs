@@ -26,16 +26,26 @@ namespace Feri.MS.Http
     /// </summary>
     public class TimeProvider
     {
+        /// <summary>
+        /// 
+        /// </summary>
         public TimeProvider()
         {
 
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns></returns>
         public DateTime GetTime()
         {
             return DateTime.Now;
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
         public void RegisterTimeSource()
         {
 

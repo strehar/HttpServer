@@ -31,6 +31,9 @@ namespace Feri.MS.Http
         DateTime _expires;
         string _sessionID;
 
+        /// <summary>
+        /// 
+        /// </summary>
         public string SessionID
         {
             get
@@ -44,6 +47,9 @@ namespace Feri.MS.Http
             }
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
         public DateTime Expires
         {
             get
@@ -57,6 +63,10 @@ namespace Feri.MS.Http
             }
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="sessionId"></param>
         public Session(string sessionId)
         {
             _expires = DateTime.Now;
@@ -64,11 +74,21 @@ namespace Feri.MS.Http
             _sessionID = sessionId;
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="key"></param>
+        /// <returns></returns>
         public bool ContainsParameter(string key)
         {
             return _values.ContainsKey(key);
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="key"></param>
+        /// <returns></returns>
         public bool RemoveParameter(string key)
         {
             if (_values.ContainsKey(key))
@@ -79,6 +99,11 @@ namespace Feri.MS.Http
             return false;
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="key"></param>
+        /// <returns></returns>
         public object this[string key]
         {
             get

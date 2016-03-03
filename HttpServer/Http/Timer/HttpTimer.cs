@@ -30,6 +30,9 @@ namespace Feri.MS.Http.Timer
         int _milisekunde;
         ThreadPoolTimer _timer;
         internal bool _debug = false;
+        /// <summary>
+        /// 
+        /// </summary>
         public delegate void timerEvent();
 
         timerEvent _timerEvent;
@@ -50,11 +53,18 @@ namespace Feri.MS.Http.Timer
             _milisekunde = milisekunde;
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="timer"></param>
         public void TimerHandler(ThreadPoolTimer timer)
         {
             _timerEvent();
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
         public void StopTimer()
         {
             _timer.Cancel();
@@ -62,6 +72,9 @@ namespace Feri.MS.Http.Timer
 
         #region IDisposable Support
         // This code added to correctly implement the disposable pattern.
+        /// <summary>
+        /// 
+        /// </summary>
         public void Dispose()
         {
             _timer.Cancel();

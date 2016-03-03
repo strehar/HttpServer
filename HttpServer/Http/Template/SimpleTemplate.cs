@@ -90,6 +90,9 @@ namespace Feri.MS.Http.Template
         #endregion
 
         #region Properties
+        /// <summary>
+        /// 
+        /// </summary>
         public bool SafeMode
         {
             get

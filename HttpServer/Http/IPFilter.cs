@@ -25,6 +25,9 @@ using Windows.Networking.Sockets;
 
 namespace Feri.MS.Http
 {
+    /// <summary>
+    /// 
+    /// </summary>
     public class IPFilter : IIPFilter
     {
         Dictionary<string, IpNumber> _blackList = new Dictionary<string, IpNumber>();

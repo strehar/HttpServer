@@ -27,6 +27,11 @@ namespace Feri.MS.Http.Json
     {
         Dictionary<string, string> _data = new Dictionary<string, string>();
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="request"></param>
+        /// <param name="response"></param>
         public void Listen(HttpRequest request, HttpResponse response)
         {
             string _jsonString;
@@ -38,6 +43,9 @@ namespace Feri.MS.Http.Json
             response.Write(System.Text.Encoding.UTF8.GetBytes(_jsonString), "application/json");
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
         public Dictionary<string, string> GetAllData
         {
             get
@@ -46,6 +54,12 @@ namespace Feri.MS.Http.Json
             }
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="key"></param>
+        /// <param name="value"></param>
+        /// <returns></returns>
         public bool AddData(string key, string value)
         {
             lock (_data)
@@ -64,6 +78,11 @@ namespace Feri.MS.Http.Json
             }
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="key"></param>
+        /// <returns></returns>
         public bool RemoveData(string key)
         {
             lock (_data)
@@ -81,6 +100,12 @@ namespace Feri.MS.Http.Json
             }
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="key"></param>
+        /// <param name="value"></param>
+        /// <returns></returns>
         public bool UpdateData(string key, string value)
         {
             lock (_data)
@@ -97,6 +122,11 @@ namespace Feri.MS.Http.Json
             }
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="key"></param>
+        /// <returns></returns>
         public string GetData(string key)
         {
             lock (_data)
@@ -112,6 +142,11 @@ namespace Feri.MS.Http.Json
             }
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="key"></param>
+        /// <returns></returns>
         public bool IsInData(string key)
         {
             if (_data.ContainsKey(key))

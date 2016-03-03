@@ -31,7 +31,6 @@ namespace Feri.MS.Parts.I2C.RealTimeClock
 
         private I2cDevice _i2cController;
         private bool _isDisposed = false;
-        private bool _conversionStarted = false;
 
         private DeviceInformationCollection FindI2cControllers()
         {

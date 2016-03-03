@@ -64,6 +64,9 @@ namespace Feri.MS.Http
 
         bool _sessionUpdated = false;
 
+        /// <summary>
+        /// 
+        /// </summary>
         public bool _debug = false;
         #endregion
 
@@ -76,6 +79,9 @@ namespace Feri.MS.Http
             }
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
         public string RequestType
         {
             get
@@ -84,6 +90,9 @@ namespace Feri.MS.Http
             }
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
         public string RequestPath
         {
             get
@@ -92,6 +101,9 @@ namespace Feri.MS.Http
             }
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
         public Dictionary<string, string> Parameters
         {
             get
@@ -100,6 +112,9 @@ namespace Feri.MS.Http
             }
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
         public Dictionary<string, string> Headers
         {
             get
@@ -108,6 +123,9 @@ namespace Feri.MS.Http
             }
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
         public int RequestSize
         {
             get
@@ -116,6 +134,9 @@ namespace Feri.MS.Http
             }
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
         public HttpConnection HttpConnection
         {
             get
@@ -145,6 +166,9 @@ namespace Feri.MS.Http
             }
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
         public int SessionLifetime
         {
             get
@@ -158,44 +182,43 @@ namespace Feri.MS.Http
             }
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="name"></param>
+        /// <returns></returns>
         public bool ContainsCookie(string name)
         {
-            //try
-            //{
             return _cookies.ContainsKey(name);
-            //}
-            //catch (Exception e)
-            //{
-            //    Debug.WriteLine(e.Message);
-            //    Debug.WriteLine(e.ToString());
-            //    return false;
-            //}
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="name"></param>
+        /// <returns></returns>
         public HttpCookie GetCookie(string name)
         {
-            //try
-            //{
             if (_cookies.ContainsKey(name))
             {
                 return _cookies[name];
             }
             else
                 return null;
-            //}
-            //catch (Exception e)
-            //{
-            //    Debug.WriteLine(e.Message);
-            //    Debug.WriteLine(e.ToString());
-            //    return null;
-            //}
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns></returns>
         public string RequestString()
         {
             return _requestString;
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
         public string AuthenticatedUser { get; internal set; }
         #endregion
 

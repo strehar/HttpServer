@@ -21,6 +21,9 @@ using System.Collections.Generic;
 
 namespace Feri.MS.Http
 {
+    /// <summary>
+    /// 
+    /// </summary>
     public class UserManager : IUserManager
     {
         Dictionary<string, string> _users = new Dictionary<string, string>();                            // Registriranu userji z gesli, ki imajo dostop do sistema
@@ -89,8 +92,7 @@ namespace Feri.MS.Http
         /// <summary>
         /// Method checks if user information provided by the client mathces the information stored on server
         /// </summary>
-        /// <param name="username">Provided username</param>
-        /// <param name="password">Provided password</param>
+        /// <param name="request">request we will use to authenticate user (extract user data from headers).</param>
         /// <returns>true if information matches and lase if it does not.</returns>
         public string AuthenticateUser(HttpRequest request)
         {

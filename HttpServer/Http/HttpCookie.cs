@@ -38,18 +38,33 @@ namespace Feri.MS.Http
 
         //TODO: Ostala funkcionalnost za cookie, https://msdn.microsoft.com/en-us/library/system.web.httpcookie(v=vs.110).aspx
         // Manjka domain= atribut
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="name"></param>
         public HttpCookie(string name)
         {
             _name = name;
             _value = null;
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="name"></param>
+        /// <param name="value"></param>
         public HttpCookie(string name, string value)
         {
             _name = name;
             _value = value;
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="name"></param>
+        /// <param name="value"></param>
+        /// <param name="expire"></param>
         public HttpCookie(string name, string value, DateTime expire)
         {
             _name = name;
@@ -57,6 +72,9 @@ namespace Feri.MS.Http
             _expire = expire;
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
         public string Name
         {
             get
@@ -70,6 +88,9 @@ namespace Feri.MS.Http
             }
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
         public string Value
         {
             get
@@ -83,6 +104,9 @@ namespace Feri.MS.Http
             }
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
         public DateTime? Expire
         {
             get
@@ -96,6 +120,9 @@ namespace Feri.MS.Http
             }
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
         public bool HasKeys
         {
             get
@@ -104,6 +131,9 @@ namespace Feri.MS.Http
             }
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
         public Dictionary<string, string> Values
         {
             get
@@ -117,6 +147,9 @@ namespace Feri.MS.Http
             }
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
         public string Path
         {
             get

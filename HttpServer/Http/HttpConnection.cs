@@ -31,6 +31,10 @@ namespace Feri.MS.Http
         private string _remotePort;
         private string _localPort;
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="data"></param>
         public HttpConnection(StreamSocket data)
         {
             // Podatki o hostu in klientu
@@ -40,6 +44,9 @@ namespace Feri.MS.Http
             _remotePort = data.Information.RemotePort;
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
         public string LocalHostName
         {
             get
@@ -48,6 +55,9 @@ namespace Feri.MS.Http
             }
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
         public string LocalHost
         {
             get
@@ -56,6 +66,9 @@ namespace Feri.MS.Http
             }
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
         public string LocalPort
         {
             get
@@ -64,6 +77,9 @@ namespace Feri.MS.Http
             }
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
         public string RemoteHostName
         {
             get
@@ -72,6 +88,9 @@ namespace Feri.MS.Http
             }
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
         public string RemoteHost
         {
             get
@@ -80,6 +99,9 @@ namespace Feri.MS.Http
             }
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
         public string RemotePort
         {
             get

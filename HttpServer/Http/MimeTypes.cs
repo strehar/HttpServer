@@ -65,6 +65,9 @@ namespace Feri.MS.Http
             }
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
         public Hashtable Types
         {
             get

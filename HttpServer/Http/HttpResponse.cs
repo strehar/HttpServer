@@ -42,6 +42,9 @@ namespace Feri.MS.Http
 
         private HttpRequest _request;
 
+        /// <summary>
+        /// 
+        /// </summary>
         public bool _debug = false;
         #endregion
 
@@ -60,6 +63,10 @@ namespace Feri.MS.Http
         }
         #endregion
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="request"></param>
         public HttpResponse(HttpRequest request)
         {
             _request = request;

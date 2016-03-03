@@ -21,16 +21,62 @@ using Windows.Networking.Sockets;
 
 namespace Feri.MS.Http
 {
+    /// <summary>
+    /// 
+    /// </summary>
     public interface IIPFilter
     {
+        /// <summary>
+        /// 
+        /// </summary>
         void Start();
+        /// <summary>
+        /// 
+        /// </summary>
         void Stop();
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="ip"></param>
+        /// <param name="bits"></param>
+        /// <returns></returns>
         bool AddBlackList(IPAddress ip, int bits);
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="ip"></param>
+        /// <param name="bits"></param>
+        /// <returns></returns>
         bool AddWhiteList(IPAddress ip, int bits);
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="ip"></param>
+        /// <returns></returns>
         bool IsBlackListed(IPAddress ip);
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="ip"></param>
+        /// <returns></returns>
         bool IsWhiteListed(IPAddress ip);
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="socket"></param>
+        /// <returns></returns>
         bool ProcessIPFilter(StreamSocket socket);
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="ip"></param>
+        /// <returns></returns>
         bool RemoveBlackList(IPAddress ip);
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="ip"></param>
+        /// <returns></returns>
         bool RemoveWhiteList(IPAddress ip);
     }
 }
