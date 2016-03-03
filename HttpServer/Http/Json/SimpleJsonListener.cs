@@ -48,8 +48,6 @@ namespace Feri.MS.Http.Json
 
         public bool AddData(string key, string value)
         {
-            //try
-            //{
             lock (_data)
             {
                 if (!_data.ContainsKey(key))
@@ -64,19 +62,10 @@ namespace Feri.MS.Http.Json
                     return false;
                 }
             }
-            //}
-            //catch (Exception e)
-            //{
-            //    Debug.WriteLine(e.Message);
-            //    Debug.WriteLine(e.StackTrace);
-            //    return false;
-            //}
         }
 
         public bool RemoveData(string key)
         {
-            //try
-            //{
             lock (_data)
             {
                 if (_data.ContainsKey(key))
@@ -90,19 +79,10 @@ namespace Feri.MS.Http.Json
                     return false;
                 }
             }
-            //}
-            //catch (Exception e)
-            //{
-            //    Debug.WriteLine(e.Message);
-            //    Debug.WriteLine(e.StackTrace);
-            //    return false;
-            //}
         }
 
         public bool UpdateData(string key, string value)
         {
-            //try
-            //{
             lock (_data)
             {
                 if (_data.ContainsKey(key))
@@ -115,19 +95,10 @@ namespace Feri.MS.Http.Json
                     return false;
                 }
             }
-            //}
-            //catch (Exception e)
-            //{
-            //    Debug.WriteLine(e.Message);
-            //    Debug.WriteLine(e.StackTrace);
-            //    return false;
-            //}
         }
 
         public string GetData(string key)
         {
-            //try
-            //{
             lock (_data)
             {
                 if (_data.ContainsKey(key))
@@ -139,19 +110,10 @@ namespace Feri.MS.Http.Json
                     return null;
                 }
             }
-            //}
-            //catch (Exception e)
-            //{
-            //    Debug.WriteLine(e.Message);
-            //    Debug.WriteLine(e.StackTrace);
-            //    return null;
-            //}
         }
 
         public bool IsInData(string key)
         {
-            //try
-            //{
             if (_data.ContainsKey(key))
             {
                 return true;
@@ -160,13 +122,6 @@ namespace Feri.MS.Http.Json
             {
                 return false;
             }
-            //}
-            //catch (Exception e)
-            //{
-            //    Debug.WriteLine(e.Message);
-            //    Debug.WriteLine(e.StackTrace);
-            //    return false;
-            //}
         }
     }
 }

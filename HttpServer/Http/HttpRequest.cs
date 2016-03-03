@@ -427,8 +427,7 @@ namespace Feri.MS.Http
             }
             catch (Exception e)
             {
-                Debug.WriteLine(e.Message);
-                Debug.WriteLine(e.ToString());
+                Debug.WriteLine(e);
                 return false;
             }
         }
@@ -503,8 +502,7 @@ namespace Feri.MS.Http
             }
             catch (Exception e)
             {
-                Debug.WriteLine(e.Message);
-                Debug.WriteLine(e.ToString());
+                Debug.WriteLine(e);
             }
         }
     }

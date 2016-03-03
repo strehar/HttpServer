@@ -75,8 +75,7 @@ namespace WebServerDemo
             }
             catch (Exception e)
             {
-                Debug.WriteLine(e.Message);
-                Debug.WriteLine(e.StackTrace);
+                Debug.WriteLine(e);
                 response.Write(e);
             }
 
@@ -100,8 +99,7 @@ namespace WebServerDemo
             }
             catch (Exception e)
             {
-                Debug.WriteLine(e.Message);
-                Debug.WriteLine(e.StackTrace);
+                Debug.WriteLine(e);
                 response.Write(e);
             }
         }
@@ -116,8 +114,7 @@ namespace WebServerDemo
             }
             catch (Exception e)
             {
-                Debug.WriteLine(e.Message);
-                Debug.WriteLine(e.StackTrace);
+                Debug.WriteLine(e);
                 response.Write(e);
             }
         }

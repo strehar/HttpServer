@@ -178,8 +178,6 @@ namespace Feri.MS.Http.Template
         public bool AddAction(string name, string pattern, string data)
         {
             //name je niz ki se menja, pattern je vzorec, ki ga menjavamo, data je za kaj se menja
-            //try
-            //{
             if (_safeMode)
             {
                 return InternalAddAction(name, pattern, WebUtility.HtmlEncode(data));
@@ -187,13 +185,6 @@ namespace Feri.MS.Http.Template
             else {
                 return InternalAddAction(name, pattern, data);
             }
-            //}
-            //catch (Exception e)
-            //{
-            //    Debug.WriteLine(e.Message);
-            //    Debug.WriteLine(e.ToString());
-            //    return false;
-            //}
         }
 
         /// <summary>
@@ -205,8 +196,6 @@ namespace Feri.MS.Http.Template
         /// <returns></returns>
         public bool AddAction(string name, Regex pattern, string data)
         {
-            //try
-            //{
             if (_safeMode)
             {
                 return InternalAddAction(name, pattern, WebUtility.HtmlEncode(data));
@@ -215,14 +204,6 @@ namespace Feri.MS.Http.Template
             {
                 return InternalAddAction(name, pattern, data);
             }
-
-            //}
-            //catch (Exception e)
-            //{
-            //    Debug.WriteLine(e.Message);
-            //    Debug.WriteLine(e.ToString());
-            //    return false;
-            //}
         }
 
         /// <summary>
@@ -233,8 +214,6 @@ namespace Feri.MS.Http.Template
         /// <returns></returns>
         public bool UpdateAction(string name, string data)
         {
-            //try
-            //{
             lock (_niz) lock (_originalniNiz) lock (_akcije)
                     {
                         if (_akcije.ContainsKey(name))
@@ -254,13 +233,6 @@ namespace Feri.MS.Http.Template
                             return false;
                         }
                     }
-            //}
-            //catch (Exception e)
-            //{
-            //    Debug.WriteLine(e.Message);
-            //    Debug.WriteLine(e.ToString());
-            //    return false;
-            //}
         }
 
         /// <summary>
@@ -270,8 +242,6 @@ namespace Feri.MS.Http.Template
         /// <returns>true if action was deleted, false if it was not.</returns>
         public bool DeleteAction(string name)
         {
-            //try
-            //{
             lock (_niz) lock (_originalniNiz) lock (_akcije)
                     {
                         if (_akcije.ContainsKey(name))
@@ -284,13 +254,6 @@ namespace Feri.MS.Http.Template
                             return false;
                         }
                     }
-            //}
-            //catch (Exception e)
-            //{
-            //    Debug.WriteLine(e.Message);
-            //    Debug.WriteLine(e.ToString());
-            //    return false;
-            //}
         }
 
         /// <summary>
@@ -298,8 +261,6 @@ namespace Feri.MS.Http.Template
         /// </summary>
         public void ProcessAction()
         {
-            //try
-            //{
             lock (_niz) lock (_originalniNiz) lock (_akcije)
                     {
                         string _tmpString = null;
@@ -332,13 +293,6 @@ namespace Feri.MS.Http.Template
                         _niz = _tmpString;
                         _posodobljenNiz = false;
                     }
-            //}
-            //catch (Exception e)
-            //{
-            //    Debug.WriteLine(e.Message);
-            //    Debug.WriteLine(e.ToString());
-            //    return false;
-            //}
 
         }
 

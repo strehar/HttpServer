@@ -86,8 +86,6 @@ namespace Feri.MS.Http
         /// <param name="headers">Optional paarameter, used to add custom headers. Usualy it is ok to leave empty, used by some server responses to add ionformation for client.</param>
         public void Write(byte[] data, string contentType, string statusCode = "200 OK", Dictionary<string, string> headers = null)
         {
-            //try
-            //{
             // Show the html 
             string _eol = "\r\n";
             string htmlVersion = "HTTP/1.1 ";
@@ -115,7 +113,6 @@ namespace Feri.MS.Http
                 }
             if (_cookies.Count > 0) // Obdelamo cookije...
             {
-                //_header.Append("Set-Cookie: ");
                 int _cookieIterration = 1;
                 foreach (KeyValuePair<string, HttpCookie> cookie in _cookies)
                 {
@@ -162,7 +159,6 @@ namespace Feri.MS.Http
                     }
                     if (_cookieIterration < _cookies.Count)
                     {
-                        //_header.Append("; ");
                         _header.Append(_eol);
                     }
                     _cookieIterration++;
@@ -181,13 +177,6 @@ namespace Feri.MS.Http
             _stream.Write(headerArray, 0, headerArray.Length);
             _stream.Write(data, 0, data.Length);
             _stream.Flush();
-            //}
-            //catch (Exception e)
-            //{
-            //    Debug.WriteLine(e.Message);
-            //    Debug.WriteLine(e.StackTrace);
-            //}
-
         }
 
         /// <summary>
@@ -223,8 +212,6 @@ namespace Feri.MS.Http
         /// <returns>Returns true if header was added, false if it was not. This means that header with same name exists.</returns>
         public bool AddHeader(string header, string data)
         {
-            //try
-            //{
             if (!_headers.ContainsKey(header))
             {
                 _headers.Add(header, data);
@@ -234,13 +221,6 @@ namespace Feri.MS.Http
             {
                 return false;
             }
-            //}
-            //catch (Exception e)
-            //{
-            //    Debug.WriteLine(e.Message);
-            //    Debug.WriteLine(e.StackTrace);
-            //    return false;
-            //}
         }
 
         /// <summary>
@@ -250,8 +230,6 @@ namespace Feri.MS.Http
         /// <returns>Returns true if header was removed, false if it was not. This means header did not exists in the response.</returns>
         public bool RemoveHeader(string header)
         {
-            //try
-            //{
             if (_headers.ContainsKey(header))
             {
                 _headers.Remove(header);
@@ -261,13 +239,6 @@ namespace Feri.MS.Http
             {
                 return false;
             }
-            //}
-            //catch (Exception e)
-            //{
-            //    Debug.WriteLine(e.Message);
-            //    Debug.WriteLine(e.StackTrace);
-            //    return false;
-            //}
         }
 
         /// <summary>
@@ -277,8 +248,6 @@ namespace Feri.MS.Http
         /// <returns>Returns string representation of the header value or null if header did not exist.</returns>
         public string GetHeader(string header)
         {
-            //try
-            //{
             if (_headers.ContainsKey(header))
             {
                 return _headers[header].ToString();
@@ -287,13 +256,6 @@ namespace Feri.MS.Http
             {
                 return null;
             }
-            //}
-            //catch (Exception e)
-            //{
-            //    Debug.WriteLine(e.Message);
-            //    Debug.WriteLine(e.StackTrace);
-            //    return null;
-            //}
         }
 
         /// <summary>
@@ -303,16 +265,7 @@ namespace Feri.MS.Http
         /// <returns>Return TRUE if cookie exists in current request and FALSE if it does not.</returns>
         public bool ContainsCookie(string name)
         {
-            //try
-            //{
             return _cookies.ContainsKey(name);
-            //}
-            //catch (Exception e)
-            //{
-            //    Debug.WriteLine(e.Message);
-            //    Debug.WriteLine(e.ToString());
-            //    return false;
-            //}
         }
 
         /// <summary>
@@ -322,8 +275,6 @@ namespace Feri.MS.Http
         /// <returns>True if cookie was added and false if cookie allready exists in the response.</returns>
         public bool AddCookie(HttpCookie cookie)
         {
-            //try
-            //{
             if (!_cookies.ContainsKey(cookie.Name))
             {
                 _cookies.Add(cookie.Name, cookie);
@@ -331,13 +282,6 @@ namespace Feri.MS.Http
             }
             else
                 return false;
-            //}
-            //catch (Exception e)
-            //{
-            //    Debug.WriteLine(e.Message);
-            //    Debug.WriteLine(e.ToString());
-            //    return false;
-            //}
         }
 
         /// <summary>
@@ -347,21 +291,12 @@ namespace Feri.MS.Http
         /// <returns>Returns HttpCookie or null if it does not exist in response.</returns>
         public HttpCookie GetCookie(string name)
         {
-            //try
-            //{
             if (_cookies.ContainsKey(name))
             {
                 return _cookies[name];
             }
             else
                 return null;
-            //}
-            //catch (Exception e)
-            //{
-            //    Debug.WriteLine(e.Message);
-            //    Debug.WriteLine(e.ToString());
-            //    return null;
-            //}
         }
 
         /// <summary>
