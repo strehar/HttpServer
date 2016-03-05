@@ -16,7 +16,6 @@
 */
 #endregion
 
-using DotLiquidCore;
 using Feri.MS.Http;
 using Feri.MS.Http.Template;
 using System;

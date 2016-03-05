@@ -4,6 +4,7 @@ Changed by Miha Strehar in 2016:
 x.Key.IsInterface to x.Key.GetTypeInfo().IsInterface
 added using Sysrem.Reflection;
 */
+#endregion
 
 using System;
 using System.Collections.Generic;
