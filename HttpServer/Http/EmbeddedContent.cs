@@ -209,6 +209,16 @@ namespace Feri.MS.Http
         }
 
         /// <summary>
+        /// Method reads embedded file and returnes string with the data.
+        /// </summary>
+        /// <param name="path">Full path to file, that is returned from UrlToPath method.</param>
+        /// <returns>string with file data</returns>
+        public string ReadEmbededToString(string path)
+        {
+            return System.Text.Encoding.UTF8.GetString(ReadEmbededToByte(path));
+        }
+
+        /// <summary>
         /// Helper method that returnes List of all names of embedded resources 
         /// </summary>
         /// <returns>List with names of embedded resources.</returns>

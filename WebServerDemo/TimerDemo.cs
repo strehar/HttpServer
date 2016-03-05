@@ -66,7 +66,7 @@ namespace WebServerDemo
 
             _ws.AddTimer("TestTimer", 10000, TimerEvent);
 
-            _ports._debug = true;
+            //_ports._debug = true;
         }
 
         public void TimerEvent()

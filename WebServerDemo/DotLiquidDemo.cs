@@ -18,7 +18,6 @@
 
 using DotLiquidCore;
 using Feri.MS.Http;
-using Feri.MS.Http.Template;
 using System;
 
 namespace WebServerDemo
@@ -26,28 +25,32 @@ namespace WebServerDemo
     /// <summary>
     /// This is SimpleTemplate demo. Since other classes display data on this template, we recive template instance from SimpleWebServer class.
     /// </summary>
-    class TemplateDemo : IDisposable
+    class DotLiquidDemo : IDisposable
     {
         HttpServer _ws;
-        SimpleTemplate _templateDemo;
+        Template liquidtemplate;
 
         string _privatePath = "AppHtml";
 
-        public void Start(HttpServer server, SimpleTemplate template)
+        public void Start(HttpServer server)
         {
             _ws = server;
-            _templateDemo = template;
-            _ws.AddPath("/template.html", VrniTemplate);
-            _templateDemo.LoadString(_ws.EmbeddedContent.ReadEmbededToByte(_privatePath + "/templateDemo.html"));
-            _templateDemo.AddAction("userName", "USERNAME", "");
+            _ws.AddPath("/dotLiquidTemplate.html", VrniTemplate);
+            Template.RegisterSafeType(typeof(HttpRequest), new[] { "AuthenticatedUser", "RequestPath", "RequestType" });
+            liquidtemplate = Template.Parse(_ws.EmbeddedContent.ReadEmbededToString(_privatePath + "/dotLiquidTemplateDemo.html"));
         }
 
-        private void VrniTemplate(HttpRequest reqiest, HttpResponse response)
+        private void VrniTemplate(HttpRequest request, HttpResponse response)
         {
-            _templateDemo.UpdateAction("userName", reqiest.AuthenticatedUser);
-            _templateDemo.ProcessAction();
-            byte[] rezultat = _templateDemo.GetByte();
-            response.Write(rezultat, _ws.GetMimeType.GetMimeFromFile(_privatePath + "/templateDemo.html"));
+            try {
+                Hash vars = Hash.FromAnonymousObject(request);
+                string result = liquidtemplate.Render(vars);
+
+                response.Write(System.Text.Encoding.UTF8.GetBytes(result.ToCharArray()), _ws.GetMimeType.GetMimeFromFile(_privatePath + "/templateDemo.html"));
+            } catch (Exception e)
+            {
+                response.Write(e);
+            }
         }
 
         #region IDisposable Support

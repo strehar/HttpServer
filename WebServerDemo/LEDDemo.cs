@@ -58,7 +58,7 @@ namespace WebServerDemo
 
             _json.AddData("MaualLed", "Off");
 
-            _ports._debug = true;
+            //_ports._debug = true;
         }
 
         private void ProcessDemoLED(HttpRequest request, HttpResponse response)

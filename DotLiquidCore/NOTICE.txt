@@ -1,0 +1,6 @@
+﻿This is port of DotLiquid 1.8.0 to the .NET Core framework. 
+Original DotLiquid can be found on the address: http://dotliquidmarkup.org/,
+Licence is Apache Licence 2.0, http://www.apache.org/licenses/LICENSE-2.0
+
+All copyrights are held by their respective owners.
+

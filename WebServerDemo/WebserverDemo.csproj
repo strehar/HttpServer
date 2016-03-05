@@ -103,6 +103,7 @@
     <Compile Include="StartupTask.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="TemperatureDemo.cs" />
+    <Compile Include="DotLiquidDemo.cs" />
     <Compile Include="TemplateDemo.cs" />
     <Compile Include="TimerDemo.cs" />
     <Compile Include="StartDemo.cs" />
@@ -126,6 +127,7 @@
     <EmbeddedResource Include="AppHtml\templateSessionSet.html" />
     <EmbeddedResource Include="AppHtml\templateTermometer.html" />
     <EmbeddedResource Include="AppHtml\templateTimer.html" />
+    <EmbeddedResource Include="AppHtml\dotLiquidTemplateDemo.html" />
     <Content Include="Properties\Default.rd.xml" />
     <Content Include="Assets\LockScreenLogo.scale-200.png">
       <InProject>false</InProject>
@@ -155,6 +157,10 @@
     <EmbeddedResource Include="PublicHtml\slika.html" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\DotLiquidCore\DotLiquidCore.csproj">
+      <Project>{7e2d1c5b-59af-4f2a-a0aa-0fca38c1740c}</Project>
+      <Name>DotLiquidCore</Name>
+    </ProjectReference>
     <ProjectReference Include="..\HttpServer\HttpServer.csproj">
       <Project>{483fa17c-a355-4828-bbe2-ce44cffa241a}</Project>
       <Name>HttpServer</Name>

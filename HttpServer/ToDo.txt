@@ -1,0 +1,4 @@
+﻿1) Implemet Integration classes
+2) Add Filesystem support to HttpServer
+3) Move default listener to it's own class and add support for loading and registring DotLiquidCore scripts at runtime.
+4) Add filesystem watcher to monitor changes on filesystem and refresh index/registred scripts.
