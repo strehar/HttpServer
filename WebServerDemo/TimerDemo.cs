@@ -54,7 +54,7 @@ namespace WebServerDemo
 
             _ws.AddPath("/demoTimer.html", ProcessTimer);
 
-            _timerControl.LoadString(_ws.EmbeddedContent.ReadEmbededToByte(_privatePath + "/templateTimer.html"));
+            _timerControl.LoadString(_ws.EmbeddedContent.ReadToByte(_privatePath + "/templateTimer.html"));
             _timerControl.AddAction("timerOn", "TIMERON", "");
             _timerControl.AddAction("timerOff", "TIMEROFF", "");
 

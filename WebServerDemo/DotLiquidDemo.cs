@@ -37,7 +37,7 @@ namespace WebServerDemo
             _ws = server;
             _ws.AddPath("/dotLiquidTemplate.html", VrniTemplate);
             Template.RegisterSafeType(typeof(HttpRequest), new[] { "AuthenticatedUser", "RequestPath", "RequestType" });
-            liquidtemplate = Template.Parse(_ws.EmbeddedContent.ReadEmbededToString(_privatePath + "/dotLiquidTemplateDemo.html"));
+            liquidtemplate = Template.Parse(_ws.EmbeddedContent.ReadToString(_privatePath + "/dotLiquidTemplateDemo.html"));
         }
 
         private void VrniTemplate(HttpRequest request, HttpResponse response)

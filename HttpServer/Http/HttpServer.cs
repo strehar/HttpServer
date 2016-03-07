@@ -66,7 +66,9 @@ namespace Feri.MS.Http
         /// <param name="response"></param>
         public delegate void serverPath(HttpRequest request, HttpResponse response);    // delegat za obdelavo http zahtev
 
-        serverPath _serverRoot;                           // Delegat za prevzeto pot, v primeru da se zahteva url, ki ga ne obdeluje nobena registrirana funkcija
+        //serverPath _serverRoot;                           // Delegat za prevzeto pot, v primeru da se zahteva url, ki ga ne obdeluje nobena registrirana funkcija
+
+        private IHttpRootManager _rootManager;
 
         string _serverRootFolder = "SystemHtml";          // prevzeta "mapa" od koder se prikazujejo datoteke, če je bila zahtevana pot, ki je ne obdeluje nobena finkcija
         string _serverRootFile = "serverDefault.html";    // Preveta datoteka za prikaz
@@ -226,6 +228,31 @@ namespace Feri.MS.Http
             }
         }
 
+        public IHttpRootManager HttpRootManager
+        {
+            get
+            {
+                if (_rootManager == null)
+                {
+                    _rootManager = new DefaultHttpRootManager();
+                    _rootManager.AddSource("EmbeddedContent", _embeddedContent);
+                    _rootManager.Start(this);
+                    //_serverRoot = _rootManager.Listen;
+                }
+                return _rootManager;
+            }
+            set
+            {
+                if (_rootManager != null)
+                {
+                    _rootManager.Stop();
+                }
+                _rootManager = value;
+                _rootManager.Start(this);
+                //_serverRoot = _rootManager.Listen;
+            }
+        }
+
         #endregion
 
         #region IDisposable Support
@@ -249,7 +276,7 @@ namespace Feri.MS.Http
         {
             _log.Open();
             _log._debug = true;
-            _serverRoot = ProcessRoot;
+            //_serverRoot = ProcessRoot;
             _mimeType._debug = _debug;
             _sessionManager._debug = _debug;
             _embeddedContent = new EmbeddedContent(this.GetType());
@@ -310,7 +337,7 @@ namespace Feri.MS.Http
                 {
                     _log.WriteLine("Blocked IP:" + DateTime.Now.ToString("R") + ": " + socket.Information.RemoteAddress.ToString() + ": " + socket.Information.LocalAddress.ToString());
                     HttpResponse _error = new HttpResponse(socket.OutputStream.AsStreamForWrite());
-                    byte[] _dataArray = _embeddedContent.ReadEmbededToByte("SystemHtml/403.html");
+                    byte[] _dataArray = _embeddedContent.ReadToByte("SystemHtml/403.html");
                     _error.Write(_dataArray, _mimeType.GetMimeFromFile("/403.html"), "403 Forbidden");
                     return;
                 }
@@ -346,7 +373,7 @@ namespace Feri.MS.Http
                 if (string.IsNullOrEmpty(loggedInUser))    // Authentication failed for some reason, request that user authenticates.
                 {
                     // user authentication failed, display authentication request:
-                    byte[] _dataArray = _embeddedContent.ReadEmbededToByte("SystemHtml/401.html");
+                    byte[] _dataArray = _embeddedContent.ReadToByte("SystemHtml/401.html");
 
                     Dictionary<string, string> _headers = new Dictionary<string, string>();
                     _headers.Add("WWW-Authenticate", "Basic realm=\"PI2 Web Access\"");
@@ -373,12 +400,12 @@ namespace Feri.MS.Http
                 }
                 else
                 {
-                    _serverRoot(_hrequest, _hresponse); //ni registrirane poti, kličemo processtoorasync
+                    _rootManager.Listen(_hrequest, _hresponse); //ni registrirane poti, kličemo processtoorasync
                 }
             }
             else
             {
-                byte[] _dataArray = _embeddedContent.ReadEmbededToByte("SystemHtml/405.html");
+                byte[] _dataArray = _embeddedContent.ReadToByte("SystemHtml/405.html");
                 Dictionary<string, string> _405header = new Dictionary<string, string>();
                 _405header.Add("Allow", "GET");
                 _hresponse.Write(_dataArray, _mimeType.GetMimeFromFile("/405.html"), "405 Method not allowed", _405header);
@@ -401,7 +428,7 @@ namespace Feri.MS.Http
                 {
                     Debug.WriteLineIf(_debug, "Unsupported POST: " + request.Headers["Content-Type"] + ".");
 
-                    byte[] _dataArray = _embeddedContent.ReadEmbededToByte("SystemHtml/415.html");
+                    byte[] _dataArray = _embeddedContent.ReadToByte("SystemHtml/415.html");
                     response.Write(_dataArray, _mimeType.GetMimeFromFile("/415.html"), "415 Unsupported Media Type");
 
                     return;
@@ -414,7 +441,7 @@ namespace Feri.MS.Http
                     int dataLength = requestBody[lokacijaPodatkov].Length;
                     Debug.WriteLineIf(_debug, "Data size mismatch. Attribute says: " + request.Headers["Content-Length"] + " Data says:" + dataLength + ".");
 
-                    byte[] _dataArray = _embeddedContent.ReadEmbededToByte("SystemHtml/415.html");
+                    byte[] _dataArray = _embeddedContent.ReadToByte("SystemHtml/415.html");
                     response.Write(_dataArray, _mimeType.GetMimeFromFile("/415.html"), "415 Unsupported Media Type");
 
                     return;
@@ -431,7 +458,7 @@ namespace Feri.MS.Http
             {
                 // request is not too small, but something went wrong. we don't know what. print server error 500.
 
-                byte[] _dataArray = _embeddedContent.ReadEmbededToByte("SystemHtml/500.html");
+                byte[] _dataArray = _embeddedContent.ReadToByte("SystemHtml/500.html");
                 response.Write(_dataArray, _mimeType.GetMimeFromFile("/500.html"), "500 Internal Server Error");
 
                 Debug.WriteLineIf(_debug, "Something went wrong. Stream type: " + request.RequestType + ": " + request.RequestString() + ": " + request.RequestSize + ".");
@@ -457,12 +484,12 @@ namespace Feri.MS.Http
             else
                 pot = request.RequestPath;
 
-            if (_embeddedContent.GetEmbededContaines(_serverRootFolder + pot))
+            if (_embeddedContent.Containes(_serverRootFolder + pot))
             {
-                _dataArray = _embeddedContent.ReadEmbededToByte(_serverRootFolder + pot);
+                _dataArray = _embeddedContent.ReadToByte(_serverRootFolder + pot);
             }
             else {
-                _dataArray = _embeddedContent.ReadEmbededToByte("SystemHtml/404.html");
+                _dataArray = _embeddedContent.ReadToByte("SystemHtml/404.html");
                 response.Write(_dataArray, _mimeType.GetMimeFromFile(pot), "404 Not Found");
                 return;
             }
@@ -547,28 +574,37 @@ namespace Feri.MS.Http
         }
 
         /// <summary>
+        /// 
+        /// </summary>
+        /// <returns></returns>
+        public Dictionary<string, serverPath> GetPath()
+        {
+            return _serverPath;
+        }
+
+        /// <summary>
         /// Method sets root path for built in static html listener. It defines where to look for static content and what is default file to look for.
         /// </summary>
         /// <param name="folder">Folder to look for, for example PublicHtml</param>
         /// <param name="file">File to look for, for example index.html</param>
-        public void SetRootPath(string folder, string file)
-        {
-            _serverRootFolder = folder;
-            if (file.StartsWith("/"))
-                _serverRootFile = file.Replace("/", "");
-            else
-                _serverRootFile = file;
-        }
+        //public void SetRootPath(string folder, string file)
+        //{
+        //    _serverRootFolder = folder;
+        //    if (file.StartsWith("/"))
+        //        _serverRootFile = file.Replace("/", "");
+        //    else
+        //        _serverRootFile = file;
+        //}
 
         /// <summary>
         /// Method replaces default listener for static and unregistered content with user specified one.
         /// Unregistered content meand all url requests that are not handeled by other listeners.
         /// </summary>
         /// <param name="metoda">Enevt listener that will be called whenever unregistered path is called.</param>
-        public void SetRootPathListener(serverPath metoda)
-        {
-            _serverRoot = metoda;
-        }
+        //public void SetRootPathListener(serverPath metoda)
+        //{
+        //    _serverRoot = metoda;
+        //}
         #endregion
     }
 }

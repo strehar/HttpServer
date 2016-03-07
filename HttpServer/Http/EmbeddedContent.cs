@@ -27,7 +27,7 @@ namespace Feri.MS.Http
     /// <summary>
     /// 
     /// </summary>
-    public class EmbeddedContent
+    public class EmbeddedContent : IContentSource
     {
         Dictionary<string, AssemblyData> _RegistriraniAssebly = new Dictionary<string, AssemblyData>();  // Asembliji (dll-i) po katerih iščemo embeded vire, ki jih lahko prikažemo uporabnikom. Rabi se za reflection
         Dictionary<string, string> _NajdeneDatoteke = new Dictionary<string, string>();                  // Datoteke, ki so vključene v asemblije kot embededresource in jih lahko pošljemo uporabniku ter v katerem assembliju so.
@@ -50,6 +50,16 @@ namespace Feri.MS.Http
             {
                 _debug = value;
             }
+        }
+
+        public void Start()
+        {
+
+        }
+
+        public void Stop()
+        {
+
         }
 
         internal EmbeddedContent(Type val)
@@ -167,7 +177,7 @@ namespace Feri.MS.Http
             bool najdeno = false;
             foreach (string _pot in _NajdeneDatoteke.Keys)
             {
-                if (_pot.ToLower().Contains(_url) && (!najdeno))
+                if (_pot.ToLower().EndsWith(_url) && (!najdeno))
                 {
                     _polnaPot = _pot;
                     najdeno = true;
@@ -181,7 +191,7 @@ namespace Feri.MS.Http
         /// </summary>
         /// <param name="pot">Full path to file, that is returned from UrlToPath method.</param>
         /// <returns>byte array with file data</returns>
-        public byte[] ReadEmbededToByte(string pot)
+        public byte[] ReadToByte(string pot)
         {
             string _potTmp = pot.Replace('/', '.');
             string _pot = UrlToPath(_potTmp);
@@ -213,16 +223,16 @@ namespace Feri.MS.Http
         /// </summary>
         /// <param name="path">Full path to file, that is returned from UrlToPath method.</param>
         /// <returns>string with file data</returns>
-        public string ReadEmbededToString(string path)
+        public string ReadToString(string path)
         {
-            return System.Text.Encoding.UTF8.GetString(ReadEmbededToByte(path));
+            return System.Text.Encoding.UTF8.GetString(ReadToByte(path));
         }
 
         /// <summary>
         /// Helper method that returnes List of all names of embedded resources 
         /// </summary>
         /// <returns>List with names of embedded resources.</returns>
-        public List<string> GetEmbededNames()
+        public List<string> GetNames()
         {
             List<string> _tmpList = new List<string>();
             foreach (string pot in _NajdeneDatoteke.Keys)
@@ -235,7 +245,7 @@ namespace Feri.MS.Http
         /// </summary>
         /// <param name="pot">name of embedded resource</param>
         /// <returns>True if it exists and false if it does not.</returns>
-        public bool GetEmbededContaines(string pot)
+        public bool Containes(string pot)
         {
             if (UrlToPath(pot.Replace('/', '.')) != null)
                 return true;

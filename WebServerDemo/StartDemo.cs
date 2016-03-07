@@ -68,7 +68,8 @@ namespace WebServerDemo
             _ws.AddPath("/data.json", _json.Listen);
 
             // Server root path for static content
-            _ws.SetRootPath("PublicHtml", "/index.html");
+            _ws.HttpRootManager.SetRootPath("PublicHtml");
+            _ws.HttpRootManager.SetIndex(new string[] { "/index.html" });
 
             // Initialize demos
             _cookieDemo.Start(_ws);

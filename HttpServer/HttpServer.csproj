@@ -118,11 +118,14 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Http\AssemblyData.cs" />
+    <Compile Include="Http\DefaultHttpRootManager.cs" />
     <Compile Include="Http\EmbeddedContent.cs" />
     <Compile Include="Http\HttpCookie.cs" />
     <Compile Include="Http\HttpConnection.cs" />
     <Compile Include="Http\HttpRequest.cs" />
     <Compile Include="Http\HttpResponse.cs" />
+    <Compile Include="Http\IContentSource.cs" />
+    <Compile Include="Http\IHttpRootManager.cs" />
     <Compile Include="Http\IIPFilter.cs" />
     <Compile Include="Http\IpNumber.cs" />
     <Compile Include="Http\IUserManager.cs" />
@@ -132,6 +135,7 @@
     <Compile Include="Http\IPFilter.cs" />
     <Compile Include="Http\Session.cs" />
     <Compile Include="Http\SessionManager.cs" />
+    <Compile Include="Http\Template\ITemplate.cs" />
     <Compile Include="Http\TimeProvider.cs" />
     <Compile Include="Http\UserManager.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

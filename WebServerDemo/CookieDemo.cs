@@ -42,10 +42,10 @@ namespace WebServerDemo
             _ws.AddPath("/demoCookieRead.html", ProcessCookieRead);
             _ws.AddPath("/demoCookieRemove.html", ProcessCookieRemove);
 
-            _cookieTemplate.LoadString(_ws.EmbeddedContent.ReadEmbededToByte(_privatePath + "/templateCookieRead.html"));
+            _cookieTemplate.LoadString(_ws.EmbeddedContent.ReadToByte(_privatePath + "/templateCookieRead.html"));
             _cookieTemplate.AddAction("cookie", "COOKIE", "");
 
-            _cookieSetTemplate.LoadString(_ws.EmbeddedContent.ReadEmbededToByte(_privatePath + "/templateCookieSet.html"));
+            _cookieSetTemplate.LoadString(_ws.EmbeddedContent.ReadToByte(_privatePath + "/templateCookieSet.html"));
             _cookieSetTemplate.AddAction("cookie", "COOKIE", "");
         }
 
@@ -57,7 +57,7 @@ namespace WebServerDemo
                 {
                     response.AddCookie(new HttpCookie("DemoCookie", request.Parameters["niz"], (DateTime.Now).AddHours(1)));
 
-                    response.Write(_ws.EmbeddedContent.ReadEmbededToByte(_privatePath + "/cookieSetPotrdi.html"), _ws.GetMimeType.GetMimeFromFile("/cookieSetPotrdi.html"));
+                    response.Write(_ws.EmbeddedContent.ReadToByte(_privatePath + "/cookieSetPotrdi.html"), _ws.GetMimeType.GetMimeFromFile("/cookieSetPotrdi.html"));
                 }
                 else
                 {
@@ -110,7 +110,7 @@ namespace WebServerDemo
             {
 
                 response.AddCookie(new HttpCookie("DemoCookie", "", DateTime.MinValue));
-                response.Write(_ws.EmbeddedContent.ReadEmbededToByte(_privatePath + "/sessionRemove.html"), _ws.GetMimeType.GetMimeFromFile("/sessionRemove.html"));
+                response.Write(_ws.EmbeddedContent.ReadToByte(_privatePath + "/sessionRemove.html"), _ws.GetMimeType.GetMimeFromFile("/sessionRemove.html"));
             }
             catch (Exception e)
             {

@@ -115,6 +115,7 @@
     <None Include="WebServerDemo_TemporaryKey.pfx" />
   </ItemGroup>
   <ItemGroup>
+    <EmbeddedResource Include="PublicHtml\Images\1index.html" />
     <EmbeddedResource Include="AppHtml\cookieRemove.html" />
     <EmbeddedResource Include="AppHtml\cookieSetPotrdi.html" />
     <EmbeddedResource Include="AppHtml\sessionRemove.html" />

@@ -77,7 +77,7 @@ namespace Feri.MS.Http.Template
     /// It will only do this if some actions have changed, else cached result is returned.
     /// If safe mode is set to true it will html encode resulting data, else data is returned as is. Safe mode is enabled by default.
     /// </summary>
-    public class SimpleTemplate
+    public class SimpleTemplate : ITemplate
     {
         #region Definitions
         Dictionary<string, Akcija> _akcije = new Dictionary<string, Akcija>();

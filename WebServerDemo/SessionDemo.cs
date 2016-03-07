@@ -42,10 +42,10 @@ namespace WebServerDemo
             _ws.AddPath("/demoSessionRead.html", ProcessSessionRead);
             _ws.AddPath("/demoSessionRemove.html", ProcessSessionRemove);
 
-            _sessionTemplate.LoadString(_ws.EmbeddedContent.ReadEmbededToByte(_privatePath + "/templateSessionRead.html"));
+            _sessionTemplate.LoadString(_ws.EmbeddedContent.ReadToByte(_privatePath + "/templateSessionRead.html"));
             _sessionTemplate.AddAction("session", "SESSION", "");
 
-            _sessionSetTemplate.LoadString(_ws.EmbeddedContent.ReadEmbededToByte(_privatePath + "/templateSessionSet.html"));
+            _sessionSetTemplate.LoadString(_ws.EmbeddedContent.ReadToByte(_privatePath + "/templateSessionSet.html"));
             _sessionSetTemplate.AddAction("session", "SESSION", "");
 
         }
@@ -57,7 +57,7 @@ namespace WebServerDemo
                 if (request.Parameters.ContainsKey("niz"))
                 {
                     string niz = (request.GetSession()["Demo"] = request.Parameters["niz"]) as string;
-                    response.Write(_ws.EmbeddedContent.ReadEmbededToByte(_privatePath + "/sessionSetPotrdi.html"), _ws.GetMimeType.GetMimeFromFile("/sessionSetPotrdi.html"));
+                    response.Write(_ws.EmbeddedContent.ReadToByte(_privatePath + "/sessionSetPotrdi.html"), _ws.GetMimeType.GetMimeFromFile("/sessionSetPotrdi.html"));
                 }
                 else
                 {
@@ -111,7 +111,7 @@ namespace WebServerDemo
             try
             {
                 request.RemoveSession();
-                response.Write(_ws.EmbeddedContent.ReadEmbededToByte(_privatePath + "/sessionRemove.html"), _ws.GetMimeType.GetMimeFromFile("/sessionRemove.html"));
+                response.Write(_ws.EmbeddedContent.ReadToByte(_privatePath + "/sessionRemove.html"), _ws.GetMimeType.GetMimeFromFile("/sessionRemove.html"));
             }
             catch (Exception e)
             {

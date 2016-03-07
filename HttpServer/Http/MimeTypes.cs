@@ -88,6 +88,8 @@ namespace Feri.MS.Http
         public string GetMimeFromFile(String fileName)
         {
             string _koncnica = "text/html";
+            if (string.IsNullOrEmpty(fileName))
+                return _koncnica;
             if (fileName.Contains("."))
             {
                 _koncnica = fileName.Substring(fileName.LastIndexOf('.'));
