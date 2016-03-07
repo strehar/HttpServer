@@ -118,9 +118,12 @@ namespace Feri.MS.Http
             IContentSource _foundSource = null;
 
 
+            // TODO: Preveri ali je pot v registriranem listenerju in gliči listener ter return ;
+            // Koda()
 
             if (request.RequestPath.EndsWith("/"))
             {
+                // Preverimo, ali je v folderju index file.
                 foreach (string file in _serverRootFile)
                 {
                     foreach (IContentSource provider in _providers.Values)
@@ -132,6 +135,7 @@ namespace Feri.MS.Http
                         }
                     }
                 }
+                // Če smo našli index file ga izpišemo.
                 if (!string.IsNullOrEmpty(pot))
                 {
                     _dataArray = _foundSource.ReadToByte(pot);
@@ -140,6 +144,12 @@ namespace Feri.MS.Http
                 }
                 else
                 {
+                    // Ni index fajla,  izpišemo folder.
+                    /*
+                    1) Skopiramo vse poti v začasno datoteko
+                    2) vse poti, ki ustrezajo ustrezni mapi, skopiramo in pripravimo za izpis
+                    3) če ne najdemo, je treba izpisat 404.
+                    */
                     List<string> _vsePoti = new List<string>();
                     List<string> _ustreznePoti = new List<string>();
                     foreach (IContentSource provider in _providers.Values)
@@ -153,14 +163,21 @@ namespace Feri.MS.Http
                     {
                         if (_pot.ToLower().Contains(_serverRootFolder.ToLower() + request.RequestPath.ToLower().Replace('/', '.')))
                         {
-                            // Popravi, da bo samo prabilni URL!!!
-                            _ustreznePoti.Add(_pot);
+                            // Dodamo samo pravilne url-je za trenutno mapo, brez polne poti in v pravilni obliki.
+                            int cut = _pot.ToLower().Split(new string[] { _serverRootFolder.ToLower() + request.RequestPath.ToLower().Replace('/', '.') }, StringSplitOptions.None)[1].Length;
+                            string _tmpPath = _pot.Replace('.', '/');
+                            int Place = _tmpPath.LastIndexOf("/");
+                            _tmpPath = _tmpPath.Remove(Place, 1).Insert(Place, ".");
+                            if (!_tmpPath.Substring(_tmpPath.Length - cut).Contains("/"))
+                                _ustreznePoti.Add(_tmpPath.Substring(_tmpPath.Length - cut));
+                            //if (!_pot.Substring(_pot.Length - cut).Contains("/"))
+                            //    _ustreznePoti.Add(_pot.Substring(_pot.Length - cut));
                         }
                     }
                     if (_ustreznePoti.Count >= 1)
                     {
                         StringBuilder rezultat = new StringBuilder();
-                        rezultat.Append("<html><head><title>Index of: " + request.RequestPath + "</title></head><body><h1>Index of: " + request.RequestPath + "<hr>");
+                        rezultat.Append("<html><head><title>Index of: " + request.RequestPath + "</title></head><body><h1>Index of: " + request.RequestPath + "</h1><hr>");
                         foreach (string _pot in _ustreznePoti)
                         {
                             rezultat.Append("<a href=\"" + _pot + "\">" + _pot + "</a><br>");
@@ -176,17 +193,13 @@ namespace Feri.MS.Http
                         response.Write(_dataArray, _server.GetMimeType.GetMimeFromFile(pot), "404 Not Found");
                         return;
                     }
-                    // Nismo našli novenega indexa v tej poti, izpišemo folder listing....
-                    /*
-                    1) pogledamo, če ima kateri provider folder, ki se konča z zahtevano potjo
-                    2) če je, izpišemo vse datoteke, ki imajo to pot v imenu, za vse provijderje.
-                    3) če ne najdemo, je treba izpisat 404.
-                    */
                 }
             }
             else
             {
-                //pot = _serverRootFolder + "/" + request.RequestPath;
+                /*
+                Ni folder, izpišemo zahtevano datoteko.
+                */
                 foreach (IContentSource provider in _providers.Values)
                 {
                     if (provider.Containes(_serverRootFolder + request.RequestPath.ToLower()))
