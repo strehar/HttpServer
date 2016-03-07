@@ -177,12 +177,12 @@ namespace Feri.MS.Http
                     if (_ustreznePoti.Count >= 1)
                     {
                         StringBuilder rezultat = new StringBuilder();
-                        rezultat.Append("<html><head><title>Index of: " + request.RequestPath + "</title></head><body><h1>Index of: " + request.RequestPath + "</h1><hr>");
+                        rezultat.Append("<html>\n<head>\n<title>Index of: " + request.RequestPath + "</title>\n</head>\n<body>\n<h1>Index of: " + request.RequestPath + "</h1>\n<hr>\n");
                         foreach (string _pot in _ustreznePoti)
                         {
-                            rezultat.Append("<a href=\"" + _pot + "\">" + _pot + "</a><br>");
+                            rezultat.Append("<a href=\"" + _pot + "\">" + _pot + "</a><br>\n");
                         }
-                        rezultat.Append("</body></html>");
+                        rezultat.Append("</body>\n</html>");
                         response.Write(System.Text.Encoding.UTF8.GetBytes(rezultat.ToString()), "text/html");
                         return;
                     }
