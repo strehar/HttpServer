@@ -33,7 +33,7 @@ namespace WebServerDemo
         HttpServer _ws;
         string _privatePath = "AppHtml";
 
-        DS1621 _termometer = new DS1621();
+        DS1621 _termometer = DS1621.Create();
 
         SimpleTemplate _temperatureTemplate = new SimpleTemplate();
 
@@ -48,7 +48,6 @@ namespace WebServerDemo
             _temperatureTemplate.AddAction("temperature", "TEMP", "");
 
             _termometer.HighPrecision = true;
-            _termometer.Initialize();
         }
 
         private void ProcessTemperature(HttpRequest request, HttpResponse response)

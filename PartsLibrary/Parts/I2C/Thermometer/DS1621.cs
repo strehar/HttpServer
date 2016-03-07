@@ -18,21 +18,51 @@
 
 using Feri.MS.Parts.Exceptions;
 using System;
+using System.Collections.Generic;
+using System.Diagnostics;
 using System.Threading.Tasks;
 using Windows.Devices.Enumeration;
 using Windows.Devices.I2c;
 
 namespace Feri.MS.Parts.I2C.Thermometer
 {
+    internal class DS1621Helper
+    {
+        internal I2cDevice I2cController { get; set; }
+        internal DS1621 Part { get; set; }
+        internal int Address { get; set; }
+        internal int ReferenceCount { get; set; } = 0;
+    }
     // DS1621 digitalni termometer na i2c vodilu
+    /// <summary>
+    /// 
+    /// </summary>
     public class DS1621 : IDisposable
     {
         // Deklaracije:
+        /// <summary>
+        /// 
+        /// </summary>
         public const byte CONVERSION_DONE = 0x80;
+        /// <summary>
+        /// 
+        /// </summary>
         public const byte TEMPERATURE_HIGH_FLAG = 0x40;
+        /// <summary>
+        /// 
+        /// </summary>
         public const byte TEMPERATURE_LOW_FLAG = 0x20;
+        /// <summary>
+        /// 
+        /// </summary>
         public const byte NONVOLATILE_MEMORA_BUSY = 0x10;
+        /// <summary>
+        /// 
+        /// </summary>
         public const byte OUTPUT_POLARITY = 0x02;
+        /// <summary>
+        /// 
+        /// </summary>
         public const byte ONESHOT_MODE = 0x01;
 
         // COMMANDS
@@ -45,17 +75,83 @@ namespace Feri.MS.Parts.I2C.Thermometer
         private const byte ACCESS_TEMPERATURE_LOW = 0xA2;    // VRNE ali SPREJME 2 Byte-a
         private const byte ACCESS_CONFIG = 0xAC;             // VRNE ali SPREJME 1 Byte
 
-        private I2cDevice _i2cController;
+        private static Dictionary<int, DS1621Helper> _initialized { get; set; } = new Dictionary<int, DS1621Helper>();
+        /// <summary>
+        /// 
+        /// </summary>
+        public I2cDevice I2cController { get; private set; }
         private bool _isDisposed = false;
         private bool _conversionStarted = false;
+        /// <summary>
+        /// 
+        /// </summary>
+        public bool _debug = false;
 
-        public bool OneShotMode { get; set; }
         private bool IsInitialized { get; set; }
+        /// <summary>
+        /// 
+        /// </summary>
+        public bool OneShotMode { get; set; }
+        /// <summary>
+        /// 
+        /// </summary>
         public bool HighPrecision { get; set; } = false;
+        /// <summary>
+        /// 
+        /// </summary>
         public int Address { get; set; } = 0;
+        /// <summary>
+        /// 
+        /// </summary>
         public int Config { get; set; }
 
-        private DeviceInformationCollection FindI2cControllers()
+        private DS1621(int address)
+        {
+            Address = address;
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="address"></param>
+        /// <param name="i2cControllerDeviceId"></param>
+        /// <returns></returns>
+        public static DS1621 Create(int address = 0x48, string i2cControllerDeviceId = null)
+        {
+            // Adresa je 1001+A2+A1+A0
+            DS1621 _part;
+            //check if address exists
+            if (!_initialized.ContainsKey(address))
+            {
+                // there is none. DoMagic();
+                if (string.IsNullOrEmpty(i2cControllerDeviceId))
+                {
+                    i2cControllerDeviceId = FindI2cControllers()[0].Id;
+                }
+
+                I2cConnectionSettings i2cSettings = new I2cConnectionSettings(address);
+                i2cSettings.BusSpeed = I2cBusSpeed.StandardMode;
+
+                Task<I2cDevice> controlerInitTask = Task.Run(async () => await I2cDevice.FromIdAsync(i2cControllerDeviceId, i2cSettings));
+                I2cDevice _i2cController = controlerInitTask.Result;
+
+                _part = new DS1621(address);
+                DS1621Helper helper = new DS1621Helper();
+                helper.Address = address;
+                helper.Part = _part;
+                helper.I2cController = _i2cController;
+
+                _initialized.Add(address, helper);
+            }
+            else
+            {
+                _part = _initialized[address].Part;
+            }
+            _initialized[address].ReferenceCount++;
+            return _part;
+        }
+
+        private static DeviceInformationCollection FindI2cControllers()
         {
             string advancedQuerySyntaxString = I2cDevice.GetDeviceSelector();
             Task<DeviceInformationCollection> initTask = Task.Run(async () => await DeviceInformation.FindAllAsync(advancedQuerySyntaxString));
@@ -67,38 +163,15 @@ namespace Feri.MS.Parts.I2C.Thermometer
             return controllerDeviceIds;
         }
 
-        public void Initialize()
-        {
-            Initialize(FindI2cControllers()[0].Id);
-        }
-
-        public void Initialize(string i2cControllerDeviceId)
-        {
-            if (IsInitialized)
-            {
-                throw new InvalidOperationException("The I2C controller is already initialized.");
-            }
-
-            // Adresa je 1001+A2+A1+A0
-            if (Address == 0) Address = 0x48;
-            I2cConnectionSettings i2cSettings = new I2cConnectionSettings(Address);
-            i2cSettings.BusSpeed = I2cBusSpeed.StandardMode;
-
-            Task<I2cDevice> controlerInitTask = Task.Run(async () => await I2cDevice.FromIdAsync(i2cControllerDeviceId, i2cSettings));
-            _i2cController = controlerInitTask.Result;
-
-            IsInitialized = true;
-        }
-
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns></returns>
         public byte[] ConfigRead()
         {
             if (_isDisposed)
             {
                 throw new ObjectDisposedException("DS1621");
-            }
-            if (!IsInitialized)
-            {
-                Initialize();
             }
 
             byte[] writeBuffer;
@@ -106,40 +179,41 @@ namespace Feri.MS.Parts.I2C.Thermometer
 
             writeBuffer = new byte[] { ACCESS_CONFIG };
             readBuffer = new byte[1];
-            _i2cController.WriteRead(writeBuffer, readBuffer);
+            _initialized[Address].I2cController.WriteRead(writeBuffer, readBuffer);
 
             return readBuffer;
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="config"></param>
         public void ConfigWrite(byte config)
         {
             if (_isDisposed)
             {
                 throw new ObjectDisposedException("DS1621");
             }
-            if (!IsInitialized)
-            {
-                Initialize();
-            }
 
             byte[] writeBuffer;
 
             writeBuffer = new byte[] { ACCESS_CONFIG, config };
-            _i2cController.Write(writeBuffer);
+            _initialized[Address].I2cController.Write(writeBuffer);
 
 
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns></returns>
         public byte[] TemperatureRead()
         {
             if (_isDisposed)
             {
                 throw new ObjectDisposedException("DS1621");
             }
-            if (!IsInitialized)
-            {
-                Initialize();
-            }
+
             if (HighPrecision)
             {
                 return TemperatureReadHighPrecision();
@@ -152,7 +226,7 @@ namespace Feri.MS.Parts.I2C.Thermometer
             if ((!_conversionStarted) || (OneShotMode))
             {
                 writeBuffer = new byte[] { START_CONVERT_TEMPERATURE };
-                _i2cController.Write(writeBuffer);
+                _initialized[Address].I2cController.Write(writeBuffer);
 
                 Task.Delay(10);
                 _conversionStarted = true;
@@ -160,20 +234,20 @@ namespace Feri.MS.Parts.I2C.Thermometer
 
             writeBuffer = new byte[] { READ_TEMPERATURE };
             readBuffer = new byte[2];
-            _i2cController.WriteRead(writeBuffer, readBuffer);
+            _initialized[Address].I2cController.WriteRead(writeBuffer, readBuffer);
 
             return readBuffer;
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns></returns>
         private byte[] TemperatureReadHighPrecision()
         {
             if (_isDisposed)
             {
                 throw new ObjectDisposedException("DS1621");
-            }
-            if (!IsInitialized)
-            {
-                Initialize();
             }
 
             byte[] writeBuffer;
@@ -186,7 +260,7 @@ namespace Feri.MS.Parts.I2C.Thermometer
             if ((!_conversionStarted) || (OneShotMode))
             {
                 writeBuffer = new byte[] { START_CONVERT_TEMPERATURE };
-                _i2cController.Write(writeBuffer);
+                _initialized[Address].I2cController.Write(writeBuffer);
 
                 Task.Delay(10);
                 _conversionStarted = true;
@@ -194,17 +268,17 @@ namespace Feri.MS.Parts.I2C.Thermometer
 
             writeBuffer = new byte[] { READ_TEMPERATURE };
             readBuffer = new byte[2];
-            _i2cController.WriteRead(writeBuffer, readBuffer);
+            _initialized[Address].I2cController.WriteRead(writeBuffer, readBuffer);
             _temperatureRead = (double)readBuffer[0];
 
             writeBuffer = new byte[] { READ_COUNTER };
             readBuffer = new byte[1];
-            _i2cController.WriteRead(writeBuffer, readBuffer);
+            _initialized[Address].I2cController.WriteRead(writeBuffer, readBuffer);
             _count_remain = (double)readBuffer[0];
 
             writeBuffer = new byte[] { READ_SLOPE };
             readBuffer = new byte[1];
-            _i2cController.WriteRead(writeBuffer, readBuffer);
+            _initialized[Address].I2cController.WriteRead(writeBuffer, readBuffer);
             _count_per_c = (double)readBuffer[0];
 
             _temperature = (_temperatureRead - 0.25) + ((_count_per_c - _count_remain) / _count_per_c);
@@ -218,15 +292,15 @@ namespace Feri.MS.Parts.I2C.Thermometer
             return rezultat;
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns></returns>
         public byte[] TemperatureLowRead()
         {
             if (_isDisposed)
             {
                 throw new ObjectDisposedException("DS1621");
-            }
-            if (!IsInitialized)
-            {
-                Initialize();
             }
 
             byte[] writeBuffer;
@@ -234,38 +308,38 @@ namespace Feri.MS.Parts.I2C.Thermometer
 
             writeBuffer = new byte[] { ACCESS_TEMPERATURE_LOW };
             readBuffer = new byte[2];
-            _i2cController.WriteRead(writeBuffer, readBuffer);
+            _initialized[Address].I2cController.WriteRead(writeBuffer, readBuffer);
 
             return readBuffer;
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="config"></param>
         public void TemperatureLowWrite(byte[] config)
         {
             if (_isDisposed)
             {
                 throw new ObjectDisposedException("DS1621");
             }
-            if (!IsInitialized)
-            {
-                Initialize();
-            }
 
             byte[] writeBuffer;
 
             writeBuffer = new byte[] { ACCESS_TEMPERATURE_LOW, config[0], config[1] };
-            _i2cController.Write(writeBuffer);
+            _initialized[Address].I2cController.Write(writeBuffer);
 
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns></returns>
         public byte[] TemperatureHighRead()
         {
             if (_isDisposed)
             {
                 throw new ObjectDisposedException("DS1621");
-            }
-            if (!IsInitialized)
-            {
-                Initialize();
             }
 
             byte[] writeBuffer;
@@ -273,39 +347,47 @@ namespace Feri.MS.Parts.I2C.Thermometer
 
             writeBuffer = new byte[] { ACCESS_TEMPERATURE_HIGH };
             readBuffer = new byte[2];
-            _i2cController.WriteRead(writeBuffer, readBuffer);
+            _initialized[Address].I2cController.WriteRead(writeBuffer, readBuffer);
 
             return readBuffer;
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="config"></param>
         public void TemperatureHighWrite(byte[] config)
         {
             if (_isDisposed)
             {
                 throw new ObjectDisposedException("DS1621");
             }
-            if (!IsInitialized)
-            {
-                Initialize();
-            }
 
             byte[] writeBuffer;
 
             writeBuffer = new byte[] { ACCESS_TEMPERATURE_HIGH, config[0], config[1] };
-            _i2cController.Write(writeBuffer);
+            _initialized[Address].I2cController.Write(writeBuffer);
 
         }
 
         #region IDisposable Support
         public void Dispose()
         {
-            if (_i2cController != null)
+            // Clean up. If there is reference to the key, and there are more then one, reduce reference. if it's the last one, remove from the static directory of parts.
+            if (_initialized.ContainsKey(Address))
             {
-                _i2cController.Dispose();
-                _i2cController = null;
+                if (_initialized[Address].ReferenceCount > 1)
+                {
+                    _initialized[Address].ReferenceCount--;
+                }
+                else
+                {
+                    _initialized[Address].I2cController.Dispose();
+                    _initialized.Remove(Address);
+                }
             }
             _isDisposed = true;
-            //GC.SuppressFinalize(this);
+            Debug.WriteLineIf(_debug, "Disposing of part with address: " + Address);
         }
         #endregion
     }
