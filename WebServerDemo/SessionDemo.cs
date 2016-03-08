@@ -33,7 +33,7 @@ namespace WebServerDemo
 
         SimpleTemplate _sessionTemplate = new SimpleTemplate();
         SimpleTemplate _sessionSetTemplate = new SimpleTemplate();
-        
+
         public void Start(HttpServer server)
         {
             _ws = server;
@@ -43,10 +43,10 @@ namespace WebServerDemo
             _ws.AddPath("/demoSessionRemove.html", ProcessSessionRemove);
 
             _sessionTemplate.LoadString(_ws.HttpRootManager.ReadToByte(_privatePath + "/templateSessionRead.html"));
-            _sessionTemplate.AddAction("session", "SESSION", "");
+            _sessionTemplate["session"] = new TemplateAction() { Pattern = "SESSION" };
 
             _sessionSetTemplate.LoadString(_ws.HttpRootManager.ReadToByte(_privatePath + "/templateSessionSet.html"));
-            _sessionSetTemplate.AddAction("session", "SESSION", "");
+            _sessionSetTemplate["session"] = new TemplateAction() { Pattern = "SESSION" };
 
         }
 
@@ -64,11 +64,11 @@ namespace WebServerDemo
                     Session _session = request.GetSession(false);
                     if (_session != null)
                     {
-                        _sessionSetTemplate.UpdateAction("session", (string)_session["Demo"]);
+                        _sessionSetTemplate["session"].Data = (string)_session["Demo"];
                     }
                     else
                     {
-                        _sessionSetTemplate.UpdateAction("session", "");
+                        _sessionSetTemplate["session"].Data = string.Empty;
                     }
                     _sessionSetTemplate.ProcessAction();
                     response.Write(_sessionSetTemplate.GetByte(), _ws.GetMimeType.GetMimeFromFile("/teplateSessionSet.html"));
@@ -89,11 +89,11 @@ namespace WebServerDemo
                 //string niz = (request.GetSession(false)?["Demo"]) as string;
                 if (_session != null)
                 {
-                    _sessionTemplate.UpdateAction("session", (string)_session["Demo"]);
+                    _sessionTemplate["session"].Data = (string)_session["Demo"];
                 }
                 else
                 {
-                    _sessionTemplate.UpdateAction("session", "no data.");
+                    _sessionTemplate["session"].Data = "no data.";
                 }
                 _sessionTemplate.ProcessAction();
                 response.Write(_sessionTemplate.GetByte(), _ws.GetMimeType.GetMimeFromFile("/teplateSessionRead.html"));

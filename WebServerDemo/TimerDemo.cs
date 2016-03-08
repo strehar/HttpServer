@@ -55,11 +55,11 @@ namespace WebServerDemo
             _ws.AddPath("/demoTimer.html", ProcessTimer);
 
             _timerControl.LoadString(_ws.HttpRootManager.ReadToByte(_privatePath + "/templateTimer.html"));
-            _timerControl.AddAction("timerOn", "TIMERON", "");
-            _timerControl.AddAction("timerOff", "TIMEROFF", "");
+            _timerControl["timerOn"] = new TemplateAction() { Pattern = "TIMERON" };
+            _timerControl["timerOff"] = new TemplateAction() { Pattern = "TIMEROFF" };
 
-            _templateDemo.AddAction("led", "LED", "Off");
-            _templateDemo.AddAction("timer", "TIMER", "Off");
+            _templateDemo["led"] = new TemplateAction() { Pattern = "LED", Data = "Off" };
+            _templateDemo["timer"] = new TemplateAction() { Pattern = "TIMER", Data = "Off" };
 
             _json.AddData("Timer", "Off");
             _json.AddData("Led", "Off");
@@ -71,13 +71,14 @@ namespace WebServerDemo
 
         public void TimerEvent()
         {
-            try {
+            try
+            {
                 if (enableBlink)
                 {
                     if (state.Equals("on", StringComparison.OrdinalIgnoreCase))
                     {
                         _json.UpdateData("Led", "Off");
-                        _templateDemo.UpdateAction("led", "Off");
+                        _templateDemo["led"].Data = "Off";
                         state = "Off";
                         //pin.Write(GpioPinValue.Low);
                         _ports.WritePin(PortNumber.PORT_ONE, false);
@@ -85,7 +86,7 @@ namespace WebServerDemo
                     else
                     {
                         _json.UpdateData("Led", "On");
-                        _templateDemo.UpdateAction("led", "On");
+                        _templateDemo["led"].Data = "On";
                         state = "On";
                         //pin.Write(GpioPinValue.High);
                         _ports.WritePin(PortNumber.PORT_ONE, true);
@@ -119,17 +120,17 @@ namespace WebServerDemo
 
                 if (enableBlink)
                 {
-                    _timerControl.UpdateAction("timerOn", "checked");
-                    _timerControl.UpdateAction("timerOff", "");
+                    _timerControl["timerOn"].Data = "checked";
+                    _timerControl["timerOff"].Data = string.Empty;
                     _json.UpdateData("Timer", "On");
-                    _templateDemo.UpdateAction("timer", "On");
+                    _templateDemo["timer"].Data = "On";
                 }
                 else
                 {
-                    _timerControl.UpdateAction("timerOn", "");
-                    _timerControl.UpdateAction("timerOff", "checked");
+                    _timerControl["timerOn"].Data = string.Empty;
+                    _timerControl["timerOff"].Data = "checked";
                     _json.UpdateData("Timer", "Off");
-                    _templateDemo.UpdateAction("timer", "Off");
+                    _templateDemo["timer"].Data = "Off";
                 }
 
                 _timerControl.ProcessAction();

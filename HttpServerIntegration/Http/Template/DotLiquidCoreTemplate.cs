@@ -20,49 +20,96 @@ using System;
 using Feri.MS.Http.Template;
 using Feri.MS.Http;
 using System.Collections.Generic;
+using System.Net;
+using System.Linq;
 
 /// <summary>
 /// Optional helper classes for HttpServer, that integrate it with DotLiquidCore library.
 /// </summary>
 namespace Feri.MS.Integration.Http.Template
 {
-    public class Action
-    {
-        public object Data { get; set; }
-        public string Name { get; set; }
-        public string Pattern { get; set; }
-    }
-
     public class DotLiquidCoreTemplate : ITemplate
     {
-        Dictionary<string, Action> _akcije = new Dictionary<string, Action>();
+        Dictionary<string, TemplateAction> _actions = new Dictionary<string, TemplateAction>();
         DotLiquidCore.Template template;
+        bool _safeMode = true;
 
-        public Dictionary<string, Action> Akcije
+        public Dictionary<string, TemplateAction> Actions
         {
             get
             {
-                return _akcije;
+                return _actions;
             }
             set
             {
-                _akcije = value;
+                _actions = value;
             }
         }
 
-        public bool AddAction(string name, string pattern, string data)
+        public bool SafeMode
         {
-            throw new NotImplementedException();
+            get
+            {
+                return _safeMode;
+            }
+
+            set
+            {
+                _safeMode = value;
+            }
         }
 
-        public void AddAction(string name, object action)
+        public List<string> Keys
         {
-
+            get
+            {
+                return _actions.Keys.ToList();
+            }
         }
 
-        public bool DeleteAction(string name)
+        public List<TemplateAction> Values
         {
-            throw new NotImplementedException();
+            get
+            {
+                return _actions.Values.ToList();
+            }
+        }
+
+        public TemplateAction this[string name]
+        {
+            get
+            {
+                lock (_actions)
+                {
+                    if (_actions.ContainsKey(name))
+                    {
+                        return _actions[name];
+                    }
+                    return null;
+                }
+            }
+            set
+            {
+                lock (_actions)
+                {
+                    if (value == null)
+                    {
+                        _actions.Remove(name);
+                        return;
+                    }
+                    TemplateAction _tmpAction = value;
+                    if (SafeMode)
+                        _tmpAction.Data = WebUtility.HtmlEncode(value.Data);
+                    if (!_actions.ContainsKey(name))
+                    {
+                        _actions.Add(name, _tmpAction);
+                    }
+                    else
+                    {
+                        _actions[name] = _tmpAction;
+                    }
+                }
+            }
         }
 
         public byte[] GetByte()
@@ -72,6 +119,7 @@ namespace Feri.MS.Integration.Http.Template
 
         public string GetString()
         {
+            //TODO: stuff for passing to templating engine!
             return template.Render();
         }
 
@@ -90,39 +138,26 @@ namespace Feri.MS.Integration.Http.Template
             return;
         }
 
-        public bool UpdateAction(string name, string data)
-        {
-            throw new NotImplementedException();
-        }
-        public bool UpdateAction(HttpRequest request, HttpResponse response)
-        {
-            //throw new NotImplementedException();
-            return true;
-        }
-
-        // Object na specifičen data type, da lahko compiler preverja za napako? strong type!
-        bool ITemplate.AddAction(string name, object data)
-        {
-            throw new NotImplementedException();
-        }
-
-        public bool UpdateAction(string name, object data)
-        {
-            throw new NotImplementedException();
-        }
-
         public bool ContainsAction(string name)
         {
-            if (_akcije.ContainsKey(name))
+            lock (_actions)
             {
+                if (_actions.ContainsKey(name))
+                {
+                    return true;
+                }
+                return false;
+            }
+        }
+
+        public bool RemoveAction(string name)
+        {
+            if (_actions.ContainsKey(name))
+            {
+                _actions.Remove(name);
                 return true;
             }
             return false;
-        }
-
-        public object GetAction(string name)
-        {
-            throw new NotImplementedException();
         }
     }
 }

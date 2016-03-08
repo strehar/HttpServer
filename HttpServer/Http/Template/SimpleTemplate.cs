@@ -19,20 +19,12 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using System.Net;
 using System.Text.RegularExpressions;
 
 namespace Feri.MS.Http.Template
 {
-    /// <summary>
-    /// 
-    /// </summary>
-    class Akcija
-    {
-        public string Ime { get; set; }
-        public string Data { get; set; }
-        public object Pattern { get; set; }
-    }
     /// <summary>
     /// Very simple and basic templating engine. It takes file as input (as byte array or sting) and caches it. Then it runs user defined actions  on it and caches result.
     /// It will only do this if some actions have changed, else cached result is returned.
@@ -41,7 +33,7 @@ namespace Feri.MS.Http.Template
     public class SimpleTemplate : ITemplate
     {
         #region Definitions
-        Dictionary<string, Akcija> _akcije = new Dictionary<string, Akcija>();
+        Dictionary<string, TemplateAction> _actions = new Dictionary<string, TemplateAction>();
 
         string _originalniNiz = "";
         string _niz = "";
@@ -66,6 +58,22 @@ namespace Feri.MS.Http.Template
                 _safeMode = value;
             }
         }
+
+        public List<string> Keys
+        {
+            get
+            {
+                return _actions.Keys.ToList();
+            }
+        }
+
+        public List<TemplateAction> Values
+        {
+            get
+            {
+                return _actions.Values.ToList();
+            }
+        }
         #endregion
 
         /// <summary>
@@ -74,7 +82,7 @@ namespace Feri.MS.Http.Template
         /// <param name="data">Data to process (html with custom tags, usually)</param>
         public void LoadString(byte[] data)
         {
-            lock (_niz) lock (_originalniNiz) lock (_akcije)
+            lock (_niz) lock (_originalniNiz) lock (_actions)
                     {
                         _originalniNiz = System.Text.Encoding.UTF8.GetString(data);
                         _posodobljenNiz = true;
@@ -87,7 +95,7 @@ namespace Feri.MS.Http.Template
         /// <param name="data">Data to process (html with custom tags, usually)</param>
         public void LoadString(string data)
         {
-            lock (_niz) lock (_originalniNiz) lock (_akcije)
+            lock (_niz) lock (_originalniNiz) lock (_actions)
                     {
                         _originalniNiz = data;
                         _posodobljenNiz = true;
@@ -95,134 +103,47 @@ namespace Feri.MS.Http.Template
         }
 
         /// <summary>
-        /// Internal method that handeles action registration.
+        /// 
         /// </summary>
-        /// <param name="name">Name of action</param>
-        /// <param name="pattern">Pattern to look for in data</param>
-        /// <param name="data">Data that will replace pattern (User tag) in the string</param>
+        /// <param name="name"></param>
         /// <returns></returns>
-        private bool InternalAddAction(string name, object pattern, string data)
+        public TemplateAction this[string name]
         {
-            //name je niz ki se menja, pattern je vzorec, ki ga menjavamo, data je za kaj se menja
-            try
+            get
             {
-                lock (_niz) lock (_originalniNiz) lock (_akcije)
+                lock (_niz) lock (_originalniNiz) lock (_actions)
                         {
-                            if (!_akcije.ContainsKey(name))
+                            if (_actions.ContainsKey(name))
                             {
-                                Akcija _tmp = new Akcija();
-                                _tmp.Ime = name;
-                                _tmp.Pattern = pattern;
-                                _tmp.Data = data;
-                                _akcije.Add(name, _tmp);
+                                return _actions[name];
+                            }
+                            return null;
+                        }
+            }
+            set
+            {
+                lock (_niz) lock (_originalniNiz) lock (_actions)
+                        {
+                            //if (value == null)
+                            //{
+                            //    _actions.Remove(name);
+                            //    return;
+                            //}
+                            TemplateAction _tmpAction = value;
+                            if (SafeMode)
+                                _tmpAction.Data = WebUtility.HtmlEncode(value.Data);
+                            if (!_actions.ContainsKey(name))
+                            {
+                                _actions.Add(name, _tmpAction);
                                 _posodobljenNiz = true;
-                                return true;
                             }
                             else
                             {
-                                return false;
+                                _actions[name] = _tmpAction;
+                                _posodobljenNiz = true;
                             }
                         }
             }
-            catch (Exception e)
-            {
-                Debug.WriteLine(e.Message);
-                Debug.WriteLine(e.ToString());
-                return false;
-            }
-        }
-
-        /// <summary>
-        /// Method for registing actions. if class is in safe mode it allso html encodes the data.
-        /// </summary>
-        /// <param name="name">Name of action</param>
-        /// <param name="pattern">Pattern to look for in data</param>
-        /// <param name="data">Data that will replace pattern (User tag) in the string</param>
-        /// <returns>result from InternalAddAction</returns>
-        public bool AddAction(string name, string pattern, string data)
-        {
-            //name je niz ki se menja, pattern je vzorec, ki ga menjavamo, data je za kaj se menja
-            if (_safeMode)
-            {
-                return InternalAddAction(name, pattern, WebUtility.HtmlEncode(data));
-            }
-            else {
-                return InternalAddAction(name, pattern, data);
-            }
-        }
-
-        /// <summary>
-        /// Method for registing actions. if class is in safe mode it allso html encodes the data.
-        /// </summary>
-        /// <param name="name">Name of action</param>
-        /// <param name="pattern">REGEX to look for in data</param>
-        /// <param name="data">Data that will replace pattern (User tag) in the string</param>
-        /// <returns></returns>
-        public bool AddAction(string name, Regex pattern, string data)
-        {
-            if (_safeMode)
-            {
-                return InternalAddAction(name, pattern, WebUtility.HtmlEncode(data));
-            }
-            else
-            {
-                return InternalAddAction(name, pattern, data);
-            }
-        }
-
-        /// <summary>
-        /// Method for updating actions.
-        /// </summary>
-        /// <param name="name">Name of action</param>
-        /// <param name="data">New data to display with this action</param>
-        /// <returns></returns>
-        public bool UpdateAction(string name, string data)
-        {
-            lock (_niz) lock (_originalniNiz) lock (_akcije)
-                    {
-                        if (_akcije.ContainsKey(name))
-                        {
-                            if (_safeMode)
-                            {
-                                _akcije[name].Data = WebUtility.HtmlEncode(data);
-                            }
-                            else {
-                                _akcije[name].Data = data;
-                            }
-                            _posodobljenNiz = true;
-                            return true;
-                        }
-                        else
-                        {
-                            return false;
-                        }
-                    }
-        }
-
-        public bool UpdateAction(HttpRequest request, HttpResponse response)
-        {
-            throw new NotImplementedException();
-        }
-
-        /// <summary>
-        /// Remove action from action list.
-        /// </summary>
-        /// <param name="name">Name of the action to remove.</param>
-        /// <returns>true if action was deleted, false if it was not.</returns>
-        public bool DeleteAction(string name)
-        {
-            lock (_niz) lock (_originalniNiz) lock (_akcije)
-                    {
-                        if (_akcije.ContainsKey(name))
-                        {
-                            _akcije.Remove(name);
-                            return true;
-                        }
-                        else
-                        {
-                            return false;
-                        }
-                    }
         }
 
         /// <summary>
@@ -230,21 +151,20 @@ namespace Feri.MS.Http.Template
         /// </summary>
         public void ProcessAction()
         {
-            lock (_niz) lock (_originalniNiz) lock (_akcije)
+            lock (_niz) lock (_originalniNiz) lock (_actions)
                     {
                         string _tmpString = null;
-                        foreach (KeyValuePair<string, Akcija> par in _akcije)
+                        foreach (KeyValuePair<string, TemplateAction> par in _actions)
                         {
-                            if (par.Value.Pattern is Regex)
+                            if (!string.IsNullOrEmpty(par.Value.RegexPattern))
                             {
                                 // Zamenjamo najden string v izvornem nizu in ga damo v izhodnega
                                 if (_tmpString == null)
-                                    _tmpString = ((Regex)par.Value.Pattern).Replace(_originalniNiz, par.Value.Data);
+                                    _tmpString = par.Value.RegexPattern.Replace(_originalniNiz, par.Value.Data);
                                 else
-                                    _tmpString = ((Regex)par.Value.Pattern).Replace(_tmpString, par.Value.Data);
-
+                                    _tmpString = par.Value.RegexPattern.Replace(_tmpString, par.Value.Data);
                             }
-                            else if (par.Value.Pattern is string)
+                            else if (!string.IsNullOrEmpty(par.Value.Pattern))
                             {
                                 // Pri stringu je začetek ključne besede @#, s tem da je v patternu ni treba določit, v templateu pa.
                                 if (_tmpString == null)
@@ -255,7 +175,7 @@ namespace Feri.MS.Http.Template
                             else
                             {
                                 //Neveljaven tip akcije...
-                                throw new NotSupportedException("Unsupported action type in ProcessAction; Should not happen.");
+                                //throw new NotSupportedException("Unsupported action type in ProcessAction; Should not happen.");
                                 //return false;
                             }
                         }
@@ -271,7 +191,7 @@ namespace Feri.MS.Http.Template
         /// <returns>Byte array of the data.</returns>
         public byte[] GetByte()
         {
-            lock (_niz) lock (_originalniNiz) lock (_akcije)
+            lock (_niz) lock (_originalniNiz) lock (_actions)
                     {
                         if (_posodobljenNiz)
                         {
@@ -288,7 +208,7 @@ namespace Feri.MS.Http.Template
         /// <returns>String representation of the data.</returns>
         public string GetString()
         {
-            lock (_niz) lock (_originalniNiz) lock (_akcije)
+            lock (_niz) lock (_originalniNiz) lock (_actions)
                     {
                         if (_posodobljenNiz)
                         {
@@ -298,24 +218,26 @@ namespace Feri.MS.Http.Template
                     }
         }
 
-        public bool AddAction(string name, object data)
-        {
-            throw new NotImplementedException();
-        }
-
-        public bool UpdateAction(string name, object data)
-        {
-            throw new NotImplementedException();
-        }
-
         public bool ContainsAction(string name)
         {
-            throw new NotImplementedException();
+            lock (_niz) lock (_originalniNiz) lock (_actions)
+                    {
+                        if (_actions.ContainsKey(name))
+                        {
+                            return true;
+                        }
+                        return false;
+                    }
         }
 
-        public object GetAction(string name)
+        public bool RemoveAction(string name)
         {
-            throw new NotImplementedException();
+            if (_actions.ContainsKey(name))
+            {
+                _actions.Remove(name);
+                return true;
+            }
+            return false;
         }
     }
 }

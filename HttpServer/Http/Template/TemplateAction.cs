@@ -16,25 +16,13 @@
 */
 #endregion
 
-using System.Collections.Generic;
-
 namespace Feri.MS.Http.Template
 {
-    public interface ITemplate
+    public class TemplateAction
     {
-        TemplateAction this[string name] { get; set; }
-        List<string> Keys { get; }
-        List<TemplateAction> Values { get; }
-
-        bool SafeMode { get; set; }
-
-        byte[] GetByte();
-        string GetString();
-        void LoadString(string data);
-        void LoadString(byte[] data);
-        void ProcessAction();
-        bool ContainsAction(string name);
-        bool RemoveAction(string name);
-
+        public string Pattern { get; set; }
+        public string RegexPattern { get; set; }
+        public string Data { get; set; }
+        public object ObjectData { get; set; }
     }
 }

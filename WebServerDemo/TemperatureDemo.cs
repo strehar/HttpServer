@@ -45,7 +45,7 @@ namespace WebServerDemo
             _ws.AddPath("/demoTemperature.html", ProcessTemperature);
 
             _temperatureTemplate.LoadString(_ws.HttpRootManager.ReadToByte(_privatePath + "/templateTermometer.html"));
-            _temperatureTemplate.AddAction("temperature", "TEMP", "");
+            _temperatureTemplate["temperature"] = new TemplateAction() { Pattern = "TEMP" };
 
             _termometer.HighPrecision = true;
         }
@@ -63,7 +63,7 @@ namespace WebServerDemo
                 temp.Append(".");
                 temp.Append(_temp[1].ToString());
 
-                _temperatureTemplate.UpdateAction("temperature", temp.ToString());
+                _temperatureTemplate["temperature"].Data = temp.ToString();
                 _temperatureTemplate.ProcessAction();
                 response.Write(_temperatureTemplate.GetByte(), _ws.GetMimeType.GetMimeFromFile("/templateTermometer.html"));
 

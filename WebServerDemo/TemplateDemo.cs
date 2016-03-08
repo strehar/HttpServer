@@ -38,12 +38,12 @@ namespace WebServerDemo
             _templateDemo = template;
             _ws.AddPath("/template.html", VrniTemplate);
             _templateDemo.LoadString(_ws.HttpRootManager.ReadToByte(_privatePath + "/templateDemo.html"));
-            _templateDemo.AddAction("userName", "USERNAME", "");
+            _templateDemo["userName"] = new TemplateAction() { Pattern = "USERNAME" };
         }
 
-        private void VrniTemplate(HttpRequest reqiest, HttpResponse response)
+        private void VrniTemplate(HttpRequest request, HttpResponse response)
         {
-            _templateDemo.UpdateAction("userName", reqiest.AuthenticatedUser);
+            _templateDemo["userName"].Data = request.AuthenticatedUser;
             _templateDemo.ProcessAction();
             byte[] rezultat = _templateDemo.GetByte();
             response.Write(rezultat, _ws.GetMimeType.GetMimeFromFile(_privatePath + "/templateDemo.html"));

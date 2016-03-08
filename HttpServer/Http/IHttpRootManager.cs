@@ -48,10 +48,10 @@ namespace Feri.MS.Http
         bool Containes(string pot);
         List<string> GetNames();
 
-        bool AddExtensionListenerData(string extension, string actionName, object data);
+        bool AddExtensionListenerData(string extension, string actionName, TemplateAction data);
         bool RemoveExtensionListenerData(string extension, string actionName);
-        bool UpdateExtensionListenerData(string extension, string actionName, object data);
-        object GetExtensionListenerData(string extension, string actionName);
+        bool UpdateExtensionListenerData(string extension, string actionName, TemplateAction data);
+        TemplateAction GetExtensionListenerData(string extension, string actionName);
 
         void Start(HttpServer server);
         void Stop();

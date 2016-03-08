@@ -185,13 +185,21 @@ namespace Feri.MS.Http
                     ITemplate _tmpTemplate = GetExtensionListener(extension);
                     Type _tmpType = _tmpTemplate.GetType();
                     IEnumerable<PropertyInfo> properties = _tmpType.GetTypeInfo().DeclaredProperties;
-                    ITemplate _clone = (ITemplate)_tmpType.GetTypeInfo().DeclaredConstructors.FirstOrDefault().Invoke(null);
+
+                    ITemplate _clone = _tmpType.GetTypeInfo().DeclaredConstructors.FirstOrDefault().Invoke(null) as ITemplate;
 
                     foreach (PropertyInfo _property in properties)
                     {
                         if (_property.CanWrite)
                         {
-                            _property.SetValue(_clone, _property.GetValue(_tmpTemplate, null), null);
+                            if (_property.Name == "Item")
+                            {
+                                foreach (string name in _tmpTemplate.Keys)
+                                    _clone[name] = _tmpTemplate[name];
+                            }
+                            else {
+                                _property.SetValue(_clone, _property.GetValue(_tmpTemplate, null), null);
+                            }
                         }
                     }
 
@@ -454,14 +462,14 @@ namespace Feri.MS.Http
         #endregion
 
         #region Extension listener data
-        public bool AddExtensionListenerData(string extension, string actionName, object data)
+        public bool AddExtensionListenerData(string extension, string actionName, TemplateAction data)
         {
             // Add object to main object and all cache objects
             bool status = true;
             ITemplate listener = GetExtensionListener(extension);
             if (!listener.ContainsAction(actionName))
             {
-                listener.AddAction(actionName, data);
+                listener[actionName] = data;
             }
             else
             {
@@ -471,7 +479,7 @@ namespace Feri.MS.Http
             {
                 if (!_listener.ContainsAction(actionName))
                 {
-                    _listener.AddAction(actionName, data);
+                    _listener[actionName] = data;
                 }
                 else
                 {
@@ -488,7 +496,7 @@ namespace Feri.MS.Http
             ITemplate listener = GetExtensionListener(extension);
             if (listener.ContainsAction(actionName))
             {
-                listener.DeleteAction(actionName);
+                listener.RemoveAction(actionName);
             }
             else
             {
@@ -498,7 +506,7 @@ namespace Feri.MS.Http
             {
                 if (_listener.ContainsAction(actionName))
                 {
-                    _listener.DeleteAction(actionName);
+                    _listener.RemoveAction(actionName);
                 }
                 else
                 {
@@ -508,12 +516,12 @@ namespace Feri.MS.Http
             return status;
         }
 
-        public object GetExtensionListenerData(string extension, string actionName)
+        public TemplateAction GetExtensionListenerData(string extension, string actionName)
         {
             ITemplate listener = GetExtensionListener(extension);
             if (listener.ContainsAction(actionName))
             {
-                return listener.GetAction(actionName);
+                return listener[actionName];
             }
             else
             {
@@ -521,14 +529,14 @@ namespace Feri.MS.Http
             }
         }
 
-        public bool UpdateExtensionListenerData(string extension, string actionName, object data)
+        public bool UpdateExtensionListenerData(string extension, string actionName, TemplateAction data)
         {
             // Update main class and allcache objects
             bool status = true;
             ITemplate listener = GetExtensionListener(extension);
             if (listener.ContainsAction(actionName))
             {
-                listener.UpdateAction(actionName, data);
+                listener[actionName] = data;
             }
             else
             {
@@ -538,7 +546,7 @@ namespace Feri.MS.Http
             {
                 if (_listener.ContainsAction(actionName))
                 {
-                    _listener.UpdateAction(actionName, data);
+                    _listener[actionName] = data;
                 }
                 else
                 {
@@ -570,10 +578,15 @@ namespace Feri.MS.Http
                 if (listener == null)
                     throw new InvalidOperationException("Unable to get listener for extension " + extension);
 
-                if (!listener.UpdateAction(request, response))
-                {
-                    throw new InvalidOperationException("Unable to call UpdateAction on listener " + listener.ToString() + " for extension " + extension);
-                }
+                if (listener.ContainsAction("request"))
+                    listener["request"].ObjectData = request;
+                else
+                    listener["request"] = new TemplateAction() { ObjectData = request };
+                if (listener.ContainsAction("response"))
+                    listener["response"].ObjectData = response;
+                else
+                    listener["response"] = new TemplateAction() { ObjectData = response };
+
                 listener.ProcessAction();
                 response.Write(listener.GetByte(), "text/html");
                 return;
@@ -653,8 +666,8 @@ namespace Feri.MS.Http
                             rezultat.Append("<a href=\"" + _pot + "\">" + _pot + "</a><br>\n");
                         }
 
-                        _template.AddAction("path", "PATH", request.RequestPath);
-                        _template.AddAction("content", "CONTENT", rezultat.ToString());
+                        _template["path"] = new TemplateAction() { Pattern = "PATH", Data = request.RequestPath };
+                        _template["content"] = new TemplateAction() { Pattern = "CONTENT", Data = rezultat.ToString() };
                         _template.ProcessAction();
                         response.Write(_template.GetByte(), "text/html");
                         return;

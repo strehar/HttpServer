@@ -51,10 +51,10 @@ namespace WebServerDemo
             _ws.AddPath("/demoLED.html", ProcessDemoLED);
 
             _LEDControl.LoadString(_ws.HttpRootManager.ReadToByte(_privatePath + "/templateLED.html"));
-            _LEDControl.AddAction("ledOn", "LEDON", "");
-            _LEDControl.AddAction("ledOff", "LEDOFF", "");
+            _LEDControl["ledOn"] = new TemplateAction() { Pattern = "LEDON" };
+            _LEDControl["ledOff"] = new TemplateAction() { Pattern = "LEDOFF" };
 
-            _templateDemo.AddAction("maualLed", "MANUALLED", "Off");
+            _templateDemo["maualLed"] = new TemplateAction() { Pattern = "MANUALLED", Data = "Off" };
 
             _json.AddData("MaualLed", "Off");
 
@@ -71,7 +71,7 @@ namespace WebServerDemo
                     {
                         stateLed = "On";
                         _json.UpdateData("MaualLed", "On");
-                        _templateDemo.UpdateAction("maualLed", "On");
+                        _templateDemo["maualLed"].Data = "On";
                         //pin2.Write(GpioPinValue.High);
                         _ports.WritePin(PortNumber.PORT_TWO, true);
                     }
@@ -79,7 +79,7 @@ namespace WebServerDemo
                     {
                         stateLed = "Off";
                         _json.UpdateData("MaualLed", "Off");
-                        _templateDemo.UpdateAction("maualLed", "Off");
+                        _templateDemo["maualLed"].Data = "Off";
                         //pin2.Write(GpioPinValue.Low);
                         _ports.WritePin(PortNumber.PORT_TWO, false);
                     }
@@ -88,13 +88,13 @@ namespace WebServerDemo
 
                 if (stateLed.Equals("on", StringComparison.OrdinalIgnoreCase))
                 {
-                    _LEDControl.UpdateAction("ledOn", "checked");
-                    _LEDControl.UpdateAction("ledOff", "");
+                    _LEDControl["ledOn"].Data = "checked";
+                    _LEDControl["ledOff"].Data = string.Empty;
                 }
                 else
                 {
-                    _LEDControl.UpdateAction("ledOn", "");
-                    _LEDControl.UpdateAction("ledOff", "checked");
+                    _LEDControl["ledOn"].Data = string.Empty;
+                    _LEDControl["ledOff"].Data = "checked";
                 }
 
                 _LEDControl.ProcessAction();

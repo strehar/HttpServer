@@ -43,10 +43,10 @@ namespace WebServerDemo
             _ws.AddPath("/demoCookieRemove.html", ProcessCookieRemove);
 
             _cookieTemplate.LoadString(_ws.HttpRootManager.ReadToByte(_privatePath + "/templateCookieRead.html"));
-            _cookieTemplate.AddAction("cookie", "COOKIE", "");
+            _cookieTemplate["cookie"] = new TemplateAction() { Pattern = "COOKIE" };
 
             _cookieSetTemplate.LoadString(_ws.HttpRootManager.ReadToByte(_privatePath + "/templateCookieSet.html"));
-            _cookieSetTemplate.AddAction("cookie", "COOKIE", "");
+            _cookieSetTemplate["cookie"] = new TemplateAction() { Pattern = "COOKIE" };
         }
 
         private void ProcessCookieSet(HttpRequest request, HttpResponse response)
@@ -63,11 +63,11 @@ namespace WebServerDemo
                 {
                     if (request.ContainsCookie("DemoCookie"))
                     {
-                        bool rezultat = _cookieSetTemplate.UpdateAction("cookie", request.GetCookie("DemoCookie").Value);
+                        _cookieSetTemplate["cookie"].Data = request.GetCookie("DemoCookie").Value;
                     }
                     else
                     {
-                        _cookieSetTemplate.UpdateAction("cookie", "");
+                        _cookieSetTemplate["cookie"].Data = string.Empty;
                     }
                     _cookieSetTemplate.ProcessAction();
                     response.Write(_cookieSetTemplate.GetByte(), _ws.GetMimeType.GetMimeFromFile("/teplateCookieSet.html"));
@@ -87,11 +87,11 @@ namespace WebServerDemo
             {
                 if (request.ContainsCookie("DemoCookie"))
                 {
-                    _cookieTemplate.UpdateAction("cookie", request.GetCookie("DemoCookie").Value);
+                    _cookieTemplate["cookie"].Data = request.GetCookie("DemoCookie").Value;
                 }
                 else
                 {
-                    _cookieTemplate.UpdateAction("cookie", "no data.");
+                    _cookieTemplate["cookie"].Data = "no data.";
                 }
                 _cookieTemplate.ProcessAction();
                 response.Write(_cookieTemplate.GetByte(), _ws.GetMimeType.GetMimeFromFile("/teplateCookieRead.html"));

@@ -137,6 +137,7 @@
     <Compile Include="Http\Session.cs" />
     <Compile Include="Http\SessionManager.cs" />
     <Compile Include="Http\Template\ITemplate.cs" />
+    <Compile Include="Http\Template\TemplateAction.cs" />
     <Compile Include="Http\TimeProvider.cs" />
     <Compile Include="Http\UserManager.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
