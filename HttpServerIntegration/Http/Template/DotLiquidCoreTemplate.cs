@@ -22,6 +22,7 @@ using Feri.MS.Http;
 using System.Collections.Generic;
 using System.Net;
 using System.Linq;
+using DotLiquidCore;
 
 /// <summary>
 /// Optional helper classes for HttpServer, that integrate it with DotLiquidCore library.
@@ -114,13 +115,15 @@ namespace Feri.MS.Integration.Http.Template
 
         public byte[] GetByte()
         {
-            return System.Text.Encoding.UTF8.GetBytes(template.Render());
+            return System.Text.Encoding.UTF8.GetBytes(GetString());
         }
 
         public string GetString()
         {
             //TODO: stuff for passing to templating engine!
-            return template.Render();
+            Hash vars = new Hash();
+            //vars["username"] = "user";
+            return template.Render(vars);
         }
 
         public void LoadString(byte[] data)
