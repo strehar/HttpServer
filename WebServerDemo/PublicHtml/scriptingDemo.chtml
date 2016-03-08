@@ -1,0 +1,19 @@
+﻿<!DOCTYPE html>
+
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="utf-8" />
+    <title>Automatic scripting test</title>
+</head>
+<body>
+    <h1>Automatic scripting test</h1>
+	<hr />
+	<p>Count to 10 from script:</p>
+    <p>
+        {% for i in (1..10) %}
+        {{ i }}<br />
+        {% endfor %}
+    </p>
+    <p><a href="index.html">Back</a></p>
+</body>
+</html>

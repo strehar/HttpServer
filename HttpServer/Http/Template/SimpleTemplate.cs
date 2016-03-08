@@ -29,48 +29,9 @@ namespace Feri.MS.Http.Template
     /// </summary>
     class Akcija
     {
-        string _ime;
-        string _data;
-        object _pattern;
-
-        public string Ime
-        {
-            get
-            {
-                return _ime;
-            }
-
-            set
-            {
-                _ime = value;
-            }
-        }
-
-        public string Data
-        {
-            get
-            {
-                return _data;
-            }
-
-            set
-            {
-                _data = value;
-            }
-        }
-
-        public object Pattern
-        {
-            get
-            {
-                return _pattern;
-            }
-
-            set
-            {
-                _pattern = value;
-            }
-        }
+        public string Ime { get; set; }
+        public string Data { get; set; }
+        public object Pattern { get; set; }
     }
     /// <summary>
     /// Very simple and basic templating engine. It takes file as input (as byte array or sting) and caches it. Then it runs user defined actions  on it and caches result.
@@ -335,6 +296,26 @@ namespace Feri.MS.Http.Template
                         }
                         return _niz;
                     }
+        }
+
+        public bool AddAction(string name, object data)
+        {
+            throw new NotImplementedException();
+        }
+
+        public bool UpdateAction(string name, object data)
+        {
+            throw new NotImplementedException();
+        }
+
+        public bool ContainsAction(string name)
+        {
+            throw new NotImplementedException();
+        }
+
+        public object GetAction(string name)
+        {
+            throw new NotImplementedException();
         }
     }
 }

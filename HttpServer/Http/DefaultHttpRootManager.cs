@@ -19,7 +19,10 @@
 using Feri.MS.Http.Template;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
+using System.Linq;
+using System.Reflection;
 using System.Text;
 using Windows.Networking.Sockets;
 
@@ -40,8 +43,9 @@ namespace Feri.MS.Http
         Dictionary<string, IContentSource> _providers = new Dictionary<string, IContentSource>();
         Dictionary<string, ExtensionListener> _extensionListeners = new Dictionary<string, ExtensionListener>();
         Dictionary<string, HttpError> _errorMessages = new Dictionary<string, HttpError>();
+        Dictionary<string, object> _listenerActions = new Dictionary<string, object>();
 
-
+        Dictionary<string, ExtensionListener> _activeListenersCache = new Dictionary<string, ExtensionListener>();
 
         public DefaultHttpRootManager()
         {
@@ -122,36 +126,146 @@ namespace Feri.MS.Http
         #endregion
 
         #region Extension listeners management
-        public bool AddExtensionListener(string name, string extension, ITemplate template)
+        public bool AddExtensionListener(string extension, ITemplate template)
         {
             // recimo listener za DotLiquid templating engine na .chtml
-            if (!_extensionListeners.ContainsKey(name))
+            if (!_extensionListeners.ContainsKey(extension))
             {
-                _extensionListeners.Add(name, new ExtensionListener() { Extension = extension, Template = template });
+                _extensionListeners.Add(extension, new ExtensionListener() { Extension = extension, Template = template });
                 return true;
             }
             return false;
         }
 
-        public bool RemoveExtensionListener(string name)
+        public bool RemoveExtensionListener(string extension)
         {
             // recimo listener za DotLiquid templating engine na .chtml
-            if (_extensionListeners.ContainsKey(name))
+            // Todo: kill all listeners in cache!
+            if (_extensionListeners.ContainsKey(extension))
             {
-                _extensionListeners.Remove(name);
+                _extensionListeners.Remove(extension);
                 return true;
             }
             return false;
         }
 
-        public ITemplate GetExtensionListener(string name)
+        public ITemplate GetExtensionListener(string extension)
         {
             // recimo listener za DotLiquid templating engine na .chtml
-            if (_extensionListeners.ContainsKey(name))
+            // Todo: don't allow if alive listeners in cache?
+            if (_extensionListeners.ContainsKey(extension))
             {
-                return _extensionListeners[name].Template;
+                return _extensionListeners[extension].Template;
             }
             return null;
+        }
+
+        private bool IsRegisteredExtension(string path)
+        {
+            string[] _tmp = path.Split(new char[] { '.' });
+            string _extension;
+            if (_tmp.Length > 0)
+                _extension = _tmp[_tmp.Length - 1];
+            else
+                return false;
+
+            ITemplate listener = GetExtensionListener(_extension);
+            if (listener == null)
+                return false;
+
+            return true;
+        }
+
+        private ITemplate AddListenerToCache(string path, string extension)
+        {
+            lock (_activeListenersCache)
+            {
+                if (!_activeListenersCache.ContainsKey(path))
+                {
+                    ITemplate _tmpTemplate = GetExtensionListener(extension);
+                    Type _tmpType = _tmpTemplate.GetType();
+                    IEnumerable<PropertyInfo> properties = _tmpType.GetTypeInfo().DeclaredProperties;
+                    ITemplate _clone = (ITemplate)_tmpType.GetTypeInfo().DeclaredConstructors.FirstOrDefault().Invoke(null);
+
+                    foreach (PropertyInfo _property in properties)
+                    {
+                        if (_property.CanWrite)
+                        {
+                            _property.SetValue(_clone, _property.GetValue(_tmpTemplate, null), null);
+                        }
+                    }
+
+                    _clone.LoadString(ReadToByte(path));
+                    _activeListenersCache.Add(path, new ExtensionListener() { Extension = extension, Template = _clone });
+                    return _clone;
+                }
+                return null;
+            }
+        }
+
+        private bool RemoveListenerFromCache(string path)
+        {
+            lock (_activeListenersCache)
+            {
+                if (_activeListenersCache.ContainsKey(path))
+                {
+                    _activeListenersCache.Remove(path);
+                    return true;
+                }
+                return false;
+            }
+        }
+
+        private void ClearListenersFromCache(string extension)
+        {
+            lock (_activeListenersCache)
+            {
+                List<string> _toRemove = new List<string>();
+                foreach (KeyValuePair<string, ExtensionListener> pair in _activeListenersCache)
+                {
+                    if (pair.Value.Extension.Equals(extension))
+                    {
+                        _toRemove.Add(pair.Key);
+                    }
+                }
+                if (_toRemove.Count > 0)
+                {
+                    foreach (string _path in _toRemove)
+                    {
+                        if (_activeListenersCache.ContainsKey(_path))
+                            _activeListenersCache.Remove(_path);
+                    }
+                }
+            }
+        }
+
+        private ITemplate GetListenerFromCache(string path)
+        {
+            lock (_activeListenersCache)
+            {
+                if (_activeListenersCache.ContainsKey(path))
+                {
+                    return _activeListenersCache[path].Template;
+                }
+                return null;
+            }
+        }
+
+        private List<ITemplate> GetListenersFromCache(string extension)
+        {
+            lock (_activeListenersCache)
+            {
+                List<ITemplate> _toReturn = new List<ITemplate>();
+                foreach (KeyValuePair<string, ExtensionListener> pair in _activeListenersCache)
+                {
+                    if (pair.Value.Extension.Equals(extension))
+                    {
+                        _toReturn.Add(pair.Value.Template);
+                    }
+                }
+                return _toReturn;
+            }
+
         }
         #endregion
 
@@ -339,26 +453,133 @@ namespace Feri.MS.Http
         }
         #endregion
 
-        private bool IsRegisteredExtension(string path)
+        public bool AddExtensionListenerData(string extension, string actionName, object data)
         {
-            string[] _tmp = path.Split(new char[] { '.' });
-            string _extension;
-            if (_tmp.Length > 0)
-                _extension = _tmp[_tmp.Length - 1];
+            // Add object to main object and all cache objects
+            bool status = true;
+            ITemplate listener = GetExtensionListener(extension);
+            if (!listener.ContainsAction(actionName))
+            {
+                listener.AddAction(actionName, data);
+            }
             else
-                return false;
-
-            ITemplate listener = GetExtensionListener(_extension);
-            if (listener == null)
-                return false;
-
-            return true;
+            {
+                status = false;
+            }
+            foreach (ITemplate _listener in GetListenersFromCache(extension))
+            {
+                if (!_listener.ContainsAction(actionName))
+                {
+                    _listener.AddAction(actionName, data);
+                }
+                else
+                {
+                    status = false;
+                }
+            }
+            return status;
         }
 
-        private void ProcessExtensionListener(HttpRequest request, HttpResponse response, ITemplate listener)
+        public bool RemoveExtensionListenerData(string extension, string actionName)
+        {
+            // remove object from main class and all cache objects
+            bool status = true;
+            ITemplate listener = GetExtensionListener(extension);
+            if (listener.ContainsAction(actionName))
+            {
+                listener.DeleteAction(actionName);
+            }
+            else
+            {
+                status = false;
+            }
+            foreach (ITemplate _listener in GetListenersFromCache(extension))
+            {
+                if (_listener.ContainsAction(actionName))
+                {
+                    _listener.DeleteAction(actionName);
+                }
+                else
+                {
+                    status = false;
+                }
+            }
+            return status;
+        }
+
+        public object GetExtensionListenerData(string extension, string actionName)
+        {
+            ITemplate listener = GetExtensionListener(extension);
+            if (listener.ContainsAction(actionName))
+            {
+                return listener.GetAction(actionName);
+            }
+            else
+            {
+                return null;
+            }
+        }
+
+        public bool UpdateExtensionListenerData(string extension, string actionName, object data)
+        {
+            // Update main class and allcache objects
+            bool status = true;
+            ITemplate listener = GetExtensionListener(extension);
+            if (listener.ContainsAction(actionName))
+            {
+                listener.UpdateAction(actionName, data);
+            }
+            else
+            {
+                status = false;
+            }
+            foreach (ITemplate _listener in GetListenersFromCache(extension))
+            {
+                if (_listener.ContainsAction(actionName))
+                {
+                    _listener.UpdateAction(actionName, data);
+                }
+                else
+                {
+                    status = false;
+                }
+            }
+            return status;
+        }
+
+        private void ProcessExtensionListener(HttpRequest request, HttpResponse response, string extension)
         {
             // Send HTTP request and response to listener. all other must be handled by the user mannualy.
-            listener.UpdateAction(request, response);
+            ITemplate listener;
+
+            if (GetExtensionListener(extension) != null)
+            {
+                if ((listener = GetListenerFromCache(request.RequestPath.ToLower())) == null)
+                {
+                    // Check if file exists in 1st place...
+                    if (!Containes(request.RequestPath))
+                    {
+                        ReturnErrorMessage(request, response, "404");
+                        return;
+                    }
+                    listener = AddListenerToCache(request.RequestPath.ToLower(), extension);
+                }
+                if (listener == null)
+                    throw new InvalidOperationException("Unable to get listener for extension " + extension);
+
+                if (!listener.UpdateAction(request, response))
+                {
+                    throw new InvalidOperationException("Unable to call UpdateAction on listener " + listener.ToString() + " for extension " + extension);
+                }
+                listener.ProcessAction();
+                response.Write(listener.GetByte(), "text/html");
+                return;
+            }
+            else
+            {
+                throw new InvalidOperationException("GetExtensionListener returned null for extension: " + extension);
+            }
+
         }
 
         /// <summary>
@@ -368,108 +589,100 @@ namespace Feri.MS.Http
         /// <param name="response"></param>
         public void Listen(HttpRequest request, HttpResponse response)
         {
-            // Ali je pot v registriranem listenerju in kliči listener ter return ;
-            if (IsRegisteredExtension(request.RequestPath.ToLower()))
+            try
             {
-                string[] _tmp = request.RequestPath.ToLower().Split(new char[] { '.' });
-                string _extension;
-                if (_tmp.Length > 0)
+                // Ali je pot v registriranem listenerju in kliči listener ter return ;
+                if (IsRegisteredExtension(request.RequestPath.ToLower()))
                 {
-                    _extension = _tmp[_tmp.Length - 1];
-                    ITemplate listener = GetExtensionListener(_extension);
-                    if (listener != null)
+                    string[] _tmp = request.RequestPath.ToLower().Split(new char[] { '.' });
+                    if (_tmp.Length > 0)
                     {
-                        //ProcessExtensionListener(request, response, listener);
-                        if (!listener.UpdateAction(request, response))
-                        {
-                            throw new InvalidOperationException("Unable to call UpdateAction on listener " + listener.ToString() + " for extension " + _extension);
-                        }
-                        listener.ProcessAction();
-                        response.Write(listener.GetByte(), "text/html");
+                        ProcessExtensionListener(request, response, _tmp[_tmp.Length - 1]);
                         return;
                     }
                     else
                     {
-                        throw new ArgumentNullException("GetExtensionListener returned null for extension: " + _extension);
+                        throw new InvalidDataException("Cannot determine extension from " + request.RequestPath);
                     }
                 }
-                else
-                {
-                    throw new InvalidDataException("Cannot determine extension from " + request.RequestPath);
-                }
-            }
 
-            if (request.RequestPath.EndsWith("/"))
-            {
-                // Preverimo, ali je v folderju index file.
-                foreach (string file in _serverRootFile)
+                if (request.RequestPath.EndsWith("/"))
                 {
-                    if (Containes(_serverRootFolder + request.RequestPath + file))
+                    // Preverimo, ali je v folderju index file.
+                    foreach (string file in _serverRootFile)
                     {
-                        response.Write(ReadToByte(_serverRootFolder + request.RequestPath + file), _server.GetMimeType.GetMimeFromFile(request.RequestPath + file));
+                        if (Containes(_serverRootFolder + request.RequestPath + file))
+                        {
+                            response.Write(ReadToByte(_serverRootFolder + request.RequestPath + file), _server.GetMimeType.GetMimeFromFile(request.RequestPath + file));
+                            return;
+                        }
+                    }
+                    // Ni index fajla,  izpišemo folder.
+                    /*
+                    1) Skopiramo vse poti v začasno datoteko
+                    2) vse poti, ki ustrezajo ustrezni mapi, skopiramo in pripravimo za izpis
+                    3) če ne najdemo, je treba izpisat 404.
+                    */
+                    List<string> _ustreznePoti = new List<string>();
+
+                    foreach (string _pot in GetNames())
+                    {
+                        if (_pot.ToLower().Contains((_serverRootFolder + request.RequestPath).ToLower().Replace('/', '.')))
+                        {
+                            // Dodamo samo pravilne url-je za trenutno mapo, brez polne poti in v pravilni obliki.
+                            int cut = _pot.ToLower().Split(new string[] { _serverRootFolder.ToLower() + request.RequestPath.ToLower().Replace('/', '.') }, StringSplitOptions.None)[1].Length;
+                            string _tmpPath = _pot.Replace('.', '/');
+                            int Place = _tmpPath.LastIndexOf("/");
+                            _tmpPath = _tmpPath.Remove(Place, 1).Insert(Place, ".");
+                            if (!_tmpPath.Substring(_tmpPath.Length - cut).Contains("/"))
+                                _ustreznePoti.Add(_tmpPath.Substring(_tmpPath.Length - cut));
+                        }
+                    }
+                    if (_ustreznePoti.Count > 0)
+                    {
+                        SimpleTemplate _template = new SimpleTemplate();
+                        _template.LoadString(ReadToByte("SystemHtml/templateFolderListing.html"));
+                        _template.SafeMode = false;
+
+                        StringBuilder rezultat = new StringBuilder();
+                        foreach (string _pot in _ustreznePoti)
+                        {
+                            rezultat.Append("<a href=\"" + _pot + "\">" + _pot + "</a><br>\n");
+                        }
+
+                        _template.AddAction("path", "PATH", request.RequestPath);
+                        _template.AddAction("content", "CONTENT", rezultat.ToString());
+                        _template.ProcessAction();
+                        response.Write(_template.GetByte(), "text/html");
+                        return;
+                    }
+                    else
+                    {
+                        ReturnErrorMessage(request, response, "404");
                         return;
                     }
                 }
-                // Ni index fajla,  izpišemo folder.
-                /*
-                1) Skopiramo vse poti v začasno datoteko
-                2) vse poti, ki ustrezajo ustrezni mapi, skopiramo in pripravimo za izpis
-                3) če ne najdemo, je treba izpisat 404.
-                */
-                List<string> _ustreznePoti = new List<string>();
-
-                foreach (string _pot in GetNames())
-                {
-                    if (_pot.ToLower().Contains((_serverRootFolder + request.RequestPath).ToLower().Replace('/', '.')))
-                    {
-                        // Dodamo samo pravilne url-je za trenutno mapo, brez polne poti in v pravilni obliki.
-                        int cut = _pot.ToLower().Split(new string[] { _serverRootFolder.ToLower() + request.RequestPath.ToLower().Replace('/', '.') }, StringSplitOptions.None)[1].Length;
-                        string _tmpPath = _pot.Replace('.', '/');
-                        int Place = _tmpPath.LastIndexOf("/");
-                        _tmpPath = _tmpPath.Remove(Place, 1).Insert(Place, ".");
-                        if (!_tmpPath.Substring(_tmpPath.Length - cut).Contains("/"))
-                            _ustreznePoti.Add(_tmpPath.Substring(_tmpPath.Length - cut));
-                    }
-                }
-                if (_ustreznePoti.Count > 0)
-                {
-                    SimpleTemplate _template = new SimpleTemplate();
-                    _template.LoadString(ReadToByte("SystemHtml/templateFolderListing.html"));
-                    _template.SafeMode = false;
-
-                    StringBuilder rezultat = new StringBuilder();
-                    foreach (string _pot in _ustreznePoti)
-                    {
-                        rezultat.Append("<a href=\"" + _pot + "\">" + _pot + "</a><br>\n");
-                    }
-
-                    _template.AddAction("path", "PATH", request.RequestPath);
-                    _template.AddAction("content", "CONTENT", rezultat.ToString());
-                    _template.ProcessAction();
-                    response.Write(_template.GetByte(), "text/html");
-                    return;
-                }
                 else
                 {
-                    ReturnErrorMessage(request, response, "404");
-                    return;
+                    /*
+                    Ni folder, izpišemo zahtevano datoteko.
+                    */
+                    if (Containes(_serverRootFolder + request.RequestPath))
+                    {
+                        response.Write(ReadToByte(_serverRootFolder + request.RequestPath), _server.GetMimeType.GetMimeFromFile(request.RequestPath));
+                        return;
+                    }
+                    else
+                    {
+                        ReturnErrorMessage(request, response, "404");
+                        return;
+                    }
                 }
             }
-            else
+            catch (Exception e)
             {
-                /*
-                Ni folder, izpišemo zahtevano datoteko.
-                */
-                if (Containes(_serverRootFolder + request.RequestPath))
-                {
-                    response.Write(ReadToByte(_serverRootFolder + request.RequestPath), _server.GetMimeType.GetMimeFromFile(request.RequestPath));
-                    return;
-                }
-                else
-                {
-                    ReturnErrorMessage(request, response, "404");
-                    return;
-                }
+                Debug.WriteLine(e);
+                response.Write(e);
             }
         }
     }

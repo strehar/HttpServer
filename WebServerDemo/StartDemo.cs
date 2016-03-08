@@ -19,6 +19,7 @@
 using Feri.MS.Http;
 using Feri.MS.Http.Json;
 using Feri.MS.Http.Template;
+using Feri.MS.Integration.Http.Template;
 using Feri.MS.Parts.I2C.PortExpander;
 using System.Net;
 using WebResources;
@@ -70,6 +71,7 @@ namespace WebServerDemo
             // Server root path for static content
             _ws.HttpRootManager.SetRootPath("PublicHtml");
             _ws.HttpRootManager.SetIndex(new string[] { "/index.html" });
+            _ws.HttpRootManager.AddExtensionListener("chtml", new DotLiquidCoreTemplate());
 
             // Initialize demos
             _cookieDemo.Start(_ws);

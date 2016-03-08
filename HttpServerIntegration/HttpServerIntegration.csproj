@@ -7,7 +7,7 @@
     <ProjectGuid>{C96DEB7F-9753-495D-9FCD-3A7F0D8D6D90}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>HttpServer.Integration</RootNamespace>
+    <RootNamespace>Feri.MS.Integration</RootNamespace>
     <AssemblyName>HttpServer.Integration</AssemblyName>
     <DefaultLanguage>en-US</DefaultLanguage>
     <TargetPlatformIdentifier>UAP</TargetPlatformIdentifier>

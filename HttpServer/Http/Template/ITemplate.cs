@@ -20,14 +20,18 @@ namespace Feri.MS.Http.Template
 {
     public interface ITemplate
     {
-        bool AddAction(string name, string pattern, string data);
-        bool DeleteAction(string name);
-        byte[] GetByte();
-        string GetString();
         void LoadString(string data);
         void LoadString(byte[] data);
-        void ProcessAction();
+        bool AddAction(string name, string pattern, string data);
+        bool AddAction(string name, object data);
         bool UpdateAction(string name, string data);
+        bool UpdateAction(string name, object data);
         bool UpdateAction(HttpRequest rquest, HttpResponse response);
+        bool DeleteAction(string name);
+        object GetAction(string name);
+        bool ContainsAction(string name);
+        void ProcessAction();
+        byte[] GetByte();
+        string GetString();
     }
 }

@@ -24,7 +24,7 @@ namespace Feri.MS.Http
 {
     public interface IHttpRootManager
     {
-        bool AddExtensionListener(string name, string extension, ITemplate template);
+        bool AddExtensionListener(string extension, ITemplate template);
         void SetIndex(string[] index);
         bool AddSource(string name, IContentSource provider);
         HttpError GetErrorMessage(string errorID);
@@ -46,6 +46,10 @@ namespace Feri.MS.Http
         List<string> GetNames();
         bool Containes(string pot);
 
+        bool AddExtensionListenerData(string extension, string actionName, object data);
+        bool RemoveExtensionListenerData(string extension, string actionName);
+        object GetExtensionListenerData(string extension, string actionName);
+        bool UpdateExtensionListenerData(string extension, string actionName, object data);
 
         void Start(HttpServer server);
         void Stop();
