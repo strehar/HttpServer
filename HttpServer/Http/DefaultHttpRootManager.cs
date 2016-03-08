@@ -1,6 +1,7 @@
 ﻿using Feri.MS.Http.Template;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -15,63 +16,134 @@ namespace Feri.MS.Http
     }
     class DefaultHttpRootManager : IHttpRootManager
     {
-        string _serverRootFolder = "SystemHtml";          // prevzeta "mapa" od koder se prikazujejo datoteke, če je bila zahtevana pot, ki je ne obdeluje nobena finkcija
+        string _serverRootFolder;          // prevzeta "mapa" od koder se prikazujejo datoteke, če je bila zahtevana pot, ki je ne obdeluje nobena finkcija
         List<string> _serverRootFile = new List<string>();
 
         HttpServer _server;
 
         Dictionary<string, IContentSource> _providers = new Dictionary<string, IContentSource>();
         Dictionary<string, ExtensionListener> _extensionListeners = new Dictionary<string, ExtensionListener>();
+        Dictionary<string, HttpError> _errorMessages = new Dictionary<string, HttpError>();
+
 
 
         public DefaultHttpRootManager()
         {
             _serverRootFile.Add("serverDefault.html");    // Preveta datoteka za prikaz
+            _serverRootFolder = "SystemHtml";
+
+            // Registracija prevzetih napak
+            AddErrorMessage(new HttpError() { ErrorCode = "401", ErrorStatus = "401 Unauthorized", ErrorFile = "SystemHtml/401.html" });
+            AddErrorMessage(new HttpError() { ErrorCode = "403", ErrorStatus = "403 Forbidden", ErrorFile = "SystemHtml/403.html" });
+            AddErrorMessage(new HttpError() { ErrorCode = "404", ErrorStatus = "404 Not Found", ErrorFile = "SystemHtml/404.html" });
+            AddErrorMessage(new HttpError() { ErrorCode = "405", ErrorStatus = "405 Method not allowed", ErrorFile = "SystemHtml/405.html" });
+            AddErrorMessage(new HttpError() { ErrorCode = "415", ErrorStatus = "415 Unsupported Media Type", ErrorFile = "SystemHtml/415.html" });
+            AddErrorMessage(new HttpError() { ErrorCode = "500", ErrorStatus = "500 Internal Server Error", ErrorFile = "SystemHtml/500.html" });
         }
 
+        #region Lifecycle management
         public void Start(HttpServer server)
         {
             _server = server;
         }
+
         public void Stop()
         {
 
         }
+        #endregion
+
+        #region Source management
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="name"></param>
+        /// <param name="provider"></param>
+        /// <returns></returns>
         public bool AddSource(string name, IContentSource provider)
         {
+            // registriramo embededcontent, filesystemcontent, ...
             if (!_providers.ContainsKey(name))
             {
                 _providers.Add(name, provider);
+                _providers[name].Start();
                 return true;
             }
             return false;
-            // registriramo embededcontent, filesystemcontent, ...
         }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="name"></param>
+        /// <returns></returns>
         public bool RemoveSource(string name)
         {
-            return true;
             // registriramo embededcontent, filesystemcontent, ...
+            if (_providers.ContainsKey(name))
+            {
+                _providers[name].Stop();
+                _providers.Remove(name);
+                return true;
+            }
+            return false;
         }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="name"></param>
+        /// <returns></returns>
         public IContentSource GetSource(string name)
         {
             // registriramo embededcontent, filesystemcontent, ...
+            if (_providers.ContainsKey(name))
+            {
+                return _providers[name];
+            }
             return null;
         }
+        #endregion
+
+        #region Extension listeners management
         public bool AddExtensionListener(string name, string extension, ITemplate template)
         {
-            return true;
             // recimo listener za DotLiquid templating engine na .chtml
+            if (!_extensionListeners.ContainsKey(name))
+            {
+                _extensionListeners.Add(name, new ExtensionListener() { Extension = extension, Template = template });
+                return true;
+            }
+            return false;
         }
+
         public bool RemoveExtensionListener(string name)
         {
-            return true;
             // recimo listener za DotLiquid templating engine na .chtml
+            if (_extensionListeners.ContainsKey(name))
+            {
+                _extensionListeners.Remove(name);
+                return true;
+            }
+            return false;
         }
+
         public ITemplate GetExtensionListener(string name)
         {
             // recimo listener za DotLiquid templating engine na .chtml
+            if (_extensionListeners.ContainsKey(name))
+            {
+                return _extensionListeners[name].Template;
+            }
             return null;
         }
+        #endregion
+
+        #region Default content location
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="index"></param>
         public void SetIndex(string[] index)
         {
             _serverRootFile.Clear();
@@ -85,114 +157,286 @@ namespace Feri.MS.Http
             }
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="folder"></param>
         public void SetRootPath(string folder)
         {
             //Pot kjer se naj iščejo datoteke
             _serverRootFolder = folder;
         }
+        #endregion
 
-        public void SetErrorMessage(string errorID, string fileToDisplay)
+        #region Data management
+        public string UrlToPath(string url)
         {
-            // Da lahko preusmerimo error message na custom errorje.
+            string _path = null;
+            bool _found = false;
+
+            foreach (IContentSource provider in _providers.Values)
+            {
+                if (provider.Containes(url) && (!_found))
+                {
+                    _path = provider.UrlToPath(url);
+                    _found = true;
+                }
+            }
+            return _found ? _path : null;
         }
 
-        public void GetErrorMessage(string errorID, string fileToDisplay)
-        {
-            // Da lahko preusmerimo error message na custom errorje.
-        }
-
-        public void SendError(HttpRequest request, HttpResponse response, string ErrorID)
-        {
-
-        }
-
-        public void SendError(StreamSocket socket, string ErrorID)
-        {
-
-        }
-
-        public void Listen(HttpRequest request, HttpResponse response)
+        public byte[] ReadToByte(string path)
         {
             byte[] _dataArray = null;
-            string pot = null;
             IContentSource _foundSource = null;
 
+            foreach (IContentSource provider in _providers.Values)
+            {
+                if (provider.Containes(path.ToLower()))
+                {
+                    _foundSource = provider;
+                }
+            }
+            if (_foundSource != null)
+            {
+                _dataArray = _foundSource.ReadToByte(path);
+                return _dataArray;
+            }
+            else
+            {
+                throw new FileNotFoundException("File " + path + " not found in any of the providers");
+            }
+        }
 
-            // TODO: Preveri ali je pot v registriranem listenerju in gliči listener ter return ;
-            // Koda()
+        public string ReadToString(string path)
+        {
+            return System.Text.Encoding.UTF8.GetString(ReadToByte(path));
+        }
+
+        public List<string> GetNames()
+        {
+            List<string> _vsePoti = new List<string>();
+            foreach (IContentSource provider in _providers.Values)
+            {
+                foreach (string _pot in provider.GetNames())
+                {
+                    _vsePoti.Add(_pot);
+                }
+            }
+            if (_vsePoti.Count > 0)
+                return _vsePoti;
+            else
+                return null;
+        }
+
+        public bool Containes(string pot)
+        {
+            List<string> _vsePoti = GetNames();
+            if (_vsePoti == null)
+                return false;
+
+            bool _found = false;
+
+            foreach (string _pot in _vsePoti)
+            {
+                if (_pot.ToLower().EndsWith(pot.ToLower().Replace('/', '.')))
+                {
+                    _found = true;
+                }
+            }
+            return _found;
+        }
+        #endregion
+
+        #region Error messages
+        public bool AddErrorMessage(HttpError error)
+        {
+            // Da lahko preusmerimo error message na custom errorje.
+            if (!_errorMessages.ContainsKey(error.ErrorCode))
+            {
+                _errorMessages.Add(error.ErrorCode, error);
+                return true;
+            }
+            return false;
+        }
+
+        public bool UpdateErrorMessage(HttpError error)
+        {
+            // Da lahko preusmerimo error message na custom errorje.
+            if (_errorMessages.ContainsKey(error.ErrorCode))
+            {
+                _errorMessages[error.ErrorCode] = error;
+                return true;
+            }
+            return false;
+
+        }
+
+        public HttpError GetErrorMessage(string errorID)
+        {
+            // Da lahko preusmerimo error message na custom errorje.
+            if (_errorMessages.ContainsKey(errorID))
+            {
+                return _errorMessages[errorID];
+            }
+            return null;
+        }
+
+        public void ReturnErrorMessage(HttpRequest request, HttpResponse response, Dictionary<string, string> headers, string ErrorID)
+        {
+            byte[] _dataArray = null;
+            HttpError error = GetErrorMessage(ErrorID);
+            if (error != null)
+            {
+                _dataArray = ReadToByte(error.ErrorFile);
+                response.Write(_dataArray, _server.GetMimeType.GetMimeFromFile(error.ErrorFile), error.ErrorStatus, headers);
+            }
+            else
+            {
+                throw new KeyNotFoundException("Cannot find error message for code: " + ErrorID);
+            }
+            return;
+        }
+
+        public void ReturnErrorMessage(HttpRequest request, HttpResponse response, string ErrorID)
+        {
+            ReturnErrorMessage(request, response, null, ErrorID);
+            return;
+        }
+
+        public void ReturnErrorMessage(StreamSocket socket, string ErrorID)
+        {
+            byte[] _dataArray = null;
+            HttpResponse _error = null;
+            HttpError error = GetErrorMessage(ErrorID);
+            if (error != null)
+            {
+                _error = new HttpResponse(socket.OutputStream.AsStreamForWrite());
+                _dataArray = ReadToByte(error.ErrorFile);
+                _error.Write(_dataArray, _server.GetMimeType.GetMimeFromFile(error.ErrorFile), error.ErrorStatus);
+            }
+            else
+            {
+                throw new KeyNotFoundException("Cannot find error message for code: " + ErrorID);
+            }
+            return;
+        }
+        #endregion
+
+        private bool IsRegisteredExtension(string path)
+        {
+            string[] _tmp = path.Split(new char[] { '.' });
+            string _extension;
+            if (_tmp.Length > 0)
+                _extension = _tmp[_tmp.Length - 1];
+            else
+                return false;
+
+            ITemplate listener = GetExtensionListener(_extension);
+            if (listener == null)
+                return false;
+
+            return true;
+        }
+
+        private void ProcessExtensionListener(HttpRequest request, HttpResponse response, ITemplate listener)
+        {
+            // Send HTTP request and response to listener. all other must be handled by the user mannualy.
+            listener.UpdateAction(request, response);
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="request"></param>
+        /// <param name="response"></param>
+        public void Listen(HttpRequest request, HttpResponse response)
+        {
+            // Ali je pot v registriranem listenerju in kliči listener ter return ;
+            if (IsRegisteredExtension(request.RequestPath.ToLower()))
+            {
+                string[] _tmp = request.RequestPath.ToLower().Split(new char[] { '.' });
+                string _extension;
+                if (_tmp.Length > 0)
+                {
+                    _extension = _tmp[_tmp.Length - 1];
+                    ITemplate listener = GetExtensionListener(_extension);
+                    if (listener != null)
+                    {
+                        //ProcessExtensionListener(request, response, listener);
+                        if (!listener.UpdateAction(request, response))
+                        {
+                            throw new InvalidOperationException("Unable to call UpdateAction on listener " + listener.ToString() + " for extension " + _extension);
+                        }
+                        listener.ProcessAction();
+                        response.Write(listener.GetByte(), "text/html");
+                        return;
+                    }
+                    else
+                    {
+                        throw new ArgumentNullException("GetExtensionListener returned null for extension: " + _extension);
+                    }
+                }
+                else
+                {
+                    throw new InvalidDataException("Cannot determine extension from " + request.RequestPath);
+                }
+            }
 
             if (request.RequestPath.EndsWith("/"))
             {
                 // Preverimo, ali je v folderju index file.
                 foreach (string file in _serverRootFile)
                 {
-                    foreach (IContentSource provider in _providers.Values)
+                    if (Containes(_serverRootFolder + request.RequestPath + file))
                     {
-                        if (provider.Containes(_serverRootFolder + request.RequestPath.ToLower() + file))
-                        {
-                            pot = _serverRootFolder + request.RequestPath.ToLower() + file;
-                            _foundSource = provider;
-                        }
+                        response.Write(ReadToByte(_serverRootFolder + request.RequestPath + file), _server.GetMimeType.GetMimeFromFile(request.RequestPath + file));
+                        return;
                     }
                 }
-                // Če smo našli index file ga izpišemo.
-                if (!string.IsNullOrEmpty(pot))
+                // Ni index fajla,  izpišemo folder.
+                /*
+                1) Skopiramo vse poti v začasno datoteko
+                2) vse poti, ki ustrezajo ustrezni mapi, skopiramo in pripravimo za izpis
+                3) če ne najdemo, je treba izpisat 404.
+                */
+                List<string> _ustreznePoti = new List<string>();
+
+                foreach (string _pot in GetNames())
                 {
-                    _dataArray = _foundSource.ReadToByte(pot);
-                    response.Write(_dataArray, _server.GetMimeType.GetMimeFromFile(pot));
+                    if (_pot.ToLower().Contains((_serverRootFolder + request.RequestPath).ToLower().Replace('/', '.')))
+                    {
+                        // Dodamo samo pravilne url-je za trenutno mapo, brez polne poti in v pravilni obliki.
+                        int cut = _pot.ToLower().Split(new string[] { _serverRootFolder.ToLower() + request.RequestPath.ToLower().Replace('/', '.') }, StringSplitOptions.None)[1].Length;
+                        string _tmpPath = _pot.Replace('.', '/');
+                        int Place = _tmpPath.LastIndexOf("/");
+                        _tmpPath = _tmpPath.Remove(Place, 1).Insert(Place, ".");
+                        if (!_tmpPath.Substring(_tmpPath.Length - cut).Contains("/"))
+                            _ustreznePoti.Add(_tmpPath.Substring(_tmpPath.Length - cut));
+                    }
+                }
+                if (_ustreznePoti.Count > 0)
+                {
+                    SimpleTemplate _template = new SimpleTemplate();
+                    _template.LoadString(ReadToByte("SystemHtml/templateFolderListing.html"));
+                    _template.SafeMode = false;
+
+                    StringBuilder rezultat = new StringBuilder();
+                    foreach (string _pot in _ustreznePoti)
+                    {
+                        rezultat.Append("<a href=\"" + _pot + "\">" + _pot + "</a><br>\n");
+                    }
+
+                    _template.AddAction("path", "PATH", request.RequestPath);
+                    _template.AddAction("content", "CONTENT", rezultat.ToString());
+                    _template.ProcessAction();
+                    response.Write(_template.GetByte(), "text/html");
                     return;
                 }
                 else
                 {
-                    // Ni index fajla,  izpišemo folder.
-                    /*
-                    1) Skopiramo vse poti v začasno datoteko
-                    2) vse poti, ki ustrezajo ustrezni mapi, skopiramo in pripravimo za izpis
-                    3) če ne najdemo, je treba izpisat 404.
-                    */
-                    List<string> _vsePoti = new List<string>();
-                    List<string> _ustreznePoti = new List<string>();
-                    foreach (IContentSource provider in _providers.Values)
-                    {
-                        foreach (string _pot in provider.GetNames())
-                        {
-                            _vsePoti.Add(_pot);
-                        }
-                    }
-                    foreach (string _pot in _vsePoti)
-                    {
-                        if (_pot.ToLower().Contains(_serverRootFolder.ToLower() + request.RequestPath.ToLower().Replace('/', '.')))
-                        {
-                            // Dodamo samo pravilne url-je za trenutno mapo, brez polne poti in v pravilni obliki.
-                            int cut = _pot.ToLower().Split(new string[] { _serverRootFolder.ToLower() + request.RequestPath.ToLower().Replace('/', '.') }, StringSplitOptions.None)[1].Length;
-                            string _tmpPath = _pot.Replace('.', '/');
-                            int Place = _tmpPath.LastIndexOf("/");
-                            _tmpPath = _tmpPath.Remove(Place, 1).Insert(Place, ".");
-                            if (!_tmpPath.Substring(_tmpPath.Length - cut).Contains("/"))
-                                _ustreznePoti.Add(_tmpPath.Substring(_tmpPath.Length - cut));
-                            //if (!_pot.Substring(_pot.Length - cut).Contains("/"))
-                            //    _ustreznePoti.Add(_pot.Substring(_pot.Length - cut));
-                        }
-                    }
-                    if (_ustreznePoti.Count >= 1)
-                    {
-                        StringBuilder rezultat = new StringBuilder();
-                        rezultat.Append("<html>\n<head>\n<title>Index of: " + request.RequestPath + "</title>\n</head>\n<body>\n<h1>Index of: " + request.RequestPath + "</h1>\n<hr>\n");
-                        foreach (string _pot in _ustreznePoti)
-                        {
-                            rezultat.Append("<a href=\"" + _pot + "\">" + _pot + "</a><br>\n");
-                        }
-                        rezultat.Append("</body>\n</html>");
-                        response.Write(System.Text.Encoding.UTF8.GetBytes(rezultat.ToString()), "text/html");
-                        return;
-                    }
-                    else
-                    {
-                        //404
-                        _dataArray = _server.EmbeddedContent.ReadToByte("SystemHtml/404.html");
-                        response.Write(_dataArray, _server.GetMimeType.GetMimeFromFile(pot), "404 Not Found");
-                        return;
-                    }
+                    ReturnErrorMessage(request, response, "404");
+                    return;
                 }
             }
             else
@@ -200,25 +444,14 @@ namespace Feri.MS.Http
                 /*
                 Ni folder, izpišemo zahtevano datoteko.
                 */
-                foreach (IContentSource provider in _providers.Values)
+                if (Containes(_serverRootFolder + request.RequestPath))
                 {
-                    if (provider.Containes(_serverRootFolder + request.RequestPath.ToLower()))
-                    {
-                        pot = _serverRootFolder + request.RequestPath.ToLower();
-                        _foundSource = provider;
-                    }
-                }
-                if (!string.IsNullOrEmpty(pot))
-                {
-                    _dataArray = _foundSource.ReadToByte(pot);
-                    response.Write(_dataArray, _server.GetMimeType.GetMimeFromFile(pot));
+                    response.Write(ReadToByte(_serverRootFolder + request.RequestPath), _server.GetMimeType.GetMimeFromFile(request.RequestPath));
                     return;
                 }
                 else
                 {
-                    // TODO: fix so it checks with registered erors.
-                    _dataArray = _server.EmbeddedContent.ReadToByte("SystemHtml/404.html");
-                    response.Write(_dataArray, _server.GetMimeType.GetMimeFromFile(pot), "404 Not Found");
+                    ReturnErrorMessage(request, response, "404");
                     return;
                 }
             }

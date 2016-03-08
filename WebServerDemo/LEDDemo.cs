@@ -50,7 +50,7 @@ namespace WebServerDemo
 
             _ws.AddPath("/demoLED.html", ProcessDemoLED);
 
-            _LEDControl.LoadString(_ws.EmbeddedContent.ReadToByte(_privatePath + "/templateLED.html"));
+            _LEDControl.LoadString(_ws.HttpRootManager.ReadToByte(_privatePath + "/templateLED.html"));
             _LEDControl.AddAction("ledOn", "LEDON", "");
             _LEDControl.AddAction("ledOff", "LEDOFF", "");
 

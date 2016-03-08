@@ -115,6 +115,16 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <EmbeddedResource Include="Properties\HttpServerIntegration.rd.xml" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\DotLiquidCore\DotLiquidCore.csproj">
+      <Project>{7e2d1c5b-59af-4f2a-a0aa-0fca38c1740c}</Project>
+      <Name>DotLiquidCore</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\HttpServer\HttpServer.csproj">
+      <Project>{483fa17c-a355-4828-bbe2-ce44cffa241a}</Project>
+      <Name>HttpServer</Name>
+    </ProjectReference>
+  </ItemGroup>
   <PropertyGroup Condition=" '$(VisualStudioVersion)' == '' or '$(VisualStudioVersion)' &lt; '14.0' ">
     <VisualStudioVersion>14.0</VisualStudioVersion>
   </PropertyGroup>

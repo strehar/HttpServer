@@ -10,5 +10,6 @@
         void LoadString(byte[] data);
         void ProcessAction();
         bool UpdateAction(string name, string data);
+        bool UpdateAction(HttpRequest rquest, HttpResponse response);
     }
 }

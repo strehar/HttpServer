@@ -238,6 +238,11 @@ namespace Feri.MS.Http.Template
                     }
         }
 
+        public bool UpdateAction(HttpRequest request, HttpResponse response)
+        {
+            throw new NotImplementedException();
+        }
+
         /// <summary>
         /// Remove action from action list.
         /// </summary>

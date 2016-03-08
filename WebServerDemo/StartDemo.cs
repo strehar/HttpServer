@@ -51,9 +51,9 @@ namespace WebServerDemo
             _ws.SetDebug = false;
 
             // Register assemblies for content and refresh file list
-            _ws.EmbeddedContent.RegisterAssembly(this.GetType());
-            _ws.EmbeddedContent.RegisterAssembly(_wh.GetType());
-            _ws.EmbeddedContent.RefreshFileList();
+            ((EmbeddedContent)_ws.HttpRootManager.GetSource("EmbeddedContent")).RegisterAssembly(this.GetType());
+            ((EmbeddedContent)_ws.HttpRootManager.GetSource("EmbeddedContent")).RegisterAssembly(_wh.GetType());
+            ((EmbeddedContent)_ws.HttpRootManager.GetSource("EmbeddedContent")).RefreshFileList();
 
             // IP Filtering
             _ws.IPFilterEnabled = false;  // Change this to true to enable IP filter!

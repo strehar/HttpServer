@@ -44,7 +44,7 @@ namespace WebServerDemo
 
             _ws.AddPath("/demoTemperature.html", ProcessTemperature);
 
-            _temperatureTemplate.LoadString(_ws.EmbeddedContent.ReadToByte(_privatePath + "/templateTermometer.html"));
+            _temperatureTemplate.LoadString(_ws.HttpRootManager.ReadToByte(_privatePath + "/templateTermometer.html"));
             _temperatureTemplate.AddAction("temperature", "TEMP", "");
 
             _termometer.HighPrecision = true;

@@ -37,7 +37,7 @@ namespace WebServerDemo
             _ws = server;
             _templateDemo = template;
             _ws.AddPath("/template.html", VrniTemplate);
-            _templateDemo.LoadString(_ws.EmbeddedContent.ReadToByte(_privatePath + "/templateDemo.html"));
+            _templateDemo.LoadString(_ws.HttpRootManager.ReadToByte(_privatePath + "/templateDemo.html"));
             _templateDemo.AddAction("userName", "USERNAME", "");
         }
 
