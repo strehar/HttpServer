@@ -100,6 +100,7 @@ namespace Feri.MS.Integration.Http.Template
             return true;
         }
 
+        // Object na specifičen data type, da lahko compiler preverja za napako? strong type!
         bool ITemplate.AddAction(string name, object data)
         {
             throw new NotImplementedException();

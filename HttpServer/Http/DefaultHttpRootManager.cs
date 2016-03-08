@@ -453,6 +453,7 @@ namespace Feri.MS.Http
         }
         #endregion
 
+        #region Extension listener data
         public bool AddExtensionListenerData(string extension, string actionName, object data)
         {
             // Add object to main object and all cache objects
@@ -546,7 +547,9 @@ namespace Feri.MS.Http
             }
             return status;
         }
+        #endregion
 
+        #region Listener
         private void ProcessExtensionListener(HttpRequest request, HttpResponse response, string extension)
         {
             // Send HTTP request and response to listener. all other must be handled by the user mannualy.
@@ -685,5 +688,6 @@ namespace Feri.MS.Http
                 response.Write(e);
             }
         }
+        #endregion
     }
 }
