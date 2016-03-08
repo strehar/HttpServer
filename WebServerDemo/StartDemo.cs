@@ -72,6 +72,7 @@ namespace WebServerDemo
             _ws.HttpRootManager.SetRootPath("PublicHtml");
             _ws.HttpRootManager.SetIndex(new string[] { "/index.html" });
             _ws.HttpRootManager.AddExtensionListener("chtml", new DotLiquidCoreTemplate());
+            _ws.HttpRootManager.AddExtensionListener("shtml", new SimpleTemplate());
 
             // Initialize demos
             _cookieDemo.Start(_ws);

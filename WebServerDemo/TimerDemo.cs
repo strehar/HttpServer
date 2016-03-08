@@ -64,6 +64,9 @@ namespace WebServerDemo
             _json.AddData("Timer", "Off");
             _json.AddData("Led", "Off");
 
+            _ws.HttpRootManager.AddExtensionListenerData("shtml", "led", new TemplateAction() { Pattern = "LED", Data = "Off" });
+            _ws.HttpRootManager.AddExtensionListenerData("shtml", "timer", new TemplateAction() { Pattern = "TIMER", Data = "Off" });
+
             _ws.AddTimer("TestTimer", 10000, TimerEvent);
 
             //_ports._debug = true;
@@ -80,6 +83,7 @@ namespace WebServerDemo
                         _json.UpdateData("Led", "Off");
                         _templateDemo["led"].Data = "Off";
                         state = "Off";
+                        _ws.HttpRootManager.UpdateExtensionListenerData("shtml", "led", new TemplateAction() { Pattern = "LED", Data = "Off" });
                         //pin.Write(GpioPinValue.Low);
                         _ports.WritePin(PortNumber.PORT_ONE, false);
                     }
@@ -88,6 +92,7 @@ namespace WebServerDemo
                         _json.UpdateData("Led", "On");
                         _templateDemo["led"].Data = "On";
                         state = "On";
+                        _ws.HttpRootManager.UpdateExtensionListenerData("shtml", "led", new TemplateAction() { Pattern = "LED", Data = "On" });
                         //pin.Write(GpioPinValue.High);
                         _ports.WritePin(PortNumber.PORT_ONE, true);
                     }
@@ -124,6 +129,7 @@ namespace WebServerDemo
                     _timerControl["timerOff"].Data = string.Empty;
                     _json.UpdateData("Timer", "On");
                     _templateDemo["timer"].Data = "On";
+                    _ws.HttpRootManager.UpdateExtensionListenerData("shtml", "timer", new TemplateAction() { Pattern = "TIMER", Data = "On" });
                 }
                 else
                 {
@@ -131,6 +137,7 @@ namespace WebServerDemo
                     _timerControl["timerOff"].Data = "checked";
                     _json.UpdateData("Timer", "Off");
                     _templateDemo["timer"].Data = "Off";
+                    _ws.HttpRootManager.UpdateExtensionListenerData("shtml", "timer", new TemplateAction() { Pattern = "TIMER", Data = "Off" });
                 }
 
                 _timerControl.ProcessAction();

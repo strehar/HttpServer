@@ -113,6 +113,7 @@
       <SubType>Designer</SubType>
     </AppxManifest>
     <EmbeddedResource Include="PublicHtml\scriptingDemo.chtml" />
+    <EmbeddedResource Include="PublicHtml\scriptingDemo.shtml" />
     <None Include="WebServerDemo_TemporaryKey.pfx" />
   </ItemGroup>
   <ItemGroup>
