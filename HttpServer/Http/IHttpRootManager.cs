@@ -24,34 +24,37 @@ namespace Feri.MS.Http
 {
     public interface IHttpRootManager
     {
-        bool AddExtensionListener(string extension, ITemplate template);
         void SetIndex(string[] index);
-        bool AddSource(string name, IContentSource provider);
-        HttpError GetErrorMessage(string errorID);
-        ITemplate GetExtensionListener(string name);
-        IContentSource GetSource(string name);
-        void Listen(HttpRequest request, HttpResponse response);
+        void SetRootPath(string folder);
+
+        bool AddExtensionListener(string extension, ITemplate template);
         bool RemoveExtensionListener(string name);
+        ITemplate GetExtensionListener(string name);
+
+        bool AddSource(string name, IContentSource provider);
         bool RemoveSource(string name);
+        IContentSource GetSource(string name);
+
+        bool AddErrorMessage(HttpError error);
         void ReturnErrorMessage(StreamSocket socket, string ErrorID);
         void ReturnErrorMessage(HttpRequest request, HttpResponse response, string ErrorID);
         void ReturnErrorMessage(HttpRequest request, HttpResponse response, Dictionary<string, string> headers, string ErrorID);
-        bool AddErrorMessage(HttpError error);
         bool UpdateErrorMessage(HttpError error);
-        void SetRootPath(string folder);
+        HttpError GetErrorMessage(string errorID);
 
-        string UrlToPath(string url);
         byte[] ReadToByte(string path);
         string ReadToString(string path);
-        List<string> GetNames();
+        string UrlToPath(string url);
         bool Containes(string pot);
+        List<string> GetNames();
 
         bool AddExtensionListenerData(string extension, string actionName, object data);
         bool RemoveExtensionListenerData(string extension, string actionName);
-        object GetExtensionListenerData(string extension, string actionName);
         bool UpdateExtensionListenerData(string extension, string actionName, object data);
+        object GetExtensionListenerData(string extension, string actionName);
 
         void Start(HttpServer server);
         void Stop();
+        void Listen(HttpRequest request, HttpResponse response);
     }
 }

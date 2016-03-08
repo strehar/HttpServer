@@ -36,7 +36,6 @@ namespace Feri.MS.Integration.Http.Template
     public class DotLiquidCoreTemplate : ITemplate
     {
         Dictionary<string, Action> _akcije = new Dictionary<string, Action>();
-
         DotLiquidCore.Template template;
 
         public Dictionary<string, Action> Akcije
