@@ -10,9 +10,9 @@
 	<hr />
 	<p>Count to 10 from script:</p>
     <p>
-        {% for i in (1..10) %}
+        {% for i in (1..10) -%}
         {{ i }}<br />
-        {% endfor %}
+        {% endfor -%}
     </p>
     <p><a href="index.html">Back</a></p>
 </body>
