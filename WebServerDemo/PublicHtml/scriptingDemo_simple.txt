@@ -13,7 +13,8 @@
         <ul>
             <li>Timer is @#TIMER</li>
             <li>Timer controlled LED is @#LED</li>
-        </ul>
+            <li>Manual LED is @#MANUALLED</li>
+</ul>
     <p><a href="index.html">Back</a></p>
 </body>
 </html>

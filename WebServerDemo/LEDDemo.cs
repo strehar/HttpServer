@@ -56,6 +56,8 @@ namespace WebServerDemo
 
             _templateDemo["maualLed"] = new TemplateAction() { Pattern = "MANUALLED", Data = "Off" };
 
+            _ws.HttpRootManager.AddExtensionListenerData("shtml", "manualLed", new TemplateAction() { Pattern = "MANUALLED", Data = "Off" });
+
             _json.AddData("MaualLed", "Off");
 
             //_ports._debug = true;
@@ -72,6 +74,7 @@ namespace WebServerDemo
                         stateLed = "On";
                         _json.UpdateData("MaualLed", "On");
                         _templateDemo["maualLed"].Data = "On";
+                        _ws.HttpRootManager.UpdateExtensionListenerData("shtml", "manualLed", new TemplateAction() { Pattern = "MANUALLED", Data = "On" });
                         //pin2.Write(GpioPinValue.High);
                         _ports.WritePin(PortNumber.PORT_TWO, true);
                     }
@@ -80,6 +83,7 @@ namespace WebServerDemo
                         stateLed = "Off";
                         _json.UpdateData("MaualLed", "Off");
                         _templateDemo["maualLed"].Data = "Off";
+                        _ws.HttpRootManager.UpdateExtensionListenerData("shtml", "manualLed", new TemplateAction() { Pattern = "MANUALLED", Data = "Off" });
                         //pin2.Write(GpioPinValue.Low);
                         _ports.WritePin(PortNumber.PORT_TWO, false);
                     }
