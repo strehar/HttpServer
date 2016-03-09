@@ -22,6 +22,12 @@
         Parameter name: {{ key }}, Parameter value: {{ Request.Parameters.Data[key] }}<br />
         {% endfor -%}
     </p>
+	<p>Display all cookies:</p>
+    <p>
+        {% for key in Request.Cookies.Keys -%}
+        Cookie name: {{ key }}, Cookie value: {{ Request.Cookies.Data[key] }}<br />
+        {% endfor -%}
+    </p>
     <p>Display all session parameters:</p>
     <p>
         {% for key in Request.Session.Keys -%}

@@ -63,7 +63,7 @@ namespace WebServerDemo
                 {
                     if (request.ContainsCookie("DemoCookie"))
                     {
-                        _cookieSetTemplate["cookie"].Data = request.GetCookie("DemoCookie").Value;
+                        _cookieSetTemplate["cookie"].Data = request.Cookies["DemoCookie"].Value;
                     }
                     else
                     {
@@ -87,7 +87,7 @@ namespace WebServerDemo
             {
                 if (request.ContainsCookie("DemoCookie"))
                 {
-                    _cookieTemplate["cookie"].Data = request.GetCookie("DemoCookie").Value;
+                    _cookieTemplate["cookie"].Data = request.Cookies["DemoCookie"].Value;
                 }
                 else
                 {

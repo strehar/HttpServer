@@ -112,7 +112,7 @@ namespace Feri.MS.Http
             if (_request != null)
                 if (_request.SessionUpdated)
                 {
-                    HttpCookie _sessionCookie = _request.GetCookie("SessionID");
+                    HttpCookie _sessionCookie = _request.Cookies["SessionID"];
                     if (_sessionCookie != null)
                     {
                         _cookies.Add("SessionID", _sessionCookie);

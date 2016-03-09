@@ -31,6 +31,7 @@ namespace Feri.MS.Http.Template
         public DotLiquidCoreTemplateDictionaryDrop Headers { get; set; } = new DotLiquidCoreTemplateDictionaryDrop();
         public DotLiquidCoreTemplateDictionaryDrop Parameters { get; set; } = new DotLiquidCoreTemplateDictionaryDrop();
         public DotLiquidCoreTemplateDictionaryDrop Session { get; set; } = new DotLiquidCoreTemplateDictionaryDrop();
+        public DotLiquidCoreTemplateDictionaryDrop Cookies { get; set; } = new DotLiquidCoreTemplateDictionaryDrop();
         public string User { get; set; }
         public string Path { get; set; }
         public string Type { get; set; }
@@ -173,15 +174,15 @@ namespace Feri.MS.Http.Template
                         _request.Type = request.RequestType;
                         _request.Size = request.RequestSize;
 
-                        DotLiquidCoreTemplateDictionaryDrop _parameters = new DotLiquidCoreTemplateDictionaryDrop();
                         foreach (string key in request.Parameters.Keys)
                             _request.Parameters.Data.Add(key, request.Parameters[key]);
 
-                        DotLiquidCoreTemplateDictionaryDrop _headers = new DotLiquidCoreTemplateDictionaryDrop();
                         foreach (string key in request.Headers.Keys)
                             _request.Headers.Data.Add(key, request.Headers[key]);
 
-                        DotLiquidCoreTemplateDictionaryDrop _sessionData = new DotLiquidCoreTemplateDictionaryDrop();
+                        foreach (string key in request.Cookies.Keys)
+                            _request.Cookies.Data.Add(key, request.Cookies[key].Value);
+
                         Session _session = request.GetSession(false);
                         if (_session != null)
                             foreach (string _name in _session.Keys)
@@ -189,6 +190,7 @@ namespace Feri.MS.Http.Template
                                 if (request.GetSession()[_name] is string)
                                     _request.Session.Data.Add(_name, _session[_name] as string);
                             }
+
                         //...
                         vars.Add("Request", _request);
 

@@ -197,14 +197,12 @@ namespace Feri.MS.Http
         /// </summary>
         /// <param name="name"></param>
         /// <returns></returns>
-        public HttpCookie GetCookie(string name)
+        public Dictionary<string, HttpCookie> Cookies
         {
-            if (_cookies.ContainsKey(name))
+            get
             {
-                return _cookies[name];
+                return _cookies;
             }
-            else
-                return null;
         }
 
         /// <summary>
