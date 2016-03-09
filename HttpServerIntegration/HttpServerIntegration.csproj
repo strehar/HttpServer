@@ -111,7 +111,6 @@
     <None Include="project.json" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Http\Template\DotLiquidCoreTemplate.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <EmbeddedResource Include="Properties\HttpServerIntegration.rd.xml" />
   </ItemGroup>
@@ -124,6 +123,9 @@
       <Project>{483fa17c-a355-4828-bbe2-ce44cffa241a}</Project>
       <Name>HttpServer</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Http\Template\" />
   </ItemGroup>
   <PropertyGroup Condition=" '$(VisualStudioVersion)' == '' or '$(VisualStudioVersion)' &lt; '14.0' ">
     <VisualStudioVersion>14.0</VisualStudioVersion>

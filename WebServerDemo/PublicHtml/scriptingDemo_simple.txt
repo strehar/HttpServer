@@ -1,0 +1,19 @@
+﻿<!DOCTYPE html>
+
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="utf-8" />
+    <title>Automatic simple scripting test</title>
+</head>
+<body>
+    <h1>Automatic simple scripting test</h1>
+    <hr />
+    <p>
+        Status of LED diodes and TIMER is:
+        <ul>
+            <li>Timer is @#TIMER</li>
+            <li>Timer controlled LED is @#LED</li>
+        </ul>
+    <p><a href="index.html">Back</a></p>
+</body>
+</html>

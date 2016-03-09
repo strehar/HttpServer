@@ -18,6 +18,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Feri.MS.Http
 {
@@ -60,6 +61,21 @@ namespace Feri.MS.Http
             set
             {
                 _expires = value;
+            }
+        }
+
+        public List<string> Keys
+        {
+            get
+            {
+                return _values.Keys.ToList();
+            }
+        }
+        public List<object> Values
+        {
+            get
+            {
+                return _values.Values.ToList();
             }
         }
 

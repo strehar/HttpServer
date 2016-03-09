@@ -19,8 +19,6 @@
 using Feri.MS.Http;
 using Feri.MS.Http.Json;
 using Feri.MS.Http.Template;
-using Feri.MS.Integration.Http.Template;
-using Feri.MS.Parts.I2C.PortExpander;
 using System.Net;
 using WebResources;
 

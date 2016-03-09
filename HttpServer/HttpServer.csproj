@@ -136,6 +136,7 @@
     <Compile Include="Http\IPFilter.cs" />
     <Compile Include="Http\Session.cs" />
     <Compile Include="Http\SessionManager.cs" />
+    <Compile Include="Http\Template\DotLiquidCoreTemplate.cs" />
     <Compile Include="Http\Template\ITemplate.cs" />
     <Compile Include="Http\Template\TemplateAction.cs" />
     <Compile Include="Http\TimeProvider.cs" />
@@ -171,6 +172,12 @@
   <ItemGroup>
     <EmbeddedResource Include="SystemHtml\templateFolderListing.html" />
     <Content Include="ToDo.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\DotLiquidCore\DotLiquidCore.csproj">
+      <Project>{7e2d1c5b-59af-4f2a-a0aa-0fca38c1740c}</Project>
+      <Name>DotLiquidCore</Name>
+    </ProjectReference>
   </ItemGroup>
   <PropertyGroup Condition=" '$(VisualStudioVersion)' == '' or '$(VisualStudioVersion)' &lt; '14.0' ">
     <VisualStudioVersion>14.0</VisualStudioVersion>

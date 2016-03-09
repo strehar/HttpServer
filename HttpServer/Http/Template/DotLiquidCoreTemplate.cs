@@ -16,9 +16,6 @@
 */
 #endregion
 
-using System;
-using Feri.MS.Http.Template;
-using Feri.MS.Http;
 using System.Collections.Generic;
 using System.Net;
 using System.Linq;
@@ -27,8 +24,43 @@ using DotLiquidCore;
 /// <summary>
 /// Optional helper classes for HttpServer, that integrate it with DotLiquidCore library.
 /// </summary>
-namespace Feri.MS.Integration.Http.Template
+namespace Feri.MS.Http.Template
 {
+    public class DotLiquidCoreTemplateRequest : Drop
+    {
+        public DotLiquidCoreTemplateDictionaryDrop Headers { get; set; } = new DotLiquidCoreTemplateDictionaryDrop();
+        public DotLiquidCoreTemplateDictionaryDrop Parameters { get; set; } = new DotLiquidCoreTemplateDictionaryDrop();
+        public DotLiquidCoreTemplateDictionaryDrop Session { get; set; } = new DotLiquidCoreTemplateDictionaryDrop();
+        public string User { get; set; }
+        public string Path { get; set; }
+        public string Type { get; set; }
+        public int Size { get; set; }
+
+    }
+    public class DotLiquidCoreTemplateDictionaryDrop : Drop {
+        public Dictionary<string, string> Data { get; set; } = new Dictionary<string, string>();
+        public List<string> Keys
+        {
+            get
+            {
+                return Data.Keys.ToList();
+            }
+        }
+        public List<string> Values
+        {
+            get
+            {
+                return Data.Values.ToList();
+            }
+        }
+        public int Count
+        {
+            get
+            {
+                return Data.Count;
+            }
+        }
+    }
     public class DotLiquidCoreTemplate : ITemplate
     {
         Dictionary<string, TemplateAction> _actions = new Dictionary<string, TemplateAction>();
@@ -122,6 +154,62 @@ namespace Feri.MS.Integration.Http.Template
         {
             //TODO: stuff for passing to templating engine!
             Hash vars = new Hash();
+            foreach (KeyValuePair<string, TemplateAction> pair in _actions)
+            {
+                if (!string.IsNullOrEmpty(pair.Value.Data))
+                {
+                    vars.Add(pair.Key, pair.Value);
+                }
+                else if (pair.Value.ObjectData != null)
+                {
+                    if (pair.Value.ObjectData is HttpRequest)
+                    {
+                        // map parameters, user, cookies, session to the template, so it can read and set appropriate data.
+                        HttpRequest request = pair.Value.ObjectData as HttpRequest;
+                        DotLiquidCoreTemplateRequest _request = new DotLiquidCoreTemplateRequest();
+
+                        _request.User = request.AuthenticatedUser;
+                        _request.Path = request.RequestPath;
+                        _request.Type = request.RequestType;
+                        _request.Size = request.RequestSize;
+
+                        DotLiquidCoreTemplateDictionaryDrop _parameters = new DotLiquidCoreTemplateDictionaryDrop();
+                        foreach (string key in request.Parameters.Keys)
+                            _request.Parameters.Data.Add(key, request.Parameters[key]);
+
+                        DotLiquidCoreTemplateDictionaryDrop _headers = new DotLiquidCoreTemplateDictionaryDrop();
+                        foreach (string key in request.Headers.Keys)
+                            _request.Headers.Data.Add(key, request.Headers[key]);
+
+                        DotLiquidCoreTemplateDictionaryDrop _sessionData = new DotLiquidCoreTemplateDictionaryDrop();
+                        Session _session = request.GetSession(false);
+                        if (_session != null)
+                            foreach (string _name in _session.Keys)
+                            {
+                                if (request.GetSession()[_name] is string)
+                                    _request.Session.Data.Add(_name, _session[_name] as string);
+                            }
+                        //...
+                        vars.Add("Request", _request);
+
+                    }
+                    else if (pair.Value.ObjectData is HttpResponse)
+                    {
+                        HttpResponse response = pair.Value.ObjectData as HttpResponse;
+                        // map the cookie to function, so the script can set cookies.
+                    }
+                    else
+                    {
+                        // We just pass the object to template. if it's not valid, it will get ignored by template.
+                        vars.Add(pair.Key, pair.Value.ObjectData);
+                    }
+
+                }
+                else
+                {
+                    // Empty action, ae are going to ignore it.
+                }
+            }
             //vars["username"] = "user";
             return template.Render(vars);
         }

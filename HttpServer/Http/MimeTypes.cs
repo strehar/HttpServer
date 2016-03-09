@@ -43,6 +43,7 @@ namespace Feri.MS.Http
             _mimeTypes.Add(".js", "application/javascript");
             _mimeTypes.Add(".css", "text/css");
             _mimeTypes.Add(".ico", "image/x-icon");
+            _mimeTypes.Add(".txt", "text/plain");
         }
 
         /// <summary>
