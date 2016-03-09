@@ -16,6 +16,8 @@ using DotLiquidCore.Util;
 using DotLiquidCore.NamingConventions;
 using System.Reflection;
 
+#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
+#pragma warning disable CS1573 // Parameter has no matching param tag in the XML comment (but other parameters do)
 namespace DotLiquidCore
 {
 	/// <summary>

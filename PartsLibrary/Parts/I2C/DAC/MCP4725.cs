@@ -30,7 +30,6 @@ namespace Feri.MS.Parts.I2C.DAC
         public int Address { get; set; } = 0;
 
         private I2cDevice _i2cController;
-        private bool _isDisposed = false;
 
         private DeviceInformationCollection FindI2cControllers()
         {
@@ -71,12 +70,6 @@ namespace Feri.MS.Parts.I2C.DAC
         #region IDisposable Support
         public void Dispose()
         {
-            if (_i2cController != null)
-            {
-                _i2cController.Dispose();
-                _i2cController = null;
-            }
-            _isDisposed = true;
             //GC.SuppressFinalize(this);
         }
         #endregion

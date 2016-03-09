@@ -16,8 +16,12 @@
 */
 #endregion
 
+#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
 namespace Feri.MS.Http.Template
 {
+    /// <summary>
+    /// Class contains data that tamplating engine must process
+    /// </summary>
     public class TemplateAction
     {
         public string Pattern { get; set; }

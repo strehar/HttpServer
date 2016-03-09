@@ -8,6 +8,7 @@ internal static readonly ResourceManager ResourceManager = new ResourceManager(t
 
 using DotLiquidCore.Util;
 
+#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
 namespace DotLiquidCore
 {
     public static class Liquid

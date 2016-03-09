@@ -64,6 +64,9 @@ namespace Feri.MS.Http
             }
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
         public List<string> Keys
         {
             get
@@ -71,6 +74,10 @@ namespace Feri.MS.Http
                 return _values.Keys.ToList();
             }
         }
+
+        /// <summary>
+        /// 
+        /// </summary>
         public List<object> Values
         {
             get

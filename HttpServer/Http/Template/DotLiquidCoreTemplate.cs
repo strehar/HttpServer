@@ -21,11 +21,12 @@ using System.Net;
 using System.Linq;
 using DotLiquidCore;
 
-/// <summary>
-/// Optional helper classes for HttpServer, that integrate it with DotLiquidCore library.
-/// </summary>
 namespace Feri.MS.Http.Template
 {
+    /// <summary>
+    /// Class to encapsulate HttpRequest for passing to the Templating engine
+    /// </summary>
+#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
     public class DotLiquidCoreTemplateRequest : Drop
     {
         public DotLiquidCoreTemplateDictionaryDrop Headers { get; set; } = new DotLiquidCoreTemplateDictionaryDrop();
@@ -36,8 +37,13 @@ namespace Feri.MS.Http.Template
         public string Path { get; set; }
         public string Type { get; set; }
         public int Size { get; set; }
-
     }
+#pragma warning restore CS1591 // Missing XML comment for publicly visible type or member
+
+    /// <summary>
+    /// Key/Value pairs that we pass to the templating engine. I't part of DotLiquidCoreTemplateRequest
+    /// </summary>
+#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
     public class DotLiquidCoreTemplateDictionaryDrop : Drop {
         public Dictionary<string, string> Data { get; set; } = new Dictionary<string, string>();
         public List<string> Keys
@@ -62,12 +68,20 @@ namespace Feri.MS.Http.Template
             }
         }
     }
+#pragma warning restore CS1591 // Missing XML comment for publicly visible type or member
+
+    /// <summary>
+    /// 
+    /// </summary>
     public class DotLiquidCoreTemplate : ITemplate
     {
         Dictionary<string, TemplateAction> _actions = new Dictionary<string, TemplateAction>();
         DotLiquidCore.Template template;
         bool _safeMode = true;
 
+        /// <summary>
+        /// 
+        /// </summary>
         public Dictionary<string, TemplateAction> Actions
         {
             get
@@ -80,6 +94,9 @@ namespace Feri.MS.Http.Template
             }
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
         public bool SafeMode
         {
             get
@@ -93,6 +110,9 @@ namespace Feri.MS.Http.Template
             }
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
         public List<string> Keys
         {
             get
@@ -101,6 +121,9 @@ namespace Feri.MS.Http.Template
             }
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
         public List<TemplateAction> Values
         {
             get
@@ -109,6 +132,11 @@ namespace Feri.MS.Http.Template
             }
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="name"></param>
+        /// <returns></returns>
         public TemplateAction this[string name]
         {
             get
@@ -146,11 +174,19 @@ namespace Feri.MS.Http.Template
             }
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns></returns>
         public byte[] GetByte()
         {
             return System.Text.Encoding.UTF8.GetBytes(GetString());
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns></returns>
         public string GetString()
         {
             //TODO: stuff for passing to templating engine!
@@ -212,25 +248,40 @@ namespace Feri.MS.Http.Template
                     // Empty action, ae are going to ignore it.
                 }
             }
-            //vars["username"] = "user";
             return template.Render(vars);
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="data"></param>
         public void LoadString(byte[] data)
         {
             template = DotLiquidCore.Template.Parse(System.Text.Encoding.UTF8.GetString(data));
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="data"></param>
         public void LoadString(string data)
         {
             template = DotLiquidCore.Template.Parse(data);
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
         public void ProcessAction()
         {
             return;
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="name"></param>
+        /// <returns></returns>
         public bool ContainsAction(string name)
         {
             lock (_actions)
@@ -243,6 +294,11 @@ namespace Feri.MS.Http.Template
             }
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="name"></param>
+        /// <returns></returns>
         public bool RemoveAction(string name)
         {
             if (_actions.ContainsKey(name))

@@ -3,6 +3,7 @@ using System.IO;
 using System.Text.RegularExpressions;
 using DotLiquidCore.Exceptions;
 
+#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
 namespace DotLiquidCore.Tags
 {
 	public class Case : DotLiquidCore.Block

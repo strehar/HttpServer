@@ -5,10 +5,11 @@ cleaned up unnecessary using.
 */
 #endregion
 
+#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
 namespace DotLiquidCore.Exceptions
 {
     public class ArgumentException : LiquidException
-	{
+    {
 		public ArgumentException(string message, params string[] args)
 			: base(string.Format(message, args))
 		{
@@ -19,3 +20,4 @@ namespace DotLiquidCore.Exceptions
 		}
 	}
 }
+#pragma warning restore CS1591 // Missing XML comment for publicly visible type or member

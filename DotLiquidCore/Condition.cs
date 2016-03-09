@@ -2,25 +2,25 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using DotLiquidCore.Exceptions;
 using DotLiquidCore.Util;
 
+#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
 namespace DotLiquidCore
 {
-	/// <summary>
-	/// Container for liquid nodes which conveniently wraps decision making logic
-	/// 
-	/// Example:
-	/// 
-	/// c = Condition.new('1', '==', '1')
-	/// c.evaluate #=> true
-	/// </summary>
-	public class Condition
+    /// <summary>
+    /// Container for liquid nodes which conveniently wraps decision making logic
+    /// 
+    /// Example:
+    /// 
+    /// c = Condition.new('1', '==', '1')
+    /// c.evaluate #=> true
+    /// </summary>
+    public class Condition
 	{
-		#region Condition operator delegates
+        #region Condition operator delegates
 
-		public static readonly Dictionary<string, ConditionOperatorDelegate> Operators = new Dictionary<string, ConditionOperatorDelegate>(Template.NamingConvention.StringComparer)
-		{
+        public static readonly Dictionary<string, ConditionOperatorDelegate> Operators = new Dictionary<string, ConditionOperatorDelegate>(Template.NamingConvention.StringComparer)
+        {
 			{ "==", (left, right) => EqualVariables(left, right) },
 			{ "!=", (left, right) => !EqualVariables(left, right) },
 			{ "<>", (left, right) => !EqualVariables(left, right) },
@@ -158,3 +158,4 @@ namespace DotLiquidCore
 
 	public delegate bool ConditionOperatorDelegate(object left, object right);
 }
+#pragma warning restore CS1591 // Missing XML comment for publicly visible type or member

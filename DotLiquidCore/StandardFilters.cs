@@ -20,6 +20,7 @@ using System.Web;
 #endif
 using DotLiquidCore.Util;
 
+#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
 namespace DotLiquidCore
 {
 	public static class StandardFilters

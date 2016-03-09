@@ -2,6 +2,7 @@
 using System.Text.RegularExpressions;
 using DotLiquidCore.Exceptions;
 
+#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
 namespace DotLiquidCore.FileSystems
 {
     /// <summary>

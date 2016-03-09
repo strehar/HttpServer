@@ -6,6 +6,11 @@ using DotLiquidCore.Exceptions;
 using DotLiquidCore.FileSystems;
 using DotLiquidCore.Util;
 
+#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
+#pragma warning disable CS1572 // XML comment has a param tag, but there is no parameter by that name
+#pragma warning disable CS1573 // Parameter has no matching param tag in the XML comment (but other parameters do)
+#pragma warning disable CS1584 // XML comment has syntactically incorrect cref attribute
+#pragma warning disable CS1658 // Warning is overriding an error
 namespace DotLiquidCore.Tags
 {
 	/// <summary>

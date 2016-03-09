@@ -371,6 +371,9 @@ namespace Feri.MS.Parts.I2C.Thermometer
         }
 
         #region IDisposable Support
+        /// <summary>
+        /// 
+        /// </summary>
         public void Dispose()
         {
             // Clean up. If there is reference to the key, and there are more then one, reduce reference. if it's the last one, remove from the static directory of parts.

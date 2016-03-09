@@ -3,14 +3,14 @@ using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
 using System.Text.RegularExpressions;
 using DotLiquidCore.Exceptions;
 using DotLiquidCore.Util;
 
+#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
 namespace DotLiquidCore.Tags.Html
 {
-	public class TableRow : DotLiquidCore.Block
+    public class TableRow : DotLiquidCore.Block
 	{
 		private static readonly Regex Syntax = R.B(R.Q(@"(\w+)\s+in\s+({0}+)"), Liquid.VariableSignature);
 

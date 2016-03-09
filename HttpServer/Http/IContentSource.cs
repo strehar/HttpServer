@@ -18,8 +18,12 @@
 
 using System.Collections.Generic;
 
+#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
 namespace Feri.MS.Http
 {
+    /// <summary>
+    /// Interface for implementing source of content (from where data is read, cn be anything local or remote)
+    /// </summary>
     public interface IContentSource
     {
         bool EnableDebug { get; set; }

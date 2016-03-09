@@ -2,10 +2,11 @@ using System.Collections.Generic;
 using System.IO;
 using DotLiquidCore.Exceptions;
 
+#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
 namespace DotLiquidCore
 {
-	public class Document : Block
-	{
+    public class Document : Block
+    {
 		/// <summary>
 		/// We don't need markup to open this block
 		/// </summary>
@@ -47,3 +48,4 @@ namespace DotLiquidCore
 	    }
 	}
 }
+#pragma warning restore CS1591 // Missing XML comment for publicly visible type or member

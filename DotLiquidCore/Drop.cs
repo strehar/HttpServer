@@ -12,6 +12,7 @@ using System.Linq;
 using System.Reflection;
 using DotLiquidCore.NamingConventions;
 
+#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
 namespace DotLiquidCore
 {
     /// <summary>
@@ -90,16 +91,16 @@ namespace DotLiquidCore
 			}
 		}
 
-		public Context Context { get; set; }
+        public Context Context { get; set; }
 
-		/// <summary>
-		/// Just an alias for InvokeDrop - but the presence of the indexer
-		/// means that Liquid will access Drop objects as though they are
-		/// dictionaries or hashes.
-		/// </summary>
-		/// <param name="method"></param>
-		/// <returns></returns>
-		public object this[object method]
+        /// <summary>
+        /// Just an alias for InvokeDrop - but the presence of the indexer
+        /// means that Liquid will access Drop objects as though they are
+        /// dictionaries or hashes.
+        /// </summary>
+        /// <param name="method"></param>
+        /// <returns></returns>
+        public object this[object method]
 		{
 			get { return InvokeDrop(method); }
 		}
@@ -220,3 +221,4 @@ namespace DotLiquidCore
 		}
     }
 }
+#pragma warning restore CS1591 // Missing XML comment for publicly visible type or member

@@ -16,8 +16,12 @@
 */
 #endregion
 
+#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
 namespace Feri.MS.Http
 {
+    /// <summary>
+    /// Helper class for storing information about file that represents HTTP Error.
+    /// </summary>
     public class HttpError
     {
         public string ErrorCode { get; set; }  // 404

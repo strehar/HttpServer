@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.IO;
 
+#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
 namespace DotLiquidCore
 {
 	public class Tag : IRenderable

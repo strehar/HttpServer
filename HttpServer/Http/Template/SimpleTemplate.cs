@@ -16,12 +16,9 @@
 */
 #endregion
 
-using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using System.Net;
-using System.Text.RegularExpressions;
 
 namespace Feri.MS.Http.Template
 {
@@ -59,6 +56,9 @@ namespace Feri.MS.Http.Template
             }
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
         public List<string> Keys
         {
             get
@@ -67,6 +67,9 @@ namespace Feri.MS.Http.Template
             }
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
         public List<TemplateAction> Values
         {
             get
@@ -218,6 +221,11 @@ namespace Feri.MS.Http.Template
                     }
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="name"></param>
+        /// <returns></returns>
         public bool ContainsAction(string name)
         {
             lock (_niz) lock (_originalniNiz) lock (_actions)
@@ -230,6 +238,11 @@ namespace Feri.MS.Http.Template
                     }
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="name"></param>
+        /// <returns></returns>
         public bool RemoveAction(string name)
         {
             if (_actions.ContainsKey(name))

@@ -18,8 +18,12 @@
 
 using System.Collections.Generic;
 
+#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
 namespace Feri.MS.Http.Template
 {
+    /// <summary>
+    /// Interface that any templating engine must implement. Without it template cannot be registred for listening to extensions.
+    /// </summary>
     public interface ITemplate
     {
         TemplateAction this[string name] { get; set; }

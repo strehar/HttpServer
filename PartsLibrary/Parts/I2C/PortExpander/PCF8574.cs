@@ -25,8 +25,12 @@ using System.Threading.Tasks;
 using Windows.Devices.Enumeration;
 using Windows.Devices.I2c;
 
+#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
 namespace Feri.MS.Parts.I2C.PortExpander
 {
+    /// <summary>
+    /// 
+    /// </summary>
     public enum PortNumber
     {
         PORT_ONE,
@@ -45,6 +49,9 @@ namespace Feri.MS.Parts.I2C.PortExpander
         internal int Address { get; set; }
         internal int ReferenceCount { get; set; } = 0;
     }
+    /// <summary>
+    /// 
+    /// </summary>
     public class PCF8574 : IDisposable
     {
         private static Dictionary<int, PCF8574Helper> _initialized { get; set; } = new Dictionary<int, PCF8574Helper>();
@@ -60,6 +67,12 @@ namespace Feri.MS.Parts.I2C.PortExpander
             Address = address;
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="address"></param>
+        /// <param name="i2cControllerDeviceId"></param>
+        /// <returns></returns>
         public static PCF8574 Create(int address = 0x38, string i2cControllerDeviceId = null)
         {
             // Adresa je PCF8574: 0100+A2+A1+A0  PCF8574A: 0111+A2+A1+A0
@@ -107,6 +120,10 @@ namespace Feri.MS.Parts.I2C.PortExpander
             return controllerDeviceIds;
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="data"></param>
         public void Write(byte data)
         {
             if (_isDisposed)
@@ -120,6 +137,10 @@ namespace Feri.MS.Parts.I2C.PortExpander
             _initialized[Address].I2cController.Write(writeBuffer);
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns></returns>
         public byte Read()
         {
             if (_isDisposed)
@@ -135,6 +156,11 @@ namespace Feri.MS.Parts.I2C.PortExpander
             return readBuffer[0];
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="pin"></param>
+        /// <param name="data"></param>
         public void WritePin(PortNumber pin, bool data)
         {
             if (_isDisposed)
@@ -162,6 +188,11 @@ namespace Feri.MS.Parts.I2C.PortExpander
 
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="pin"></param>
+        /// <returns></returns>
         public bool ReadPin(PortNumber pin)
         {
             if (_isDisposed)

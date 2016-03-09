@@ -52,11 +52,17 @@ namespace Feri.MS.Http
             }
         }
 
+        /// <summary>
+        /// Not needed, implemented for interface
+        /// </summary>
         public void Start()
         {
 
         }
 
+        /// <summary>
+        /// Not needed, implemented for interface
+        /// </summary>
         public void Stop()
         {
 

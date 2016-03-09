@@ -195,8 +195,6 @@ namespace Feri.MS.Http
         /// <summary>
         /// 
         /// </summary>
-        /// <param name="name"></param>
-        /// <returns></returns>
         public Dictionary<string, HttpCookie> Cookies
         {
             get

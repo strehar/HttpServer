@@ -1,25 +1,25 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
 using System.Text.RegularExpressions;
 using DotLiquidCore.Exceptions;
 
+#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
 namespace DotLiquidCore.Tags
 {
-	/// <summary>
-	/// Capture stores the result of a block into a variable without rendering it inplace.
-	/// 
-	/// {% capture heading %}
-	/// Monkeys!
-	/// {% endcapture %}
-	/// ...
-	/// <h1>{{ heading }}</h1>
-	/// 
-	/// Capture is useful for saving content for use later in your template, such as
-	/// in a sidebar or footer.
-	/// </summary>
-	public class Capture : DotLiquidCore.Block
+    /// <summary>
+    /// Capture stores the result of a block into a variable without rendering it inplace.
+    /// 
+    /// {% capture heading %}
+    /// Monkeys!
+    /// {% endcapture %}
+    /// ...
+    /// <h1>{{ heading }}</h1>
+    /// 
+    /// Capture is useful for saving content for use later in your template, such as
+    /// in a sidebar or footer.
+    /// </summary>
+    public class Capture : DotLiquidCore.Block
 	{
 		private static readonly Regex Syntax = new Regex(@"(\w+)");
 

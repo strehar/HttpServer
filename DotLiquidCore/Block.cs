@@ -7,16 +7,17 @@ using DotLiquidCore.Util;
 
 namespace DotLiquidCore
 {
-	public class Block : Tag
-	{
+#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
+    public class Block : Tag
+    {
 		private static readonly Regex IsTag = new Regex(string.Format(@"^{0}", Liquid.TagStart));
 		private static readonly Regex IsVariable = new Regex(string.Format(@"^{0}", Liquid.VariableStart));
 		private static readonly Regex ContentOfVariable = new Regex(string.Format(@"^{0}(.*){1}$", Liquid.VariableStart, Liquid.VariableEnd));
 
 		internal static readonly Regex FullToken = new Regex(string.Format(@"^{0}\s*(\w+)\s*(.*)?{1}$", Liquid.TagStart, Liquid.TagEnd));
 
-		protected override void Parse(List<string> tokens)
-		{
+        protected override void Parse(List<string> tokens)
+        {
 			NodeList = NodeList ?? new List<object>();
 			NodeList.Clear();
 
@@ -145,4 +146,5 @@ namespace DotLiquidCore
 			});
 		}
 	}
+#pragma warning restore CS1591 // Missing XML comment for publicly visible type or member
 }

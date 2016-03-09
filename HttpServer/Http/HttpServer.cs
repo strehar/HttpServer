@@ -52,9 +52,6 @@ namespace Feri.MS.Http
         Dictionary<string, serverPath> _serverPath = new Dictionary<string, serverPath>();               // Registrirane http poti (url) in metode ki se kličejo za obdelavo te zahteve
         Dictionary<string, HttpTimer> _timerji = new Dictionary<string, HttpTimer>();                            // registrirani timerji, ki so na sistemu in se prožijo
 
-
-
-        //private const int BufferSize = 8192;            // Prevzeta največja velikost predpomnilnika za obdelavo HTTP zahtev.
         StreamSocketListener listener;                    // Socket listener za prejem zahtev, je flobalna spremenljivka zato da .net runtime ve da mora obdržati proces živ v kombinaciji z taskInstance.GetDeferral(); v glavnem razredu
 
         MimeTypes _mimeType = new MimeTypes();            // Interna instanca razreda MimeTypes za pretvorbo tipov. Rabi se v processroot, sicer pa služi kot helper class za uporabnika
@@ -67,9 +64,6 @@ namespace Feri.MS.Http
         public delegate void serverPath(HttpRequest request, HttpResponse response);    // delegat za obdelavo http zahtev
 
         private IHttpRootManager _rootManager;
-
-        string _serverRootFolder = "SystemHtml";          // prevzeta "mapa" od koder se prikazujejo datoteke, če je bila zahtevana pot, ki je ne obdeluje nobena finkcija
-        string _serverRootFile = "serverDefault.html";    // Preveta datoteka za prikaz
 
         private bool _debug = false;                      // Ali se naj izpisujejo debug informacije iz metod (precej spama)
         private bool _authenticationRequired = false;     // Ali server zahteva avtentikacijo za dostop do HTTP vmesnika. prevzeto je ne.
