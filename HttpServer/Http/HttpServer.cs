@@ -217,7 +217,7 @@ namespace Feri.MS.Http
                 if (_rootManager == null)
                 {
                     _rootManager = new DefaultHttpRootManager();
-                    _rootManager.AddSource("EmbeddedContent", new EmbeddedContent(this.GetType()));
+                    _rootManager.AddSource(new EmbeddedContent(this.GetType()));
                     _rootManager.Start(this);
                 }
                 return _rootManager;

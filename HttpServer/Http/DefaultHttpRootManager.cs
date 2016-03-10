@@ -28,7 +28,7 @@ using Windows.Networking.Sockets;
 
 namespace Feri.MS.Http
 {
-    internal class ExtensionListener
+    internal class ExtensionTemplate
     {
         internal string Extension { get; set; }
         internal ITemplate Template { get; set; }
@@ -40,12 +40,10 @@ namespace Feri.MS.Http
 
         HttpServer _server;
 
-        Dictionary<string, IContentSource> _providers = new Dictionary<string, IContentSource>();
-        Dictionary<string, ExtensionListener> _extensionListeners = new Dictionary<string, ExtensionListener>();
+        Dictionary<string, IContentSource> _sources = new Dictionary<string, IContentSource>();
+        Dictionary<string, ExtensionTemplate> _extensionTemplates = new Dictionary<string, ExtensionTemplate>();
         Dictionary<string, HttpError> _errorMessages = new Dictionary<string, HttpError>();
-        Dictionary<string, object> _listenerActions = new Dictionary<string, object>();
-
-        Dictionary<string, ExtensionListener> _activeListenersCache = new Dictionary<string, ExtensionListener>();
+        Dictionary<string, ExtensionTemplate> _activeTemplatesCache = new Dictionary<string, ExtensionTemplate>();
 
         public DefaultHttpRootManager()
         {
@@ -80,13 +78,15 @@ namespace Feri.MS.Http
         /// <param name="name"></param>
         /// <param name="provider"></param>
         /// <returns></returns>
-        public bool AddSource(string name, IContentSource provider)
+        public bool AddSource(IContentSource provider, string name = null)
         {
             // registriramo embededcontent, filesystemcontent, ...
-            if (!_providers.ContainsKey(name))
+            if (string.IsNullOrEmpty(name))
+                name = provider.SourceName;
+            if (!_sources.ContainsKey(name))
             {
-                _providers.Add(name, provider);
-                _providers[name].Start();
+                _sources.Add(name, provider);
+                _sources[name].Start();
                 return true;
             }
             return false;
@@ -100,10 +100,10 @@ namespace Feri.MS.Http
         public bool RemoveSource(string name)
         {
             // registriramo embededcontent, filesystemcontent, ...
-            if (_providers.ContainsKey(name))
+            if (_sources.ContainsKey(name))
             {
-                _providers[name].Stop();
-                _providers.Remove(name);
+                _sources[name].Stop();
+                _sources.Remove(name);
                 return true;
             }
             return false;
@@ -117,45 +117,72 @@ namespace Feri.MS.Http
         public IContentSource GetSource(string name)
         {
             // registriramo embededcontent, filesystemcontent, ...
-            if (_providers.ContainsKey(name))
+            if (_sources.ContainsKey(name))
             {
-                return _providers[name];
+                return _sources[name];
             }
             return null;
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns></returns>
+        public Dictionary<string, IContentSource> GetAllSources()
+        {
+            return _sources;
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public void ReloadSourceFileList(string name = null)
+        {
+            if (name == null)
+            {
+                foreach (KeyValuePair<string, IContentSource> pair in _sources)
+                {
+                    pair.Value.ReloadFileList();
+                }
+            }
+            else
+            {
+                GetSource(name).ReloadFileList();
+            }
         }
         #endregion
 
         #region Extension listeners management
-        public bool AddExtensionListener(string extension, ITemplate template)
+        public bool AddExtension(string extension, ITemplate template)
         {
             // recimo listener za DotLiquid templating engine na .chtml
-            if (!_extensionListeners.ContainsKey(extension))
+            if (!_extensionTemplates.ContainsKey(extension))
             {
-                _extensionListeners.Add(extension, new ExtensionListener() { Extension = extension, Template = template });
+                _extensionTemplates.Add(extension, new ExtensionTemplate() { Extension = extension, Template = template });
                 return true;
             }
             return false;
         }
 
-        public bool RemoveExtensionListener(string extension)
+        public bool RemoveExtension(string extension)
         {
             // recimo listener za DotLiquid templating engine na .chtml
             // Todo: kill all listeners in cache!
-            if (_extensionListeners.ContainsKey(extension))
+            if (_extensionTemplates.ContainsKey(extension))
             {
-                _extensionListeners.Remove(extension);
+                _extensionTemplates.Remove(extension);
                 return true;
             }
             return false;
         }
 
-        public ITemplate GetExtensionListener(string extension)
+        public ITemplate GetExtension(string extension)
         {
             // recimo listener za DotLiquid templating engine na .chtml
             // Todo: don't allow if alive listeners in cache?
-            if (_extensionListeners.ContainsKey(extension))
+            if (_extensionTemplates.ContainsKey(extension))
             {
-                return _extensionListeners[extension].Template;
+                return _extensionTemplates[extension].Template;
             }
             return null;
         }
@@ -169,20 +196,20 @@ namespace Feri.MS.Http
             else
                 return false;
 
-            ITemplate listener = GetExtensionListener(_extension);
+            ITemplate listener = GetExtension(_extension);
             if (listener == null)
                 return false;
 
             return true;
         }
 
-        private ITemplate AddListenerToCache(string path, string extension)
+        private ITemplate CacheAddExtension(string path, string extension)
         {
-            lock (_activeListenersCache)
+            lock (_activeTemplatesCache)
             {
-                if (!_activeListenersCache.ContainsKey(path))
+                if (!_activeTemplatesCache.ContainsKey(path))
                 {
-                    ITemplate _tmpTemplate = GetExtensionListener(extension);
+                    ITemplate _tmpTemplate = GetExtension(extension);
                     Type _tmpType = _tmpTemplate.GetType();
                     IEnumerable<PropertyInfo> properties = _tmpType.GetTypeInfo().DeclaredProperties;
 
@@ -204,32 +231,32 @@ namespace Feri.MS.Http
                     }
 
                     _clone.LoadString(ReadToByte(path));
-                    _activeListenersCache.Add(path, new ExtensionListener() { Extension = extension, Template = _clone });
+                    _activeTemplatesCache.Add(path, new ExtensionTemplate() { Extension = extension, Template = _clone });
                     return _clone;
                 }
                 return null;
             }
         }
 
-        private bool RemoveListenerFromCache(string path)
+        private bool CacheRemoveExtension(string path)
         {
-            lock (_activeListenersCache)
+            lock (_activeTemplatesCache)
             {
-                if (_activeListenersCache.ContainsKey(path))
+                if (_activeTemplatesCache.ContainsKey(path))
                 {
-                    _activeListenersCache.Remove(path);
+                    _activeTemplatesCache.Remove(path);
                     return true;
                 }
                 return false;
             }
         }
 
-        private void ClearListenersFromCache(string extension)
+        private void CacheClearExtension(string extension)
         {
-            lock (_activeListenersCache)
+            lock (_activeTemplatesCache)
             {
                 List<string> _toRemove = new List<string>();
-                foreach (KeyValuePair<string, ExtensionListener> pair in _activeListenersCache)
+                foreach (KeyValuePair<string, ExtensionTemplate> pair in _activeTemplatesCache)
                 {
                     if (pair.Value.Extension.Equals(extension))
                     {
@@ -240,31 +267,31 @@ namespace Feri.MS.Http
                 {
                     foreach (string _path in _toRemove)
                     {
-                        if (_activeListenersCache.ContainsKey(_path))
-                            _activeListenersCache.Remove(_path);
+                        if (_activeTemplatesCache.ContainsKey(_path))
+                            _activeTemplatesCache.Remove(_path);
                     }
                 }
             }
         }
 
-        private ITemplate GetListenerFromCache(string path)
+        private ITemplate CacheGetTemplate(string path)
         {
-            lock (_activeListenersCache)
+            lock (_activeTemplatesCache)
             {
-                if (_activeListenersCache.ContainsKey(path))
+                if (_activeTemplatesCache.ContainsKey(path))
                 {
-                    return _activeListenersCache[path].Template;
+                    return _activeTemplatesCache[path].Template;
                 }
                 return null;
             }
         }
 
-        private List<ITemplate> GetListenersFromCache(string extension)
+        private List<ITemplate> CacheGetExtensions(string extension)
         {
-            lock (_activeListenersCache)
+            lock (_activeTemplatesCache)
             {
                 List<ITemplate> _toReturn = new List<ITemplate>();
-                foreach (KeyValuePair<string, ExtensionListener> pair in _activeListenersCache)
+                foreach (KeyValuePair<string, ExtensionTemplate> pair in _activeTemplatesCache)
                 {
                     if (pair.Value.Extension.Equals(extension))
                     {
@@ -312,7 +339,7 @@ namespace Feri.MS.Http
             string _path = null;
             bool _found = false;
 
-            foreach (IContentSource provider in _providers.Values)
+            foreach (IContentSource provider in _sources.Values)
             {
                 if (provider.Containes(url) && (!_found))
                 {
@@ -328,7 +355,7 @@ namespace Feri.MS.Http
             byte[] _dataArray = null;
             IContentSource _foundSource = null;
 
-            foreach (IContentSource provider in _providers.Values)
+            foreach (IContentSource provider in _sources.Values)
             {
                 if (provider.Containes(path.ToLower()))
                 {
@@ -354,7 +381,7 @@ namespace Feri.MS.Http
         public List<string> GetNames()
         {
             List<string> _vsePoti = new List<string>();
-            foreach (IContentSource provider in _providers.Values)
+            foreach (IContentSource provider in _sources.Values)
             {
                 foreach (string _pot in provider.GetNames())
                 {
@@ -461,12 +488,12 @@ namespace Feri.MS.Http
         }
         #endregion
 
-        #region Extension listener data
-        public bool AddExtensionListenerData(string extension, string actionName, TemplateAction data)
+        #region Extension Template data
+        public bool AddExtensionTemplateData(string extension, string actionName, TemplateAction data)
         {
             // Add object to main object and all cache objects
             bool status = true;
-            ITemplate listener = GetExtensionListener(extension);
+            ITemplate listener = GetExtension(extension);
             if (!listener.ContainsAction(actionName))
             {
                 listener[actionName] = data;
@@ -475,7 +502,7 @@ namespace Feri.MS.Http
             {
                 status = false;
             }
-            foreach (ITemplate _listener in GetListenersFromCache(extension))
+            foreach (ITemplate _listener in CacheGetExtensions(extension))
             {
                 if (!_listener.ContainsAction(actionName))
                 {
@@ -489,11 +516,11 @@ namespace Feri.MS.Http
             return status;
         }
 
-        public bool RemoveExtensionListenerData(string extension, string actionName)
+        public bool RemoveExtensionTemplateData(string extension, string actionName)
         {
             // remove object from main class and all cache objects
             bool status = true;
-            ITemplate listener = GetExtensionListener(extension);
+            ITemplate listener = GetExtension(extension);
             if (listener.ContainsAction(actionName))
             {
                 listener.RemoveAction(actionName);
@@ -502,7 +529,7 @@ namespace Feri.MS.Http
             {
                 status = false;
             }
-            foreach (ITemplate _listener in GetListenersFromCache(extension))
+            foreach (ITemplate _listener in CacheGetExtensions(extension))
             {
                 if (_listener.ContainsAction(actionName))
                 {
@@ -516,9 +543,9 @@ namespace Feri.MS.Http
             return status;
         }
 
-        public TemplateAction GetExtensionListenerData(string extension, string actionName)
+        public TemplateAction GetExtensionTemplateData(string extension, string actionName)
         {
-            ITemplate listener = GetExtensionListener(extension);
+            ITemplate listener = GetExtension(extension);
             if (listener.ContainsAction(actionName))
             {
                 return listener[actionName];
@@ -529,11 +556,11 @@ namespace Feri.MS.Http
             }
         }
 
-        public bool UpdateExtensionListenerData(string extension, string actionName, TemplateAction data)
+        public bool UpdateExtensionTemplateData(string extension, string actionName, TemplateAction data)
         {
             // Update main class and allcache objects
             bool status = true;
-            ITemplate listener = GetExtensionListener(extension);
+            ITemplate listener = GetExtension(extension);
             if (listener.ContainsAction(actionName))
             {
                 listener[actionName] = data;
@@ -542,7 +569,7 @@ namespace Feri.MS.Http
             {
                 status = false;
             }
-            foreach (ITemplate _listener in GetListenersFromCache(extension))
+            foreach (ITemplate _listener in CacheGetExtensions(extension))
             {
                 if (_listener.ContainsAction(actionName))
                 {
@@ -563,9 +590,9 @@ namespace Feri.MS.Http
             // Send HTTP request and response to listener. all other must be handled by the user mannualy.
             ITemplate listener;
 
-            if (GetExtensionListener(extension) != null)
+            if (GetExtension(extension) != null)
             {
-                if ((listener = GetListenerFromCache(request.RequestPath.ToLower())) == null)
+                if ((listener = CacheGetTemplate(request.RequestPath.ToLower())) == null)
                 {
                     // Check if file exists in 1st place...
                     if (!Containes(request.RequestPath))
@@ -573,7 +600,7 @@ namespace Feri.MS.Http
                         ReturnErrorMessage(request, response, "404");
                         return;
                     }
-                    listener = AddListenerToCache(request.RequestPath.ToLower(), extension);
+                    listener = CacheAddExtension(request.RequestPath.ToLower(), extension);
                 }
                 if (listener == null)
                     throw new InvalidOperationException("Unable to get listener for extension " + extension);

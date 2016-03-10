@@ -16,8 +16,8 @@
 */
 #endregion
 
-using DotLiquidCore;
 using Feri.MS.Http;
+using Feri.MS.Http.Template;
 using System;
 
 namespace WebServerDemo
@@ -28,7 +28,7 @@ namespace WebServerDemo
     class DotLiquidDemo : IDisposable
     {
         HttpServer _ws;
-        Template liquidtemplate;
+        DotLiquidCoreTemplate liquidtemplate = new DotLiquidCoreTemplate();
 
         string _privatePath = "AppHtml";
 
@@ -36,18 +36,18 @@ namespace WebServerDemo
         {
             _ws = server;
             _ws.AddPath("/dotLiquidTemplate.html", VrniTemplate);
-            Template.RegisterSafeType(typeof(HttpRequest), new[] { "AuthenticatedUser", "RequestPath", "RequestType" });
-            liquidtemplate = Template.Parse(_ws.HttpRootManager.ReadToString(_privatePath + "/dotLiquidTemplateDemo.html"));
+            liquidtemplate.LoadString(_ws.HttpRootManager.ReadToString(_privatePath + "/dotLiquidTemplateDemo.html"));
         }
 
         private void VrniTemplate(HttpRequest request, HttpResponse response)
         {
-            try {
-                Hash vars = Hash.FromAnonymousObject(request);
-                string result = liquidtemplate.Render(vars);
+            try
+            {
+                liquidtemplate["Request"] = new TemplateAction() { ObjectData=request };
 
-                response.Write(System.Text.Encoding.UTF8.GetBytes(result.ToCharArray()), _ws.GetMimeType.GetMimeFromFile(_privatePath + "/templateDemo.html"));
-            } catch (Exception e)
+                response.Write(liquidtemplate.GetByte(), _ws.GetMimeType.GetMimeFromFile(_privatePath + "/templateDemo.html"));
+            }
+            catch (Exception e)
             {
                 response.Write(e);
             }

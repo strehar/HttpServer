@@ -50,9 +50,9 @@ namespace WebServerDemo
             _ws.SetDebug = false;
 
             // Register assemblies for content and refresh file list
-            ((EmbeddedContent)_ws.HttpRootManager.GetSource("EmbeddedContent")).RegisterAssembly(this.GetType());
-            ((EmbeddedContent)_ws.HttpRootManager.GetSource("EmbeddedContent")).RegisterAssembly(_wh.GetType());
-            ((EmbeddedContent)_ws.HttpRootManager.GetSource("EmbeddedContent")).RefreshFileList();
+            ((EmbeddedContent)_ws.HttpRootManager.GetSource("EmbeddedContent")).RegisterAssembly(this.GetType()); // Register it in specific source
+            EmbeddedContent.RegisterAssembly(_ws, _wh.GetType());  // Register it in all sources of matching type (helper method specific to this source)
+            _ws.HttpRootManager.ReloadSourceFileList();   // Reload all file lists in all sources
 
             // IP Filtering
             _ws.IPFilterEnabled = false;  // Change this to true to enable IP filter!
@@ -69,8 +69,8 @@ namespace WebServerDemo
             // Server root path for static content
             _ws.HttpRootManager.SetRootPath("PublicHtml");
             _ws.HttpRootManager.SetIndex(new string[] { "/index.html" });
-            _ws.HttpRootManager.AddExtensionListener("chtml", new DotLiquidCoreTemplate());
-            _ws.HttpRootManager.AddExtensionListener("shtml", new SimpleTemplate());
+            _ws.HttpRootManager.AddExtension("chtml", new DotLiquidCoreTemplate());
+            _ws.HttpRootManager.AddExtension("shtml", new SimpleTemplate());
 
             // Initialize demos
             _cookieDemo.Start(_ws);

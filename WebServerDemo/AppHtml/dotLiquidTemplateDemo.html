@@ -3,14 +3,43 @@
 <html lang="en" xmlns="http://www.w3.org/1999/xhtml">
 <head>
     <meta charset="utf-8" />
-    <title>dotLiquid DEMO page</title>
+    <title>Automatic scripting test</title>
 </head>
 <body>
-    <h1>DotLiquid DEMO page.</h1>
+    <h1>Automatic scripting test</h1>
     <hr />
-    <p>Username = {{ AuthenticatedUser }}</p>
-    <p>Request type = {{RequestType}}</p>
-    <p>Path = {{RequestPath}}</p>
+    <p>Hello, {{ Request.User }}</p>
+    <p>Request was {{ Request.Type }}, to path {{ Request.Path}}, size: {{ Request.Size }}</p>
+    <p>Display all request headers:</p>
+    <p>
+        {% for key in Request.Headers.Keys -%}
+        Header name: {{ key }}, Header value: {{ Request.Headers.Data[key] }}<br />
+        {% endfor -%}
+    </p>
+    <p>Display all parameters:</p>
+    <p>
+        {% for key in Request.Parameters.Keys -%}
+        Parameter name: {{ key }}, Parameter value: {{ Request.Parameters.Data[key] }}<br />
+        {% endfor -%}
+    </p>
+    <p>Display all cookies:</p>
+    <p>
+        {% for key in Request.Cookies.Keys -%}
+        Cookie name: {{ key }}, Cookie value: {{ Request.Cookies.Data[key] }}<br />
+        {% endfor -%}
+    </p>
+    <p>Display all session parameters:</p>
+    <p>
+        {% for key in Request.Session.Keys -%}
+        Session parameter name: {{ key }}, Session parameter value: {{ Request.Session.Data[key] }}<br />
+        {% endfor -%}
+    </p>
+    <p>Count to 10 from script:</p>
+    <p>
+        {% for i in (1..10) -%}
+        {{ i }}<br />
+        {% endfor -%}
+    </p>
     <p><a href="index.html">Back</a></p>
 </body>
 </html>

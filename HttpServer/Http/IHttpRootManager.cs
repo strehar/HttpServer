@@ -31,13 +31,15 @@ namespace Feri.MS.Http
         void SetIndex(string[] index);
         void SetRootPath(string folder);
 
-        bool AddExtensionListener(string extension, ITemplate template);
-        bool RemoveExtensionListener(string name);
-        ITemplate GetExtensionListener(string name);
+        bool AddExtension(string extension, ITemplate template);
+        bool RemoveExtension(string name);
+        ITemplate GetExtension(string name);
 
-        bool AddSource(string name, IContentSource provider);
+        bool AddSource(IContentSource provider, string name = null);
         bool RemoveSource(string name);
         IContentSource GetSource(string name);
+        Dictionary<string, IContentSource> GetAllSources();
+        void ReloadSourceFileList(string name = null);
 
         bool AddErrorMessage(HttpError error);
         void ReturnErrorMessage(StreamSocket socket, string ErrorID);
@@ -52,10 +54,10 @@ namespace Feri.MS.Http
         bool Containes(string pot);
         List<string> GetNames();
 
-        bool AddExtensionListenerData(string extension, string actionName, TemplateAction data);
-        bool RemoveExtensionListenerData(string extension, string actionName);
-        bool UpdateExtensionListenerData(string extension, string actionName, TemplateAction data);
-        TemplateAction GetExtensionListenerData(string extension, string actionName);
+        bool AddExtensionTemplateData(string extension, string actionName, TemplateAction data);
+        bool RemoveExtensionTemplateData(string extension, string actionName);
+        bool UpdateExtensionTemplateData(string extension, string actionName, TemplateAction data);
+        TemplateAction GetExtensionTemplateData(string extension, string actionName);
 
         void Start(HttpServer server);
         void Stop();

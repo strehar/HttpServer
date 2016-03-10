@@ -27,9 +27,12 @@ namespace Feri.MS.Http
     public interface IContentSource
     {
         bool EnableDebug { get; set; }
+        string SourceName { get; }
 
         void Start();
         void Stop();
+
+        void ReloadFileList();
         string UrlToPath(string url);
         byte[] ReadToByte(string pot);
         string ReadToString(string path);

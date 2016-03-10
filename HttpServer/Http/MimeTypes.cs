@@ -18,7 +18,9 @@
 
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 
 namespace Feri.MS.Http
 {
@@ -28,7 +30,7 @@ namespace Feri.MS.Http
     public class MimeTypes
     {
         internal bool _debug = false;
-        private Hashtable _mimeTypes = new Hashtable();
+        private Dictionary<string, string> _mimeTypes = new Dictionary<string, string>();
 
         /// <summary>
         /// Known mime types
@@ -55,7 +57,7 @@ namespace Feri.MS.Http
         {
             get
             {
-                if (_mimeTypes.Contains(koncnica.ToLower()))
+                if (_mimeTypes.ContainsKey(koncnica.ToLower()))
                 {
                     return _mimeTypes[koncnica.ToLower()].ToString();
                 } else
@@ -69,7 +71,7 @@ namespace Feri.MS.Http
         /// <summary>
         /// 
         /// </summary>
-        public Hashtable Types
+        public Dictionary<string, string> Types
         {
             get
             {
@@ -78,6 +80,28 @@ namespace Feri.MS.Http
             set
             {
                 _mimeTypes = value;
+            }
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public List<string> Keys
+        {
+            get
+            {
+                return _mimeTypes.Keys.ToList();
+            }
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public List<string> Values
+        {
+            get
+            {
+                return _mimeTypes.Values.ToList();
             }
         }
 

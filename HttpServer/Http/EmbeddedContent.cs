@@ -29,11 +29,12 @@ namespace Feri.MS.Http
     /// </summary>
     public class EmbeddedContent : IContentSource
     {
+        private string name = "EmbeddedContent";
+
         Dictionary<string, AssemblyData> _RegistriraniAssebly = new Dictionary<string, AssemblyData>();  // Asembliji (dll-i) po katerih iščemo embeded vire, ki jih lahko prikažemo uporabnikom. Rabi se za reflection
         Dictionary<string, string> _NajdeneDatoteke = new Dictionary<string, string>();                  // Datoteke, ki so vključene v asemblije kot embededresource in jih lahko pošljemo uporabniku ter v katerem assembliju so.
 
         Assembly _sistemskiAssembly = null;               // asembly od tega dll-a, da se lahko sklicujemo na sistemske vire
-
         private bool _debug = false;                      // Ali se naj izpisujejo debug informacije iz metod (precej spama)
 
         /// <summary>
@@ -53,6 +54,19 @@ namespace Feri.MS.Http
         }
 
         /// <summary>
+        /// 
+        /// </summary>
+        public string SourceName
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(name))
+                    return GetType().GetTypeInfo().Name;
+                else
+                    return name;
+            }
+        }
+        /// <summary>
         /// Not needed, implemented for interface
         /// </summary>
         public void Start()
@@ -68,6 +82,28 @@ namespace Feri.MS.Http
 
         }
 
+        /// <summary>
+        /// Static helper method to register assembly within current assembly provider.
+        /// </summary>
+        /// <param name="server">reference to HttpServer in witch we wish to register new assembly</param>
+        /// <param name="assembly">assembly we are registring with provider.</param>
+        /// <returns></returns>
+        public static bool RegisterAssembly(HttpServer server, Type assembly)
+        {
+            bool register = false;
+            if ((server != null)&&(assembly!=null))
+            {
+                foreach (KeyValuePair<string, IContentSource> pair in server.HttpRootManager.GetAllSources())
+                {
+                    if (pair.Value is EmbeddedContent) {
+                        ((EmbeddedContent)pair.Value).RegisterAssembly(assembly);
+                        register = true;
+                    }
+                }
+            }
+            return register;
+        }
+
         internal EmbeddedContent(Type val)
         {
             _sistemskiAssembly = val.GetTypeInfo().Assembly;
@@ -76,7 +112,7 @@ namespace Feri.MS.Http
                 _RegistriraniAssebly.Add(_sistemskiAssembly.GetName().Name, new AssemblyData() { Name = _sistemskiAssembly.GetName().Name, Assembly = _sistemskiAssembly });
             else
                 _RegistriraniAssebly.Add(_sistemskiAssembly.GetName().Name, new AssemblyData() { Name = _sistemskiAssembly.GetName().Name, Assembly = _sistemskiAssembly, NameSpace = _namespace });
-            RefreshFileList();
+            ReloadFileList();
         }
 
         #region Assembly processing
@@ -148,7 +184,7 @@ namespace Feri.MS.Http
         /// <summary>
         /// Method scans for new embedded content that can be read form registered assemblies. It must be called whenever new assemblies are added or removed.
         /// </summary>
-        public void RefreshFileList()
+        public void ReloadFileList()
         {
 
             _NajdeneDatoteke.Clear();
