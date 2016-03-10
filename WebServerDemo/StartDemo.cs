@@ -60,7 +60,7 @@ namespace WebServerDemo
             _ws.IPFilter.AddWhiteList(new IPAddress(new byte[] { 192, 168, 2, 64 }), 32);
 
             // User Authentication
-            //_ws.AuthenticationRequired = true;
+            _ws.AuthenticationRequired = true;
             _ws.UserManager.AddUser("user", "password");
 
             // JSON
