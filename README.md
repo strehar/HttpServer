@@ -1,8 +1,8 @@
 ##HTTP Server library for windows IoT devices and Universal apps.
 
-There is limited HTTP server support functionality in Windows IoT, but some projects could really benifit from embedded HTTP Server. It specially makes it easy to display data to the clients or controll the IoT device itself.
+There is limited HTTP server support functionality in Windows IoT, but some projects could really benifit from HTTP Server embedded in the app. It specially makes it easy to display data to the clients or control the IoT device itself.
 
-This HTTP server library can be embedded in any project and is simple to use. User does not need to know anything about HTTP protocol or what is going on behind the scenes. It is all done with few calls to functions of HttpServer class.
+This HTTP server library can be embedded in any project. User does not need to know anything about HTTP protocol or what is going on behind the scenes. It is all done with few calls to functions of HttpServer class.
 
 For example, to embed simple HelloWorld style web page in your application, you would add following code:
 
@@ -17,7 +17,11 @@ server.start();
 
 This will start http server on port 8000 and display "It works!" page to user.
 
-To add some functionality to the server, you would have to write and register listener function. When registring listener, you need to provide URL that will tell the server when to trigger event.
+To add some functionality to the server, you could either write "Liquid" or "Simple" templates or write and register listener function. 
+Templates are served by default listener and are passed request, response and and other objets that are provided to them.
+All scripts are cached to avoid slow recompilations.
+
+When registring listener, you need to provide URL that will tell the server when to trigger event.
 
 Code could look something like this:
 
