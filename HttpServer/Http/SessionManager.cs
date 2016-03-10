@@ -95,7 +95,7 @@ namespace Feri.MS.Http
                 List<string> _toRemove = new List<string>();
                 foreach (KeyValuePair<string, Session> par in _sessions)
                 {
-                    DateTime _timeNow = DateTime.Now;
+                    DateTime _timeNow = TimeProvider.GetTime();
                     if (par.Value.Expires.CompareTo(_timeNow) < 0)
                     {
                         // Timeout je potekel.

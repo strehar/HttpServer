@@ -313,7 +313,7 @@ namespace Feri.MS.Http
                 // We do ip filtering before anyting, if access is denied, there is no point in processing data.
                 if (_IPFilter.ProcessIPFilter(socket))
                 {
-                    _log.WriteLine("Blocked IP:" + DateTime.Now.ToString("R") + ": " + socket.Information.RemoteAddress.ToString() + ": " + socket.Information.LocalAddress.ToString());
+                    _log.WriteLine("Blocked IP:" + TimeProvider.GetTime().ToString("R") + ": " + socket.Information.RemoteAddress.ToString() + ": " + socket.Information.LocalAddress.ToString());
                     HttpRootManager.ReturnErrorMessage(socket, "403");
                     return;
                 }
@@ -334,13 +334,13 @@ namespace Feri.MS.Http
             if (!_streamInit)
             {
                 // log error
-                _log.WriteLine("Error:" + DateTime.Now.ToString("R") + ": " + _hrequest.HttpConnection.RemoteHost + ": " + _hrequest.HttpConnection.LocalHost + ": " + _hrequest.RequestString().TrimEnd());
+                _log.WriteLine("Error:" + TimeProvider.GetTime().ToString("R") + ": " + _hrequest.HttpConnection.RemoteHost + ": " + _hrequest.HttpConnection.LocalHost + ": " + _hrequest.RequestString().TrimEnd());
                 ProcessHttpError(_hrequest, _hresponse);
                 return;
             }
 
             //Log request
-            _log.WriteLine(DateTime.Now.ToString("R") + ": " + _hrequest.HttpConnection.RemoteHost + ": " + _hrequest.HttpConnection.LocalHost + ": " + _hrequest.RequestString().TrimEnd());
+            _log.WriteLine(TimeProvider.GetTime().ToString("R") + ": " + _hrequest.HttpConnection.RemoteHost + ": " + _hrequest.HttpConnection.LocalHost + ": " + _hrequest.RequestString().TrimEnd());
 
             // Authentication management
             if (_authenticationRequired)

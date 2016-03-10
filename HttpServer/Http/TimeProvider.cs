@@ -38,15 +38,15 @@ namespace Feri.MS.Http
         /// 
         /// </summary>
         /// <returns></returns>
-        public DateTime GetTime()
+        public static DateTime GetTime()
         {
-            return DateTime.Now;
+            return DateTime.UtcNow;
         }
 
         /// <summary>
         /// 
         /// </summary>
-        public void RegisterTimeSource()
+        public static void RegisterTimeSource()
         {
 
         }

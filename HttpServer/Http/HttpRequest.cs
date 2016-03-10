@@ -236,7 +236,7 @@ namespace Feri.MS.Http
         /// <returns>Session or null</returns>
         public Session GetSession(bool create = true)
         {
-            DateTime _tmpTime = (DateTime.Now).AddHours(_sessionLifetime);
+            DateTime _tmpTime = TimeProvider.GetTime().AddHours(_sessionLifetime);
             Session _tmpSession;
             if (create)
             {

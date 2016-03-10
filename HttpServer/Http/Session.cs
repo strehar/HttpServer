@@ -92,7 +92,7 @@ namespace Feri.MS.Http
         /// <param name="sessionId"></param>
         public Session(string sessionId)
         {
-            _expires = DateTime.Now;
+            _expires = TimeProvider.GetTime();
             _expires.AddHours(2);
             _sessionID = sessionId;
         }

@@ -173,9 +173,13 @@ namespace Feri.MS.Http
                 _header.Append(_eol);
             }
             _header.Append("Status: " + statusCode + _eol);
-            _header.Append("Server: MihaServer/0.1 (Windows RT)" + _eol);
+            _header.Append("Server: HttpServer/0.2.0.0 (Windows RT)" + _eol);
             _header.Append("X-Powered-By: WindowsRT" + _eol);
             _header.Append("TSV: !" + _eol);
+            _header.Append("Date: " + TimeProvider.GetTime().ToString("R")+_eol);
+            //_header.Append("Cache-Control: no-cache, no-store, must-revalidate" + _eol);
+            //_header.Append("Pragma: no-cache" + _eol);
+            //_header.Append("Expires: 0" + _eol);
             _header.Append("Content-Type: " + contentType + _eol);
             _header.Append("Content-Length: " + data.Length + _eol);
             _header.Append("Connection: close" + _eol + _eol);

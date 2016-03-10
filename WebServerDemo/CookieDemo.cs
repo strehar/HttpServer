@@ -55,7 +55,7 @@ namespace WebServerDemo
             {
                 if (request.Parameters.ContainsKey("niz"))
                 {
-                    response.AddCookie(new HttpCookie("DemoCookie", request.Parameters["niz"], (DateTime.Now).AddHours(1)));
+                    response.AddCookie(new HttpCookie("DemoCookie", request.Parameters["niz"], TimeProvider.GetTime().AddHours(1)));
 
                     response.Write(_ws.HttpRootManager.ReadToByte(_privatePath + "/cookieSetPotrdi.html"), _ws.GetMimeType.GetMimeFromFile("/cookieSetPotrdi.html"));
                 }
