@@ -18,7 +18,7 @@ server.start();
 This will start http server on port 8000 and display "It works!" page to user.
 
 To add some functionality to the server, you could either write "Liquid" or "Simple" templates or write and register listener function. There are two templating engines, "DotLiquidCore", that is [DotLiquid](http://dotliquidmarkup.org/) templating engine ported to Windows Universal Apps (.net core) and "SimpleTemplate" that is just string substitutions within document.
-Templates are served by default listener and are passed request, response and and other objets that are provided to them.
+Templates can served by default listener and are passed request, response and and other objets that are provided to them or can be used within custom listener to format output from it.
 All scripts are cached to avoid slow recompilations.
 
 When registring listener, you need to provide URL that will tell the server when to trigger event.
