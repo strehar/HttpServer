@@ -173,7 +173,7 @@ namespace Feri.MS.Http
                 _header.Append(_eol);
             }
             _header.Append("Status: " + statusCode + _eol);
-            _header.Append("Server: HttpServer/0.2.0.0 (Windows RT)" + _eol);
+            _header.Append("Server: HttpServer/0.2.0.0 (Windows IoT)" + _eol);
             _header.Append("X-Powered-By: .NET Core" + _eol);
             _header.Append("TSV: !" + _eol);
             _header.Append("Date: " + TimeProvider.GetTime().ToString("R")+_eol);
