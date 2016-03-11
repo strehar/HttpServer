@@ -23,7 +23,7 @@ namespace Feri.MS.Http
     /// <summary>
     /// Class is used to log information from library. Currently it only writes debug from information recived.
     /// </summary>
-    public class HttpLog
+    public class HttpLog : IHttpLog
     {
         /// <summary>
         /// 
@@ -38,7 +38,7 @@ namespace Feri.MS.Http
         /// <summary>
         /// 
         /// </summary>
-        public bool _debug = false;
+        public bool SetDebug { get; set; } = false;
 
         /// <summary>
         /// 
@@ -62,7 +62,7 @@ namespace Feri.MS.Http
         /// <param name="niz"></param>
         public void WriteLine(string niz)
         {
-            Debug.WriteLineIf(_debug, niz);
+            Debug.WriteLineIf(SetDebug, niz);
             return;
         }
     }

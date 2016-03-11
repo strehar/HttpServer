@@ -24,7 +24,6 @@ using System.Threading.Tasks;
 using Windows.Networking.Sockets;
 using Feri.MS.Http.Timer;
 using System.Linq;
-using System.Text.RegularExpressions;
 
 namespace Feri.MS.Http
 {
@@ -43,7 +42,8 @@ namespace Feri.MS.Http
     /// 
     /// Normal usage:
     /// HttpServer server = new HttpServer();
-    /// server.SetRootPath("PublicHtml", "/index.html");
+    /// server.HttpRootManager.SetRootPath("PublicHtml");
+    /// server.HttpRootManager.SetIndex(new string[] { "/index.html" });
     /// server.AddPath("/some_path.html", some_listener_method);
     /// server.start();
     /// </summary>
@@ -72,7 +72,7 @@ namespace Feri.MS.Http
 
         private SessionManager _sessionManager = new SessionManager(); // Skrbi za seje. Poda se kot referenca novim HttRequest in HttpResponse objektom.
 
-        private HttpLog _log = new HttpLog();             // Glavni razred, ki skrbi za logiranje dogodkov preko http protokola.
+        private IHttpLog _log;             // Glavni razred, ki skrbi za logiranje dogodkov preko http protokola.
 
         private IUserManager _userManager;                // Razred skrbi za dodajanje, odvzemanje in avtentikacijo uporabnikov
         private IIPFilter _IPFilter;                      // Razred skrbi za preverjanje IP naslovov uporabnikov in vzdrženje White in Black list
@@ -234,6 +234,22 @@ namespace Feri.MS.Http
             }
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        public IHttpLog Log
+        {
+            get
+            {
+                return _log;
+            }
+
+            set
+            {
+                _log = value;
+            }
+        }
+
         #endregion
 
         #region IDisposable Support
@@ -255,8 +271,9 @@ namespace Feri.MS.Http
         /// </summary>
         public HttpServer()
         {
+            _log = new HttpLog();
             _log.Open();
-            _log._debug = true;
+            _log.SetDebug = true;
             _mimeType._debug = _debug;
             _sessionManager._debug = _debug;
             //_log._debug = _debug;
