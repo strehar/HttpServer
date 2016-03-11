@@ -273,10 +273,9 @@ namespace Feri.MS.Http
         {
             _log = new HttpLog();
             _log.Open();
-            _log.SetDebug = true;
             _mimeType._debug = _debug;
             _sessionManager._debug = _debug;
-            //_log._debug = _debug;
+            _log.SetDebug = _debug;
             AddTimer("SessionCleanupTimer", 60000, _sessionManager.SessionCleanupTimer);
         }
 

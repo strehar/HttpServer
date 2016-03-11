@@ -43,6 +43,7 @@ namespace WebServerDemo
         TimerDemo _timerDemo = new TimerDemo();
         TemplateDemo _templateDemo = new TemplateDemo();
         DotLiquidDemo _liquidDemo = new DotLiquidDemo();
+        LogDisplayDemo _logDemo = new LogDisplayDemo();
 
         public void Start()
         {
@@ -81,6 +82,7 @@ namespace WebServerDemo
             _timerDemo.Start(_ws, _json, _template);
             _templateDemo.Start(_ws, _template);
             _liquidDemo.Start(_ws);
+            _logDemo.Start(_ws);
 
             // Start server on default port (8000)
             _ws.Start();

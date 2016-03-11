@@ -16,6 +16,8 @@
 */
 #endregion
 
+using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 
 namespace Feri.MS.Http
@@ -25,6 +27,7 @@ namespace Feri.MS.Http
     /// </summary>
     public class HttpLog : IHttpLog
     {
+        private List<string> _log = new List<string>();
         /// <summary>
         /// 
         /// </summary>
@@ -39,6 +42,17 @@ namespace Feri.MS.Http
         /// 
         /// </summary>
         public bool SetDebug { get; set; } = false;
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public List<string> Cached
+        {
+            get
+            {
+                return _log;
+            }
+        }
 
         /// <summary>
         /// 
@@ -63,6 +77,11 @@ namespace Feri.MS.Http
         public void WriteLine(string niz)
         {
             Debug.WriteLineIf(SetDebug, niz);
+            if (_log.Count > 1000)
+            {
+                _log.RemoveAt(0);
+            }
+            _log.Add(niz);
             return;
         }
     }
