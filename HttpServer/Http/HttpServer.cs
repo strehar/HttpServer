@@ -24,6 +24,7 @@ using System.Threading.Tasks;
 using Windows.Networking.Sockets;
 using Feri.MS.Http.Timer;
 using System.Linq;
+using System.Text.RegularExpressions;
 
 namespace Feri.MS.Http
 {
@@ -364,12 +365,17 @@ namespace Feri.MS.Http
 
             // check request type, and if it's supported, call listeners.
             string[] supportedMethods = new string[] { "GET", "POST" };
+            string _tmpKey = null;
 
             if (supportedMethods.Contains(_hrequest.RequestType))
             {
                 if (_serverPath.ContainsKey(_hrequest.RequestPath.ToLower()))
                 {
                     _serverPath[_hrequest.RequestPath.ToLower()](_hrequest, _hresponse);
+                }
+                else if (!string.IsNullOrEmpty(_tmpKey = IsPathRegistredGeneral(_hrequest.RequestPath))) 
+                {
+                    _serverPath[_tmpKey](_hrequest, _hresponse);
                 }
                 else
                 {
@@ -465,6 +471,22 @@ namespace Feri.MS.Http
         #endregion
 
         #region HTTP listeners
+        private string IsPathRegistredGeneral(string path)
+        {
+            string _tmpPath = null;
+            foreach (string _searchPath in _serverPath.Keys)
+            {
+                if (_searchPath.EndsWith("*"))
+                {
+                    _tmpPath = _searchPath.Remove(_searchPath.Length - 1);
+                    if (path.ToLower().StartsWith(_tmpPath)) {
+                        return _searchPath;
+                    }
+                }
+            }
+            return string.Empty;
+        }
+
         /// <summary>
         /// Method registers new event listener for specified part recived in HttpREquest.
         /// For example, if path recived was /HelloWorld it could call registered listener ProcessHelloWorld(HttpRequest, HttpResponse)

@@ -32,7 +32,7 @@ namespace WebServerDemo
         {
             _ws = server;
 
-            _ws.AddPath("/demoRedirect.html", ProcessDemoRedirect);
+            _ws.AddPath("/demoRedirect*", ProcessDemoRedirect);
         }
 
         private void ProcessDemoRedirect(HttpRequest request, HttpResponse response)
