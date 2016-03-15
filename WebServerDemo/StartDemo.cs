@@ -86,7 +86,7 @@ namespace WebServerDemo
             _logDemo.Start(_ws);
 
             // Start server on default port (8000)
-            _ws.Start();
+            //_ws.Start();
 
             // Start server on alternate port 80
             _ws.Start("80");
