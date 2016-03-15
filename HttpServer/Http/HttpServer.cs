@@ -30,6 +30,7 @@ using Feri.MS.Http.Security;
 using Feri.MS.Http.RootManager;
 using Feri.MS.Http.Util;
 using Feri.MS.Http.HttpSession;
+using System.Text;
 
 namespace Feri.MS.Http
 {
@@ -342,87 +343,125 @@ namespace Feri.MS.Http
         /// <param name="socket">StreamSocket with connection from the client.</param>
         private void ProcessRequest(StreamSocket socket)
         {
+            bool __streamInit;
+            HttpRequest __hrequest = null;
+            HttpResponse __hresponse = null;
+            Dictionary<string, string> __headers = new Dictionary<string, string>();
+            string[] __supportedMethods = new string[] { "GET", "POST" };
+            string __tmpKey = null;
+
+            string __status = null;
+            string __message = null;
+            bool __ipFilterError = false;
+            bool __streamInitError = false;
+            bool __authenticationError = false;
+            bool __methodError = false;
+
+
             // Access management
             if (_ipFilterEnabled)
             {
                 // We do ip filtering before anyting, if access is denied, there is no point in processing data.
                 if (_IPFilter.ProcessIPFilter(socket))
                 {
-                    _log.WriteLine("Blocked IP:" + TimeProvider.GetTime().ToString("R") + ": " + socket.Information.RemoteAddress.ToString() + ": " + socket.Information.LocalAddress.ToString());
-                    HttpRootManager.ReturnErrorMessage(socket, "403");
-                    return;
+                    __ipFilterError = true;
                 }
             }
 
-            // Create request and response objects
-            HttpRequest _hrequest = new HttpRequest();
-            _hrequest._debug = _debug;
-
-            bool _streamInit = _hrequest.Init(socket);
-
-            HttpResponse _hresponse = new HttpResponse(_hrequest);
-            _hresponse._debug = _debug;
-
-            _hrequest.SessionManager = _sessionManager;
-
-            // Error management
-            if (!_streamInit)
+            if (!__ipFilterError)
             {
-                // log error
-                _log.WriteLine("Error:" + TimeProvider.GetTime().ToString("R") + ": " + _hrequest.HttpConnection.RemoteHost + ": " + _hrequest.HttpConnection.LocalHost + ": " + _hrequest.RequestString().TrimEnd());
-                ProcessHttpError(_hrequest, _hresponse);
+                // Create request and response objects
+                __hrequest = new HttpRequest();
+                __hrequest._debug = _debug;
+
+                __streamInit = __hrequest.Init(socket);
+
+                __hresponse = new HttpResponse(__hrequest);
+                __hresponse._debug = _debug;
+
+                __hrequest.SessionManager = _sessionManager;
+
+                // Error management
+                if (!__streamInit)
+                {
+                    // log error
+                    __status = ProcessHttpError(__hrequest, __hresponse);
+                    __streamInitError = true;
+                    //return;
+                }
+                else
+                {
+                    // Authentication management
+                    if (_authenticationRequired)
+                    {
+                        string loggedInUser = _userManager.AuthenticateUser(__hrequest);
+                        if (string.IsNullOrEmpty(loggedInUser))    // Authentication failed for some reason, request that user authenticates.
+                        {
+                            // user authentication failed, display authentication request:                    
+                            __headers.Add("WWW-Authenticate", "Basic realm=\"PI2 Web Access\"");
+                            __status = "401";
+                            __authenticationError = true;
+                        }
+                        else
+                        {
+                            // User is logged in, set the username property in HttpRequest object
+                            __hrequest.AuthenticatedUser = loggedInUser;
+                        }
+                    }
+                    if (!__authenticationError)
+                        if (!__supportedMethods.Contains(__hrequest.RequestType))
+                        {
+                            Debug.WriteLineIf(_debug, "Method not allowed (Error 405) in ProcessRequest()");
+                            StringBuilder _tmpMethods = new StringBuilder();
+                            foreach (string tmp in __supportedMethods)
+                            {
+                                _tmpMethods.Append(tmp + ", ");
+                            }
+                            __headers.Add("Allow", _tmpMethods.ToString().TrimEnd(new char[] { ',' }));
+                            __status = "405";
+                            __methodError = true;
+                        }
+                }
+            }
+
+            if (__ipFilterError)
+            {
+                __message = TimeProvider.GetTime().ToString("R") + ": " + socket.Information.RemoteAddress.ToString() + ": " + socket.Information.LocalAddress.ToString() + ": " + socket.Information.LocalPort + ": ";
+                __status = "403";
+                _log.WriteLine(__message + ": " + __status);
+                HttpRootManager.ReturnErrorMessage(socket, __status);
+                return;
+            }
+            __message = TimeProvider.GetTime().ToString("R") + ": " + __hrequest.HttpConnection.RemoteHost + ": " + __hrequest.HttpConnection.LocalHost + ": " + __hrequest.HttpConnection.LocalPort + ": " + __hrequest.RequestString().TrimEnd();
+            if (__streamInitError || __authenticationError || __methodError)
+            {
+                if (!string.IsNullOrEmpty(__status))
+                {
+                    _log.WriteLine(__message + ": " + __status);
+                    HttpRootManager.ReturnErrorMessage(__hrequest, __hresponse, __headers, __status);
+                }
+                // Empty status message, can happen if we got empty request, ignore?
                 return;
             }
 
-            //Log request
-            _log.WriteLine(TimeProvider.GetTime().ToString("R") + ": " + _hrequest.HttpConnection.RemoteHost + ": " + _hrequest.HttpConnection.LocalHost + ": " + _hrequest.RequestString().TrimEnd());
-
-            // Authentication management
-            if (_authenticationRequired)
+            if (_serverPath.ContainsKey(__hrequest.RequestPath.ToLower()))
             {
-                string loggedInUser = _userManager.AuthenticateUser(_hrequest);
-                if (string.IsNullOrEmpty(loggedInUser))    // Authentication failed for some reason, request that user authenticates.
-                {
-                    // user authentication failed, display authentication request:
-                    Dictionary<string, string> _headers = new Dictionary<string, string>();
-                    _headers.Add("WWW-Authenticate", "Basic realm=\"PI2 Web Access\"");
-                    HttpRootManager.ReturnErrorMessage(_hrequest, _hresponse, _headers, "401");
-                }
-                else
-                {
-                    // User is logged in, set the username property in HttpRequest object
-                    _hrequest.AuthenticatedUser = loggedInUser;
-                }
+                _serverPath[__hrequest.RequestPath.ToLower()](__hrequest, __hresponse);
+                __status = "200";
             }
-
-            Debug.WriteLineIf(_debug, "TaskID: " + Task.CurrentId + " Pot: " + _hrequest.RequestPath + " ThreadID: " + System.Environment.CurrentManagedThreadId);
-
-            // check request type, and if it's supported, call listeners.
-            string[] supportedMethods = new string[] { "GET", "POST" };
-            string _tmpKey = null;
-
-            if (supportedMethods.Contains(_hrequest.RequestType))
+            else if (!string.IsNullOrEmpty(__tmpKey = IsPathRegistredGeneral(__hrequest.RequestPath)))
             {
-                if (_serverPath.ContainsKey(_hrequest.RequestPath.ToLower()))
-                {
-                    _serverPath[_hrequest.RequestPath.ToLower()](_hrequest, _hresponse);
-                }
-                else if (!string.IsNullOrEmpty(_tmpKey = IsPathRegistredGeneral(_hrequest.RequestPath))) 
-                {
-                    _serverPath[_tmpKey](_hrequest, _hresponse);
-                }
-                else
-                {
-                    _rootManager.Listen(_hrequest, _hresponse); //ni registrirane poti, kličemo processtoorasync
-                }
+                _serverPath[__tmpKey](__hrequest, __hresponse);
+                __status = "200";
             }
             else
             {
-                Dictionary<string, string> _headers = new Dictionary<string, string>();
-                _headers.Add("Allow", "GET");
-                HttpRootManager.ReturnErrorMessage(_hrequest, _hresponse, _headers, "405");
-                Debug.WriteLineIf(_debug, "Method not allowed (Error 405) in ProcessRequest()");
+                __status = _rootManager.Listen(__hrequest, __hresponse); //ni registrirane poti, kličemo rootmanager, ter preberemo status
             }
+
+            // Write debug and log
+            Debug.WriteLineIf(_debug, "TaskID: " + Task.CurrentId + " Pot: " + __hrequest.RequestPath + " ThreadID: " + System.Environment.CurrentManagedThreadId);
+            _log.WriteLine(__message + ": " + __status);
         }
 
         /// <summary>
@@ -430,7 +469,7 @@ namespace Feri.MS.Http
         /// </summary>
         /// <param name="request">Current request</param>
         /// <param name="response">Current reponse assosiated with request object</param>
-        private void ProcessHttpError(HttpRequest request, HttpResponse response)
+        private string ProcessHttpError(HttpRequest request, HttpResponse response)
         {
             if (request.Headers.ContainsKey("Content-Type"))
             {
@@ -438,8 +477,8 @@ namespace Feri.MS.Http
                 if (!request.Headers["Content-Type"].Equals("application/x-www-form-urlencoded"))
                 {
                     Debug.WriteLineIf(_debug, "Unsupported POST: " + request.Headers["Content-Type"] + ".");
-                    HttpRootManager.ReturnErrorMessage(request, response, "415");
-                    return;
+                    //HttpRootManager.ReturnErrorMessage(request, response, "415");
+                    return "415";
                 }
                 else {
                     // če ni to, potem je napačna velikost....
@@ -447,8 +486,8 @@ namespace Feri.MS.Http
                     int lokacijaPodatkov = Array.IndexOf(requestBody, "\r") + 1;
                     int dataLength = requestBody[lokacijaPodatkov].Length;
                     Debug.WriteLineIf(_debug, "Data size mismatch. Attribute says: " + request.Headers["Content-Length"] + " Data says:" + dataLength + ".");
-                    HttpRootManager.ReturnErrorMessage(request, response, "415");
-                    return;
+                    //HttpRootManager.ReturnErrorMessage(request, response, "415");
+                    return "415";
                 }
             }
 
@@ -456,14 +495,14 @@ namespace Feri.MS.Http
             {
                 // We recived too small request. It happens. If in debug mode write debug line, else ignore
                 Debug.WriteLineIf(_debug, "Stream malformed: " + request.RequestType + ": " + request.RequestString() + ": " + request.RequestSize + ".");
-                return;
+                return string.Empty;
             }
             else
             {
                 // request is not too small, but something went wrong. we don't know what. print server error 500.
-                HttpRootManager.ReturnErrorMessage(request, response, "500");
+                //HttpRootManager.ReturnErrorMessage(request, response, "500");
                 Debug.WriteLineIf(_debug, "Something went wrong. Stream type: " + request.RequestType + ": " + request.RequestString() + ": " + request.RequestSize + ".");
-                return;
+                return "500";
             }
         }
         #endregion
@@ -513,7 +552,8 @@ namespace Feri.MS.Http
                 if (_searchPath.EndsWith("*"))
                 {
                     _tmpPath = _searchPath.Remove(_searchPath.Length - 1);
-                    if (path.ToLower().StartsWith(_tmpPath)) {
+                    if (path.ToLower().StartsWith(_tmpPath))
+                    {
                         return _searchPath;
                     }
                 }

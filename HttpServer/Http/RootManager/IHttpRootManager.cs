@@ -62,6 +62,6 @@ namespace Feri.MS.Http.RootManager
 
         void Start(HttpServer server);
         void Stop();
-        void Listen(HttpRequest request, HttpResponse response);
+        string Listen(HttpRequest request, HttpResponse response);
     }
 }

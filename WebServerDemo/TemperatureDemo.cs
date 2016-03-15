@@ -54,7 +54,8 @@ namespace WebServerDemo
         {
             try
             {
-                byte[] _temp = _termometer.TemperatureRead();
+                //byte[] _temp = _termometer.TemperatureRead();   // Uncomment for sensors
+                byte[] _temp = { 20, 0 };
                 StringBuilder temp = new StringBuilder();
                 if (_temp[0] > 125)  // Termometer gre do 125, če je več, potem pomeni da je negativna temperatura. (Thermometer reads up to 125C, everything above it is negative)
                     temp.Append((_temp[0] - 256).ToString());

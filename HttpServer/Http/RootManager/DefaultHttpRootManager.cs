@@ -586,7 +586,7 @@ namespace Feri.MS.Http.RootManager
         #endregion
 
         #region Listener
-        private void ProcessExtensionListener(HttpRequest request, HttpResponse response, string extension)
+        private string ProcessExtensionListener(HttpRequest request, HttpResponse response, string extension)
         {
             // Send HTTP request and response to listener. all other must be handled by the user mannualy.
             ITemplate listener;
@@ -599,7 +599,7 @@ namespace Feri.MS.Http.RootManager
                     if (!Containes(request.RequestPath))
                     {
                         ReturnErrorMessage(request, response, "404");
-                        return;
+                        return "404";
                     }
                     listener = CacheAddExtension(request.RequestPath.ToLower(), extension);
                 }
@@ -617,7 +617,7 @@ namespace Feri.MS.Http.RootManager
 
                 listener.ProcessAction();
                 response.Write(listener.GetByte(), "text/html");
-                return;
+                return "200";
             }
             else
             {
@@ -631,7 +631,7 @@ namespace Feri.MS.Http.RootManager
         /// </summary>
         /// <param name="request"></param>
         /// <param name="response"></param>
-        public void Listen(HttpRequest request, HttpResponse response)
+        public string Listen(HttpRequest request, HttpResponse response)
         {
             try
             {
@@ -641,8 +641,7 @@ namespace Feri.MS.Http.RootManager
                     string[] _tmp = request.RequestPath.ToLower().Split(new char[] { '.' });
                     if (_tmp.Length > 0)
                     {
-                        ProcessExtensionListener(request, response, _tmp[_tmp.Length - 1]);
-                        return;
+                        return ProcessExtensionListener(request, response, _tmp[_tmp.Length - 1]);
                     }
                     else
                     {
@@ -658,7 +657,7 @@ namespace Feri.MS.Http.RootManager
                         if (Containes(_serverRootFolder + request.RequestPath + file))
                         {
                             response.Write(ReadToByte(_serverRootFolder + request.RequestPath + file), _server.GetMimeType.GetMimeFromFile(request.RequestPath + file));
-                            return;
+                            return "200";
                         }
                     }
                     // Ni index fajla,  izpišemo folder.
@@ -698,12 +697,12 @@ namespace Feri.MS.Http.RootManager
                         _template["content"] = new TemplateAction() { Pattern = "CONTENT", Data = rezultat.ToString() };
                         _template.ProcessAction();
                         response.Write(_template.GetByte(), "text/html");
-                        return;
+                        return "200";
                     }
                     else
                     {
                         ReturnErrorMessage(request, response, "404");
-                        return;
+                        return "404";
                     }
                 }
                 else
@@ -714,12 +713,12 @@ namespace Feri.MS.Http.RootManager
                     if (Containes(_serverRootFolder + request.RequestPath))
                     {
                         response.Write(ReadToByte(_serverRootFolder + request.RequestPath), _server.GetMimeType.GetMimeFromFile(request.RequestPath));
-                        return;
+                        return "200";
                     }
                     else
                     {
                         ReturnErrorMessage(request, response, "404");
-                        return;
+                        return "404";
                     }
                 }
             }
@@ -727,6 +726,7 @@ namespace Feri.MS.Http.RootManager
             {
                 Debug.WriteLine(e);
                 response.Write(e);
+                return "500";
             }
         }
         #endregion
