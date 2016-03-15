@@ -22,7 +22,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 
-namespace Feri.MS.Http
+namespace Feri.MS.Http.Util
 {
     /// <summary>
     /// Helper class that handeles MIME types.

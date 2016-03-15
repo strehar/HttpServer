@@ -17,6 +17,7 @@
 #endregion
 
 using Feri.MS.Http;
+using Feri.MS.Http.ContentSource;
 using Feri.MS.Http.Json;
 using Feri.MS.Http.Template;
 using System.Net;
@@ -86,6 +87,9 @@ namespace WebServerDemo
 
             // Start server on default port (8000)
             _ws.Start();
+
+            // Start server on alternate port 80
+            _ws.Start("80");
         }
     }
 }

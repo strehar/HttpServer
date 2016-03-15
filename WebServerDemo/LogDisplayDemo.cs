@@ -17,6 +17,7 @@
 #endregion
 
 using Feri.MS.Http;
+using Feri.MS.Http.Log;
 using Feri.MS.Http.Template;
 using System;
 using System.Diagnostics;

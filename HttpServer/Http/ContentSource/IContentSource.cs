@@ -16,16 +16,30 @@
 */
 #endregion
 
+using System.Collections.Generic;
+
 #pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
-namespace Feri.MS.Http
+namespace Feri.MS.Http.ContentSource
 {
     /// <summary>
-    /// Helper class for storing information about file that represents HTTP Error.
+    /// Interface for implementing source of content (from where data is read, cn be anything local or remote)
     /// </summary>
-    public class HttpError
+    public interface IContentSource
     {
-        public string ErrorCode { get; set; }  // 404
-        public string ErrorFile { get; set; }  // SystemHtml.404.html
-        public string ErrorStatus { get; set; }  // 404 File not found
+        bool EnableDebug { get; set; }
+        bool IsWritable { get; }
+        string SourceName { get; }
+        List<string> Names { get; }
+
+        void Start();
+        void Stop();
+
+        void ReloadFileList();
+        string UrlToPath(string url);
+        byte[] ReadToByte(string path);
+        string ReadToString(string path);
+        void WriteFromByte(string path, byte[] data);
+        void WriteFromtring(string path, string data);
+        bool Containes(string pot);
     }
 }

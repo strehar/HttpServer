@@ -16,11 +16,12 @@
 */
 #endregion
 
+using Feri.MS.Http.Util;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 
-namespace Feri.MS.Http
+namespace Feri.MS.Http.HttpSession
 {
     /// <summary>
     /// Handeling of Sessions. Supports creating, removal, retrival of the sessions.

@@ -24,6 +24,12 @@ using System.Threading.Tasks;
 using Windows.Networking.Sockets;
 using Feri.MS.Http.Timer;
 using System.Linq;
+using Feri.MS.Http.ContentSource;
+using Feri.MS.Http.Log;
+using Feri.MS.Http.Security;
+using Feri.MS.Http.RootManager;
+using Feri.MS.Http.Util;
+using Feri.MS.Http.HttpSession;
 
 namespace Feri.MS.Http
 {
@@ -53,7 +59,7 @@ namespace Feri.MS.Http
         Dictionary<string, serverPath> _serverPath = new Dictionary<string, serverPath>();               // Registrirane http poti (url) in metode ki se kličejo za obdelavo te zahteve
         Dictionary<string, HttpTimer> _timerji = new Dictionary<string, HttpTimer>();                            // registrirani timerji, ki so na sistemu in se prožijo
 
-        StreamSocketListener listener;                    // Socket listener za prejem zahtev, je flobalna spremenljivka zato da .net runtime ve da mora obdržati proces živ v kombinaciji z taskInstance.GetDeferral(); v glavnem razredu
+        Dictionary<string, StreamSocketListener> listeners = new Dictionary<string, StreamSocketListener>();                    // Socket listener za prejem zahtev, je flobalna spremenljivka zato da .net runtime ve da mora obdržati proces živ v kombinaciji z taskInstance.GetDeferral(); v glavnem razredu
 
         MimeTypes _mimeType = new MimeTypes();            // Interna instanca razreda MimeTypes za pretvorbo tipov. Rabi se v processroot, sicer pa služi kot helper class za uporabnika
 
@@ -259,7 +265,11 @@ namespace Feri.MS.Http
         /// </summary>
         public void Dispose()
         {
-            listener.Dispose();
+            foreach (KeyValuePair<string, StreamSocketListener> pair in listeners)
+            {
+                pair.Value.Dispose();
+            }
+            listeners.Clear();
             _userManager?.Stop();
             _IPFilter?.Stop();
         }
@@ -290,11 +300,19 @@ namespace Feri.MS.Http
             {
                 throw new InvalidDataException("Invalid service name in Start(string)");
             }
-            listener = new StreamSocketListener();
-            listener.ConnectionReceived += (sender, args) => ProcessRequestAsync(args.Socket);
+            if (!listeners.ContainsKey(serviceName))
+            {
+                StreamSocketListener _listener = new StreamSocketListener();
+                _listener.ConnectionReceived += (sender, args) => ProcessRequestAsync(args.Socket);
 #pragma warning disable CS4014
-            listener.BindServiceNameAsync(serviceName);
+                _listener.BindServiceNameAsync(serviceName);
 #pragma warning restore CS4014
+                listeners.Add(serviceName, _listener);
+            }
+            else
+            {
+                throw new ArgumentException("Service " + serviceName + " is allready registred.");
+            }
 
         }
 

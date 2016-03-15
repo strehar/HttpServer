@@ -19,7 +19,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace Feri.MS.Http
+namespace Feri.MS.Http.Security
 {
     /// <summary>
     /// 

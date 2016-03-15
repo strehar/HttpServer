@@ -16,7 +16,7 @@
 */
 #endregion
 
-namespace Feri.MS.Http
+namespace Feri.MS.Http.Security
 {
     /// <summary>
     /// Interface that defines API for user management. If you wish to use your own user management class and not build in one, you need to implement this interface and

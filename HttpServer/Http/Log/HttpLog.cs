@@ -20,7 +20,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 
-namespace Feri.MS.Http
+namespace Feri.MS.Http.Log
 {
     /// <summary>
     /// Class is used to log information from library. Currently it only writes debug from information recived.

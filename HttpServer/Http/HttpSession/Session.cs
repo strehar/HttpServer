@@ -16,11 +16,12 @@
 */
 #endregion
 
+using Feri.MS.Http.Util;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace Feri.MS.Http
+namespace Feri.MS.Http.HttpSession
 {
 
     /// <summary>

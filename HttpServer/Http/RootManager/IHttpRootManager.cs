@@ -16,12 +16,13 @@
 */
 #endregion
 
+using Feri.MS.Http.ContentSource;
 using Feri.MS.Http.Template;
 using System.Collections.Generic;
 using Windows.Networking.Sockets;
 
 #pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
-namespace Feri.MS.Http
+namespace Feri.MS.Http.RootManager
 {
     /// <summary>
     /// Interface for implementing main manager for processing root requests. includes content sources, error messages, reading from sources and template registrations.

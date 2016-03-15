@@ -18,7 +18,7 @@
 
 using System;
 
-namespace Feri.MS.Http
+namespace Feri.MS.Http.Util
 {
     /// <summary>
     /// Class checks if there is RTC prsent and provides time from it. If it is not found, it returns the system time (can be problematic on boards without built in RTC)

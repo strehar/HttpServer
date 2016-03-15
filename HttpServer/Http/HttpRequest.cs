@@ -25,6 +25,8 @@ using Windows.Networking.Sockets;
 using Windows.Storage.Streams;
 using System.Runtime.InteropServices.WindowsRuntime;
 using System.Net;
+using Feri.MS.Http.Util;
+using Feri.MS.Http.HttpSession;
 
 namespace Feri.MS.Http
 {

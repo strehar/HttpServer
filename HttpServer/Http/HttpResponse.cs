@@ -16,6 +16,8 @@
 */
 #endregion
 
+using Feri.MS.Http.HttpSession;
+using Feri.MS.Http.Util;
 using System;
 using System.Collections.Generic;
 using System.IO;

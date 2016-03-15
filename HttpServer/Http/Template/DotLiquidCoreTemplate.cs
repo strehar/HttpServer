@@ -20,6 +20,7 @@ using System.Collections.Generic;
 using System.Net;
 using System.Linq;
 using DotLiquidCore;
+using Feri.MS.Http.HttpSession;
 
 namespace Feri.MS.Http.Template
 {

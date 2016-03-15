@@ -16,17 +16,21 @@
 */
 #endregion
 
-using System.Reflection;
+#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
+using System.Collections.Generic;
 
-namespace Feri.MS.Http
+namespace Feri.MS.Http.Log
 {
-    /// <summary>
-    /// Internal class used to store data about registered assemblies.
-    /// </summary>
-    internal class AssemblyData
+    public interface IHttpLog
     {
-        public string Name { get; set; }
-        public string NameSpace { get; set; }
-        public Assembly  Assembly { get; set; }
+        bool InMemory { get; set; }
+        string Pot { get; set; }
+        bool SetDebug { get; set; }
+        List<string> Cached { get; }
+
+        void Close();
+        void Open();
+        void WriteLine(string niz);
+        
     }
 }

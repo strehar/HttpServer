@@ -16,6 +16,7 @@
 */
 #endregion
 
+using Feri.MS.Http.ContentSource;
 using Feri.MS.Http.Template;
 using System;
 using System.Collections.Generic;
@@ -26,7 +27,7 @@ using System.Reflection;
 using System.Text;
 using Windows.Networking.Sockets;
 
-namespace Feri.MS.Http
+namespace Feri.MS.Http.RootManager
 {
     internal class ExtensionTemplate
     {
@@ -383,7 +384,7 @@ namespace Feri.MS.Http
             List<string> _vsePoti = new List<string>();
             foreach (IContentSource provider in _sources.Values)
             {
-                foreach (string _pot in provider.GetNames())
+                foreach (string _pot in provider.Names)
                 {
                     _vsePoti.Add(_pot);
                 }

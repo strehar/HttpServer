@@ -18,6 +18,7 @@
 
 using Feri.MS.Http;
 using Feri.MS.Http.Template;
+using Feri.MS.Http.Util;
 using System;
 using System.Diagnostics;
 

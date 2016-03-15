@@ -16,21 +16,15 @@
 */
 #endregion
 
-#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
-using System.Collections.Generic;
-
-namespace Feri.MS.Http
+namespace Feri.MS.Http.Security
 {
-    public interface IHttpLog
+    /// <summary>
+    /// This is data class for IPFilter class.
+    /// </summary>
+    internal class IpNumber
     {
-        bool InMemory { get; set; }
-        string Pot { get; set; }
-        bool SetDebug { get; set; }
-        List<string> Cached { get; }
-
-        void Close();
-        void Open();
-        void WriteLine(string niz);
-        
+        internal byte[] IPAddress { get; set; }
+        internal byte[] IPAddressUpper { get; set; }
+        internal byte[] IPAddressLower { get; set; }
     }
 }

@@ -19,7 +19,7 @@
 using System.Net;
 using Windows.Networking.Sockets;
 
-namespace Feri.MS.Http
+namespace Feri.MS.Http.Security
 {
     /// <summary>
     /// 

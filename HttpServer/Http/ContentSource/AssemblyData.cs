@@ -16,15 +16,17 @@
 */
 #endregion
 
-namespace Feri.MS.Http
+using System.Reflection;
+
+namespace Feri.MS.Http.ContentSource
 {
     /// <summary>
-    /// This is data class for IPFilter class.
+    /// Internal class used to store data about registered assemblies.
     /// </summary>
-    internal class IpNumber
+    internal class AssemblyData
     {
-        internal byte[] IPAddress { get; set; }
-        internal byte[] IPAddressUpper { get; set; }
-        internal byte[] IPAddressLower { get; set; }
+        public string Name { get; set; }
+        public string NameSpace { get; set; }
+        public Assembly  Assembly { get; set; }
     }
 }

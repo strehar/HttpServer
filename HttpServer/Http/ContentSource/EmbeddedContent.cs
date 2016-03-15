@@ -22,7 +22,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Reflection;
 
-namespace Feri.MS.Http
+namespace Feri.MS.Http.ContentSource
 {
     /// <summary>
     /// 
@@ -231,15 +231,15 @@ namespace Feri.MS.Http
         /// <summary>
         /// Method reads embedded file and returnes byte array with the data.
         /// </summary>
-        /// <param name="pot">Full path to file, that is returned from UrlToPath method.</param>
+        /// <param name="path">Full path to file, that is returned from UrlToPath method.</param>
         /// <returns>byte array with file data</returns>
-        public byte[] ReadToByte(string pot)
+        public byte[] ReadToByte(string path)
         {
-            string _potTmp = pot.Replace('/', '.');
+            string _potTmp = path.Replace('/', '.');
             string _pot = UrlToPath(_potTmp);
             if (_pot == null)
             {
-                throw new FileNotFoundException("File " + pot + " not found.");
+                throw new FileNotFoundException("File " + path + " not found.");
             }
             Debug.WriteLineIf(_debug, "Open File: " + _pot);
             //string _assemblyName = _pot.Substring(0, _pot.IndexOf('.'));
@@ -256,7 +256,7 @@ namespace Feri.MS.Http
             }
             else
             {
-                throw new FileNotFoundException("File " + pot + " not found in Assembly " + _assemblyName);
+                throw new FileNotFoundException("File " + path + " not found in Assembly " + _assemblyName);
             }
         }
 
@@ -274,12 +274,26 @@ namespace Feri.MS.Http
         /// Helper method that returnes List of all names of embedded resources 
         /// </summary>
         /// <returns>List with names of embedded resources.</returns>
-        public List<string> GetNames()
+        public List<string> Names
         {
-            List<string> _tmpList = new List<string>();
-            foreach (string pot in _NajdeneDatoteke.Keys)
-                _tmpList.Add(pot);
-            return _tmpList;
+            get
+            {
+                List<string> _tmpList = new List<string>();
+                foreach (string pot in _NajdeneDatoteke.Keys)
+                    _tmpList.Add(pot);
+                return _tmpList;
+            }
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public bool IsWritable
+        {
+            get
+            {
+                return false;
+            }
         }
 
         /// <summary>
@@ -293,6 +307,26 @@ namespace Feri.MS.Http
                 return true;
             else
                 return false;
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="path"></param>
+        /// <param name="data"></param>
+        public void WriteFromByte(string path, byte[] data)
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="path"></param>
+        /// <param name="data"></param>
+        public void WriteFromtring(string path, string data)
+        {
+            throw new NotImplementedException();
         }
         #endregion
     }
