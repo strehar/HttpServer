@@ -31,8 +31,8 @@ namespace Feri.MS.Http.Security
 
         HttpServer _server;
 
-        public int FirstStageBanTimerMinutes { get; set; } = 1;
-        public int SecondStageBanTimerMinutes { get; set; } = 1;
+        public int FirstStageBanTimerMinutes { get; set; } = 5;
+        public int SecondStageBanTimerMinutes { get; set; } = 60;
         public bool Enabled { get; set; } = true;
         List<string> _toRemoveFirstStage = new List<string>();
         List<string> _toRemoveSecondStage = new List<string>();
