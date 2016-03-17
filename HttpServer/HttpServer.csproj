@@ -131,6 +131,7 @@
     <Compile Include="Http\Log\IHttpLog.cs" />
     <Compile Include="Http\RootManager\IHttpRootManager.cs" />
     <Compile Include="Http\Security\HttpSecurityManagerData.cs" />
+    <Compile Include="Http\Security\IHttpSecurityManager.cs" />
     <Compile Include="Http\Security\IIPFilter.cs" />
     <Compile Include="Http\Security\IpNumber.cs" />
     <Compile Include="Http\Security\IUserManager.cs" />

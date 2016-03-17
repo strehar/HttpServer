@@ -20,10 +20,11 @@ using Feri.MS.Http.Util;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Net;
+using System.Net.Sockets;
 
 namespace Feri.MS.Http.Security
 {
-    class HttpSecurityManager
+    class HttpSecurityManager : IHttpSecurityManager
     {
         Dictionary<string, HttpSecurityManagerData> _firstStage = new Dictionary<string, HttpSecurityManagerData>();
         Dictionary<string, HttpSecurityManagerData> _secondStage = new Dictionary<string, HttpSecurityManagerData>();
@@ -40,10 +41,22 @@ namespace Feri.MS.Http.Security
 
         public bool IsBanned(IPAddress address)
         {
+            bool __found = false;
             lock (_firstStage) lock (_secondStage)
                 {
-                    return false;
+
+                    foreach (string key in _firstStage.Keys)
+                    {
+                        if (key.Equals(address.ToString()))
+                            __found = true;
+                    }
+                    foreach (string key in _secondStage.Keys)
+                    {
+                        if (key.Equals(address.ToString()))
+                            __found = true;
+                    }
                 }
+            return __found;
         }
 
         public void Start(HttpServer server)
@@ -62,6 +75,7 @@ namespace Feri.MS.Http.Security
         {
             if (!Enabled)
                 return;
+            if (!_server.IPFilterEnabled) _server.IPFilterEnabled = true;
             lock (_firstStage) lock (_secondStage)
                 {
                     if (_firstStage.ContainsKey(request.HttpConnection.RemoteHost))
@@ -70,7 +84,10 @@ namespace Feri.MS.Http.Security
                         if (_firstStage[request.HttpConnection.RemoteHost].Counter >= 5)
                         {
                             // TODO: BAN                 
-                            _server.IPFilter.AddBlackList(_firstStage[request.HttpConnection.RemoteHost].IPAddress, 32);
+                            if (_firstStage[request.HttpConnection.RemoteHost].IPAddress.AddressFamily == AddressFamily.InterNetwork)
+                                _server.IPFilter.AddBlackList(_firstStage[request.HttpConnection.RemoteHost].IPAddress, 32);
+                            else
+                                _server.IPFilter.AddBlackList(_firstStage[request.HttpConnection.RemoteHost].IPAddress, 128);
 
                             _firstStage[request.HttpConnection.RemoteHost].Time = TimeProvider.GetTime().AddMinutes(FirstStageBanTimerMinutes);
                             Debug.WriteLineIf(SetDebug, "First stage ban ip " + request.HttpConnection.RemoteHost + " on " + (_firstStage[request.HttpConnection.RemoteHost].Counter + 1) + " try. Time is " + _firstStage[request.HttpConnection.RemoteHost].Time + ".");
@@ -89,7 +106,10 @@ namespace Feri.MS.Http.Security
                         if (_secondStage[request.HttpConnection.RemoteHost].Counter >= 5)
                         {
                             // TODO: BAN
-                            _server.IPFilter.AddBlackList(_secondStage[request.HttpConnection.RemoteHost].IPAddress, 32);
+                            if (_secondStage[request.HttpConnection.RemoteHost].IPAddress.AddressFamily == AddressFamily.InterNetwork)
+                                _server.IPFilter.AddBlackList(_secondStage[request.HttpConnection.RemoteHost].IPAddress, 32);
+                            else
+                                _server.IPFilter.AddBlackList(_secondStage[request.HttpConnection.RemoteHost].IPAddress, 128);
 
                             _secondStage[request.HttpConnection.RemoteHost].Time = TimeProvider.GetTime().AddMinutes(SecondStageBanTimerMinutes);
                             Debug.WriteLineIf(SetDebug, "Second stage ban ip " + request.HttpConnection.RemoteHost + " on " + _secondStage[request.HttpConnection.RemoteHost].Counter + " try. Time is " + _secondStage[request.HttpConnection.RemoteHost].Time + ".");
@@ -114,6 +134,7 @@ namespace Feri.MS.Http.Security
         {
             if (!Enabled)
                 return;
+            if (!_server.IPFilterEnabled) _server.IPFilterEnabled = true;
             lock (_firstStage) lock (_secondStage)
                 {
                     Debug.WriteLineIf(SetDebug, "Authentication OK from ip " + request.HttpConnection.RemoteHost + " removing from first and second stage.");
@@ -128,6 +149,7 @@ namespace Feri.MS.Http.Security
         {
             if (!Enabled)
                 return;
+            if (!_server.IPFilterEnabled) _server.IPFilterEnabled = true;
             lock (_firstStage) lock (_secondStage)
                 {
                     // check the ban timer lists for any expired timers. if they are, remove them form those lists and from ipfilter's ban

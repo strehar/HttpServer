@@ -83,7 +83,7 @@ namespace Feri.MS.Http
 
         private IUserManager _userManager;                // Razred skrbi za dodajanje, odvzemanje in avtentikacijo uporabnikov
         private IIPFilter _IPFilter;                      // Razred skrbi za preverjanje IP naslovov uporabnikov in vzdrženje White in Black list
-        private HttpSecurityManager _securityManager;
+        private IHttpSecurityManager _securityManager;
         #endregion
 
         #region Properties
@@ -258,6 +258,22 @@ namespace Feri.MS.Http
             }
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        internal IHttpSecurityManager SecurityManager
+        {
+            get
+            {
+                return _securityManager;
+            }
+
+            set
+            {
+                _securityManager = value;
+            }
+        }
+
         #endregion
 
         #region IDisposable Support
@@ -289,8 +305,7 @@ namespace Feri.MS.Http
             _mimeType._debug = _debug;
             _sessionManager._debug = _debug;
             _log.SetDebug = _debug;
-            //_securityManager.SetDebug = _debug;
-            _securityManager.SetDebug = true;
+            _securityManager.SetDebug = _debug;
             _securityManager.Start(this);
             AddTimer("SessionCleanupTimer", 60000, _sessionManager.SessionCleanupTimer);
             AddTimer("SecurityManagerCleanupTImer", 60000, _securityManager.BanTimer);
