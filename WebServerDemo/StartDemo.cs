@@ -57,13 +57,15 @@ namespace WebServerDemo
             _ws.HttpRootManager.ReloadSourceFileList();   // Reload all file lists in all sources
 
             // IP Filtering
-            _ws.IPFilterEnabled = false;  // Change this to true to enable IP filter!
-            _ws.IPFilter.AddBlackList(new IPAddress(new byte[] { 192, 168, 1, 64 }), 24);
-            _ws.IPFilter.AddWhiteList(new IPAddress(new byte[] { 192, 168, 2, 64 }), 32);
+            //_ws.IPFilterEnabled = true;  // Change this to true to enable IP filter!
+            //_ws.IPFilter.AddBlackList(new IPAddress(new byte[] { 192, 168, 1, 64 }), 24);
+            //_ws.IPFilter.AddWhiteList(new IPAddress(new byte[] { 192, 168, 2, 64 }), 32);
+            //_ws.IPFilter.AddBlackList(IPAddress.Parse("164.8.251.107"), 24);
+            //_ws.IPFilter.AddWhiteList(IPAddress.Parse("164.8.251.107"), 32);
 
             // User Authentication
             _ws.AuthenticationRequired = true;
-            _ws.UserManager.AddUser("user", "password");
+            _ws.UserManager.AddUser("user", "password1");
 
             // JSON
             _ws.AddPath("/data.json", _json.Listen);

@@ -23,8 +23,7 @@ namespace Feri.MS.Http.Security
     /// </summary>
     internal class IpNumber
     {
-        internal byte[] IPAddress { get; set; }
-        internal byte[] IPAddressUpper { get; set; }
-        internal byte[] IPAddressLower { get; set; }
+        internal System.Net.IPAddress IPAddress { get; set; }
+        internal System.Net.IPNetwork IPNetwork { get; set; }
     }
 }

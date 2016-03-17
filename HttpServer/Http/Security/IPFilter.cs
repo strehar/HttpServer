@@ -65,20 +65,7 @@ namespace Feri.MS.Http.Security
         public bool ProcessIPFilter(StreamSocket socket)
         {
             // Get remote IP
-            HostName remoteHost = socket.Information.RemoteAddress;
-            string[] _remoteHostString = remoteHost.ToString().Split('.');
-            if (_remoteHostString.Length < 4)
-            {
-                // IP ni ok. nekaj je treba narediti...
-            }
-            byte[] _remoteIP = new byte[4];
-            for (int i = 0; i < _remoteIP.Length; i++)
-            {
-                if (!byte.TryParse(_remoteHostString[i], out _remoteIP[i]))
-                {
-                    // konverzija ni uspela, spet je treba nekaj naredit.
-                }
-            }
+            IPAddress _remoteIP = IPAddress.Parse(socket.Information.RemoteAddress.ToString());
 
             // process each IP from black and white list. if remote IP is not any of the black lists and if on atleast one white list then return ok, else return true for blocked.
             // 1st check whitelist, then blacklist, so blackist can override whitelist
@@ -87,7 +74,7 @@ namespace Feri.MS.Http.Security
             {
                 foreach (KeyValuePair<string, IpNumber> key in _whiteList)
                 {
-                    if (IpInRange(_remoteIP, key.Value))
+                    if (IPNetwork.Contains(key.Value.IPNetwork, _remoteIP))
                         _result = false;
                 }
             }
@@ -96,35 +83,12 @@ namespace Feri.MS.Http.Security
 
             foreach (KeyValuePair<string, IpNumber> key in _blackList)
             {
-                if (IpInRange(_remoteIP, key.Value))
+                if (IPNetwork.Contains(key.Value.IPNetwork, _remoteIP))
                     _result = true;
             }
 
             return _result;
 
-        }
-
-        /// <summary>
-        /// Internal helper method to check if provided ip is in range of provided filter.
-        /// </summary>
-        /// <param name="ip">IP address we are checking in byte format.</param>
-        /// <param name="filter">Ip filter (IP range) we are checking against</param>
-        /// <returns>true if ip is in range, false if it is not.</returns>
-        private bool IpInRange(byte[] ip, IpNumber filter)
-        {
-            bool _result = true;
-            for (int i = 0; i < ip.Length; i++)
-            {
-                if ((ip[i] >= filter.IPAddressLower[i]) && (ip[i] <= filter.IPAddressUpper[i]))
-                {
-                    //
-                }
-                else
-                {
-                    _result = false;
-                }
-            }
-            return _result;
         }
 
         /// <summary>
@@ -135,7 +99,17 @@ namespace Feri.MS.Http.Security
         /// <returns>true if ip was added, false if it allready exist in the blacklist</returns>
         public bool AddBlackList(IPAddress ip, int bits)
         {
-            IpNumber _IP = GetIpRangeFromIpAddress(ip, bits);
+            IpNumber _IP = new IpNumber();
+            string _ipAddress;
+            if (ip.ToString().Contains("%"))
+            {
+                _ipAddress = ip.ToString().Split(new char[] { '%' })[0];
+            } else
+            {
+                _ipAddress = ip.ToString();
+            }
+            _IP.IPAddress = ip;
+            _IP.IPNetwork = IPNetwork.Parse(_ipAddress + "/" + bits);
 
             if (!_blackList.ContainsKey(ip.ToString()))
             {
@@ -152,7 +126,7 @@ namespace Feri.MS.Http.Security
         /// <returns>true if ip was removed or else if it did not exist in blacklist</returns>
         public bool RemoveBlackList(IPAddress ip)
         {
-            if (!_blackList.ContainsKey(ip.ToString()))
+            if (_blackList.ContainsKey(ip.ToString()))
             {
                 _blackList.Remove(ip.ToString());
                 return true;
@@ -167,7 +141,7 @@ namespace Feri.MS.Http.Security
         /// <returns>true if it exist or false if it does not exist in blacklist</returns>
         public bool IsBlackListed(IPAddress ip)
         {
-            if (!_blackList.ContainsKey(ip.ToString()))
+            if (_blackList.ContainsKey(ip.ToString()))
             {
                 return true;
             }
@@ -182,7 +156,18 @@ namespace Feri.MS.Http.Security
         /// <returns>true if ip was added, false if it allready exist in the whitelist</returns>
         public bool AddWhiteList(IPAddress ip, int bits)
         {
-            IpNumber _IP = GetIpRangeFromIpAddress(ip, bits);
+            IpNumber _IP = new IpNumber();
+            string _ipAddress;
+            _IP.IPAddress = ip;
+            if (ip.ToString().Contains("%"))
+            {
+                _ipAddress = ip.ToString().Split(new char[] { '%' })[0];
+            }
+            else
+            {
+                _ipAddress = ip.ToString();
+            }
+            _IP.IPNetwork = IPNetwork.Parse(_ipAddress + "/" + bits);
 
             if (!_whiteList.ContainsKey(ip.ToString()))
             {
@@ -199,7 +184,7 @@ namespace Feri.MS.Http.Security
         /// <returns>true if ip was removed or else if it did not exist in whitelist</returns>
         public bool RemoveWhiteList(IPAddress ip)
         {
-            if (!_whiteList.ContainsKey(ip.ToString()))
+            if (_whiteList.ContainsKey(ip.ToString()))
             {
                 _blackList.Remove(ip.ToString());
                 return true;
@@ -214,49 +199,11 @@ namespace Feri.MS.Http.Security
         /// <returns>true if it exist or false if it does not exist in whitelist</returns>
         public bool IsWhiteListed(IPAddress ip)
         {
-            if (!_whiteList.ContainsKey(ip.ToString()))
+            if (_whiteList.ContainsKey(ip.ToString()))
             {
                 return true;
             }
             return false;
-        }
-
-        /// <summary>
-        /// internal helper method that calculates upper and lower ip address of ip range, from provided IP address and nework bit mask.
-        /// ip if provided as IPAddress class and mask is provided as bits (for example: 0, 8, 16, 24, 32, ...)
-        /// </summary>
-        /// <param name="ip">IP to be used for range caclulation</param>
-        /// <param name="bits">Network bits to be used for range calculation</param>
-        /// <returns>IPNumber filter object contain provided ip address and upper and lowe ranges of the network</returns>
-        private IpNumber GetIpRangeFromIpAddress(IPAddress ip, int bits)
-        {
-            uint _IPMask;
-            if (bits != 32)
-                _IPMask = ~(uint.MaxValue >> bits);
-            else
-                _IPMask = uint.MaxValue;
-
-            byte[] _ipBytes = ip.GetAddressBytes();
-
-            byte[] _maskBytes;
-            if (BitConverter.IsLittleEndian)
-                _maskBytes = BitConverter.GetBytes(_IPMask).Reverse().ToArray();
-            else
-                _maskBytes = BitConverter.GetBytes(_IPMask).ToArray();
-
-            byte[] _lowerIPBytes = new byte[_ipBytes.Length];
-            byte[] _upperIPBytes = new byte[_ipBytes.Length];
-            for (int i = 0; i < _ipBytes.Length; i++)
-            {
-                _lowerIPBytes[i] = (byte)(_ipBytes[i] & _maskBytes[i]);
-                _upperIPBytes[i] = (byte)(_ipBytes[i] | ~_maskBytes[i]);
-            }
-
-            IpNumber _IP = new IpNumber();
-            _IP.IPAddress = _ipBytes;
-            _IP.IPAddressLower = _lowerIPBytes;
-            _IP.IPAddressUpper = _upperIPBytes;
-            return _IP;
         }
         #endregion
     }

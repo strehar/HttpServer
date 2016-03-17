@@ -1,0 +1,251 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{5DDEBBB4-5876-43A4-A158-B60625DE3A8B}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>System.Net.IPNetwork</RootNamespace>
+    <AssemblyName>System.Net.IPNetwork</AssemblyName>
+    <DefaultLanguage>en-US</DefaultLanguage>
+    <TargetPlatformIdentifier>UAP</TargetPlatformIdentifier>
+    <TargetPlatformVersion>10.0.10586.0</TargetPlatformVersion>
+    <TargetPlatformMinVersion>10.0.10240.0</TargetPlatformMinVersion>
+    <MinimumVisualStudioVersion>14</MinimumVisualStudioVersion>
+    <FileAlignment>512</FileAlignment>
+    <ProjectTypeGuids>{A5A43C5B-DE2A-4C0C-9213-0A381AF9435A};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE;NETFX_CORE;WINDOWS_UWP</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE;NETFX_CORE;WINDOWS_UWP</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x86'">
+    <PlatformTarget>x86</PlatformTarget>
+    <DebugSymbols>true</DebugSymbols>
+    <OutputPath>bin\x86\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE;NETFX_CORE;WINDOWS_UWP</DefineConstants>
+    <NoWarn>;2008</NoWarn>
+    <DebugType>full</DebugType>
+    <PlatformTarget>x86</PlatformTarget>
+    <UseVSHostingProcess>false</UseVSHostingProcess>
+    <ErrorReport>prompt</ErrorReport>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x86'">
+    <PlatformTarget>x86</PlatformTarget>
+    <OutputPath>bin\x86\Release\</OutputPath>
+    <DefineConstants>TRACE;NETFX_CORE;WINDOWS_UWP</DefineConstants>
+    <Optimize>true</Optimize>
+    <NoWarn>;2008</NoWarn>
+    <DebugType>pdbonly</DebugType>
+    <PlatformTarget>x86</PlatformTarget>
+    <UseVSHostingProcess>false</UseVSHostingProcess>
+    <ErrorReport>prompt</ErrorReport>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|ARM'">
+    <PlatformTarget>ARM</PlatformTarget>
+    <DebugSymbols>true</DebugSymbols>
+    <OutputPath>bin\ARM\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE;NETFX_CORE;WINDOWS_UWP</DefineConstants>
+    <NoWarn>;2008</NoWarn>
+    <DebugType>full</DebugType>
+    <PlatformTarget>ARM</PlatformTarget>
+    <UseVSHostingProcess>false</UseVSHostingProcess>
+    <ErrorReport>prompt</ErrorReport>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|ARM'">
+    <PlatformTarget>ARM</PlatformTarget>
+    <OutputPath>bin\ARM\Release\</OutputPath>
+    <DefineConstants>TRACE;NETFX_CORE;WINDOWS_UWP</DefineConstants>
+    <Optimize>true</Optimize>
+    <NoWarn>;2008</NoWarn>
+    <DebugType>pdbonly</DebugType>
+    <PlatformTarget>ARM</PlatformTarget>
+    <UseVSHostingProcess>false</UseVSHostingProcess>
+    <ErrorReport>prompt</ErrorReport>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'">
+    <PlatformTarget>x64</PlatformTarget>
+    <DebugSymbols>true</DebugSymbols>
+    <OutputPath>bin\x64\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE;NETFX_CORE;WINDOWS_UWP</DefineConstants>
+    <NoWarn>;2008</NoWarn>
+    <DebugType>full</DebugType>
+    <PlatformTarget>x64</PlatformTarget>
+    <UseVSHostingProcess>false</UseVSHostingProcess>
+    <ErrorReport>prompt</ErrorReport>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'">
+    <PlatformTarget>x64</PlatformTarget>
+    <OutputPath>bin\x64\Release\</OutputPath>
+    <DefineConstants>TRACE;NETFX_CORE;WINDOWS_UWP</DefineConstants>
+    <Optimize>true</Optimize>
+    <NoWarn>;2008</NoWarn>
+    <DebugType>pdbonly</DebugType>
+    <PlatformTarget>x64</PlatformTarget>
+    <UseVSHostingProcess>false</UseVSHostingProcess>
+    <ErrorReport>prompt</ErrorReport>
+  </PropertyGroup>
+  <ItemGroup>
+    <!-- A reference to the entire .Net Framework and Windows SDK are automatically included -->
+    <None Include="LICENSE" />
+    <None Include="project.json" />
+    <None Include="README.md" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="BigIntegerExt.cs" />
+    <Compile Include="IPAddressCollection.cs" />
+    <Compile Include="IPNetwork.cs" />
+    <Compile Include="IPNetworkCollection.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <EmbeddedResource Include="Properties\IPNetwork.rd.xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="doc\html\annotated.html" />
+    <Content Include="doc\html\arrowdown.png" />
+    <Content Include="doc\html\arrowright.png" />
+    <Content Include="doc\html\bc_s.png" />
+    <Content Include="doc\html\bdwn.png" />
+    <Content Include="doc\html\classes.html" />
+    <Content Include="doc\html\class_system_1_1_net_1_1_i_p_address_collection-members.html" />
+    <Content Include="doc\html\class_system_1_1_net_1_1_i_p_address_collection.html" />
+    <Content Include="doc\html\class_system_1_1_net_1_1_i_p_address_collection.png" />
+    <Content Include="doc\html\class_system_1_1_net_1_1_i_p_network-members.html" />
+    <Content Include="doc\html\class_system_1_1_net_1_1_i_p_network.html" />
+    <Content Include="doc\html\class_system_1_1_net_1_1_i_p_network.png" />
+    <Content Include="doc\html\class_system_1_1_net_1_1_i_p_network_collection-members.html" />
+    <Content Include="doc\html\class_system_1_1_net_1_1_i_p_network_collection.html" />
+    <Content Include="doc\html\class_system_1_1_net_1_1_i_p_network_collection.png" />
+    <Content Include="doc\html\closed.png" />
+    <Content Include="doc\html\dir_09ae5f393d8cf349a54a5816656c1f11.html" />
+    <Content Include="doc\html\dir_402e0fa5262240f04a40cafe6f30b382.html" />
+    <Content Include="doc\html\dir_b168a5a14bb66a87bccdbb8d63d30231.html" />
+    <Content Include="doc\html\doc.png" />
+    <Content Include="doc\html\doxygen.css" />
+    <Content Include="doc\html\doxygen.png" />
+    <Content Include="doc\html\dynsections.js" />
+    <Content Include="doc\html\folderclosed.png" />
+    <Content Include="doc\html\folderopen.png" />
+    <Content Include="doc\html\functions.html" />
+    <Content Include="doc\html\functions_func.html" />
+    <Content Include="doc\html\functions_prop.html" />
+    <Content Include="doc\html\hierarchy.html" />
+    <Content Include="doc\html\index.html" />
+    <Content Include="doc\html\jquery.js" />
+    <Content Include="doc\html\namespaces.html" />
+    <Content Include="doc\html\namespace_system.html" />
+    <Content Include="doc\html\namespace_system_1_1_net.html" />
+    <Content Include="doc\html\nav_f.png" />
+    <Content Include="doc\html\nav_g.png" />
+    <Content Include="doc\html\nav_h.png" />
+    <Content Include="doc\html\open.png" />
+    <Content Include="doc\html\search\all_0.html" />
+    <Content Include="doc\html\search\all_0.js" />
+    <Content Include="doc\html\search\all_1.html" />
+    <Content Include="doc\html\search\all_1.js" />
+    <Content Include="doc\html\search\all_2.html" />
+    <Content Include="doc\html\search\all_2.js" />
+    <Content Include="doc\html\search\all_3.html" />
+    <Content Include="doc\html\search\all_3.js" />
+    <Content Include="doc\html\search\all_4.html" />
+    <Content Include="doc\html\search\all_4.js" />
+    <Content Include="doc\html\search\all_5.html" />
+    <Content Include="doc\html\search\all_5.js" />
+    <Content Include="doc\html\search\all_6.html" />
+    <Content Include="doc\html\search\all_6.js" />
+    <Content Include="doc\html\search\all_7.html" />
+    <Content Include="doc\html\search\all_7.js" />
+    <Content Include="doc\html\search\all_8.html" />
+    <Content Include="doc\html\search\all_8.js" />
+    <Content Include="doc\html\search\all_9.html" />
+    <Content Include="doc\html\search\all_9.js" />
+    <Content Include="doc\html\search\all_a.html" />
+    <Content Include="doc\html\search\all_a.js" />
+    <Content Include="doc\html\search\all_b.html" />
+    <Content Include="doc\html\search\all_b.js" />
+    <Content Include="doc\html\search\all_c.html" />
+    <Content Include="doc\html\search\all_c.js" />
+    <Content Include="doc\html\search\classes_0.html" />
+    <Content Include="doc\html\search\classes_0.js" />
+    <Content Include="doc\html\search\close.png" />
+    <Content Include="doc\html\search\functions_0.html" />
+    <Content Include="doc\html\search\functions_0.js" />
+    <Content Include="doc\html\search\functions_1.html" />
+    <Content Include="doc\html\search\functions_1.js" />
+    <Content Include="doc\html\search\functions_2.html" />
+    <Content Include="doc\html\search\functions_2.js" />
+    <Content Include="doc\html\search\functions_3.html" />
+    <Content Include="doc\html\search\functions_3.js" />
+    <Content Include="doc\html\search\functions_4.html" />
+    <Content Include="doc\html\search\functions_4.js" />
+    <Content Include="doc\html\search\functions_5.html" />
+    <Content Include="doc\html\search\functions_5.js" />
+    <Content Include="doc\html\search\functions_6.html" />
+    <Content Include="doc\html\search\functions_6.js" />
+    <Content Include="doc\html\search\functions_7.html" />
+    <Content Include="doc\html\search\functions_7.js" />
+    <Content Include="doc\html\search\mag_sel.png" />
+    <Content Include="doc\html\search\namespaces_0.html" />
+    <Content Include="doc\html\search\namespaces_0.js" />
+    <Content Include="doc\html\search\nomatches.html" />
+    <Content Include="doc\html\search\properties_0.html" />
+    <Content Include="doc\html\search\properties_0.js" />
+    <Content Include="doc\html\search\properties_1.html" />
+    <Content Include="doc\html\search\properties_1.js" />
+    <Content Include="doc\html\search\properties_2.html" />
+    <Content Include="doc\html\search\properties_2.js" />
+    <Content Include="doc\html\search\properties_3.html" />
+    <Content Include="doc\html\search\properties_3.js" />
+    <Content Include="doc\html\search\properties_4.html" />
+    <Content Include="doc\html\search\properties_4.js" />
+    <Content Include="doc\html\search\properties_5.html" />
+    <Content Include="doc\html\search\properties_5.js" />
+    <Content Include="doc\html\search\properties_6.html" />
+    <Content Include="doc\html\search\properties_6.js" />
+    <Content Include="doc\html\search\properties_7.html" />
+    <Content Include="doc\html\search\properties_7.js" />
+    <Content Include="doc\html\search\properties_8.html" />
+    <Content Include="doc\html\search\properties_8.js" />
+    <Content Include="doc\html\search\search.css" />
+    <Content Include="doc\html\search\search.js" />
+    <Content Include="doc\html\search\searchdata.js" />
+    <Content Include="doc\html\search\search_l.png" />
+    <Content Include="doc\html\search\search_m.png" />
+    <Content Include="doc\html\search\search_r.png" />
+    <Content Include="doc\html\splitbar.png" />
+    <Content Include="doc\html\sync_off.png" />
+    <Content Include="doc\html\sync_on.png" />
+    <Content Include="doc\html\tabs.css" />
+    <Content Include="doc\html\tab_a.png" />
+    <Content Include="doc\html\tab_b.png" />
+    <Content Include="doc\html\tab_h.png" />
+    <Content Include="doc\html\tab_s.png" />
+  </ItemGroup>
+  <PropertyGroup Condition=" '$(VisualStudioVersion)' == '' or '$(VisualStudioVersion)' &lt; '14.0' ">
+    <VisualStudioVersion>14.0</VisualStudioVersion>
+  </PropertyGroup>
+  <Import Project="$(MSBuildExtensionsPath)\Microsoft\WindowsXaml\v$(VisualStudioVersion)\Microsoft.Windows.UI.Xaml.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

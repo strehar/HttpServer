@@ -83,6 +83,7 @@ namespace Feri.MS.Http
 
         private IUserManager _userManager;                // Razred skrbi za dodajanje, odvzemanje in avtentikacijo uporabnikov
         private IIPFilter _IPFilter;                      // Razred skrbi za preverjanje IP naslovov uporabnikov in vzdrženje White in Black list
+        private HttpSecurityManager _securityManager;
         #endregion
 
         #region Properties
@@ -283,11 +284,16 @@ namespace Feri.MS.Http
         public HttpServer()
         {
             _log = new HttpLog();
+            _securityManager = new HttpSecurityManager();
             _log.Open();
             _mimeType._debug = _debug;
             _sessionManager._debug = _debug;
             _log.SetDebug = _debug;
+            //_securityManager.SetDebug = _debug;
+            _securityManager.SetDebug = true;
+            _securityManager.Start(this);
             AddTimer("SessionCleanupTimer", 60000, _sessionManager.SessionCleanupTimer);
+            AddTimer("SecurityManagerCleanupTImer", 60000, _securityManager.BanTimer);
         }
 
         /// <summary>
@@ -344,8 +350,8 @@ namespace Feri.MS.Http
         private void ProcessRequest(StreamSocket socket)
         {
             bool __streamInit;
-            HttpRequest __hrequest = null;
-            HttpResponse __hresponse = null;
+            HttpRequest __request = null;
+            HttpResponse __response = null;
             Dictionary<string, string> __headers = new Dictionary<string, string>();
             string[] __supportedMethods = new string[] { "GET", "POST" };
             string __tmpKey = null;
@@ -371,21 +377,21 @@ namespace Feri.MS.Http
             if (!__ipFilterError)
             {
                 // Create request and response objects
-                __hrequest = new HttpRequest();
-                __hrequest._debug = _debug;
+                __request = new HttpRequest();
+                __request._debug = _debug;
 
-                __streamInit = __hrequest.Init(socket);
+                __streamInit = __request.Init(socket);
 
-                __hresponse = new HttpResponse(__hrequest);
-                __hresponse._debug = _debug;
+                __response = new HttpResponse(__request);
+                __response._debug = _debug;
 
-                __hrequest.SessionManager = _sessionManager;
+                __request.SessionManager = _sessionManager;
 
                 // Error management
                 if (!__streamInit)
                 {
                     // log error
-                    __status = ProcessHttpError(__hrequest, __hresponse);
+                    __status = ProcessHttpError(__request, __response);
                     __streamInitError = true;
                     //return;
                 }
@@ -394,22 +400,24 @@ namespace Feri.MS.Http
                     // Authentication management
                     if (_authenticationRequired)
                     {
-                        string loggedInUser = _userManager.AuthenticateUser(__hrequest);
+                        string loggedInUser = _userManager.AuthenticateUser(__request);
                         if (string.IsNullOrEmpty(loggedInUser))    // Authentication failed for some reason, request that user authenticates.
                         {
                             // user authentication failed, display authentication request:                    
                             __headers.Add("WWW-Authenticate", "Basic realm=\"PI2 Web Access\"");
                             __status = "401";
                             __authenticationError = true;
+                            _securityManager.UnauthenticatedAccess(__request, __response);
                         }
                         else
                         {
                             // User is logged in, set the username property in HttpRequest object
-                            __hrequest.AuthenticatedUser = loggedInUser;
+                            __request.AuthenticatedUser = loggedInUser;
+                            _securityManager.AuthenticatedAccess(__request, __response);
                         }
                     }
                     if (!__authenticationError)
-                        if (!__supportedMethods.Contains(__hrequest.RequestType))
+                        if (!__supportedMethods.Contains(__request.RequestType))
                         {
                             Debug.WriteLineIf(_debug, "Method not allowed (Error 405) in ProcessRequest()");
                             StringBuilder _tmpMethods = new StringBuilder();
@@ -432,35 +440,35 @@ namespace Feri.MS.Http
                 HttpRootManager.ReturnErrorMessage(socket, __status);
                 return;
             }
-            __message = TimeProvider.GetTime().ToString("R") + ": " + __hrequest.HttpConnection.RemoteHost + ": " + __hrequest.HttpConnection.LocalHost + ": " + __hrequest.HttpConnection.LocalPort + ": " + __hrequest.RequestString().TrimEnd();
+            __message = TimeProvider.GetTime().ToString("R") + ": " + __request.HttpConnection.RemoteHost + ": " + __request.HttpConnection.LocalHost + ": " + __request.HttpConnection.LocalPort + ": " + __request.RequestString().TrimEnd();
             if (__streamInitError || __authenticationError || __methodError)
             {
                 if (!string.IsNullOrEmpty(__status))
                 {
                     _log.WriteLine(__message + ": " + __status);
-                    HttpRootManager.ReturnErrorMessage(__hrequest, __hresponse, __headers, __status);
+                    HttpRootManager.ReturnErrorMessage(__request, __response, __headers, __status);
                 }
                 // Empty status message, can happen if we got empty request, ignore?
                 return;
             }
 
-            if (_serverPath.ContainsKey(__hrequest.RequestPath.ToLower()))
+            if (_serverPath.ContainsKey(__request.RequestPath.ToLower()))
             {
-                _serverPath[__hrequest.RequestPath.ToLower()](__hrequest, __hresponse);
+                _serverPath[__request.RequestPath.ToLower()](__request, __response);
                 __status = "200";
             }
-            else if (!string.IsNullOrEmpty(__tmpKey = IsPathRegistredGeneral(__hrequest.RequestPath)))
+            else if (!string.IsNullOrEmpty(__tmpKey = IsPathRegistredGeneral(__request.RequestPath)))
             {
-                _serverPath[__tmpKey](__hrequest, __hresponse);
+                _serverPath[__tmpKey](__request, __response);
                 __status = "200";
             }
             else
             {
-                __status = _rootManager.Listen(__hrequest, __hresponse); //ni registrirane poti, kličemo rootmanager, ter preberemo status
+                __status = _rootManager.Listen(__request, __response); //ni registrirane poti, kličemo rootmanager, ter preberemo status
             }
 
             // Write debug and log
-            Debug.WriteLineIf(_debug, "TaskID: " + Task.CurrentId + " Pot: " + __hrequest.RequestPath + " ThreadID: " + System.Environment.CurrentManagedThreadId);
+            Debug.WriteLineIf(_debug, "TaskID: " + Task.CurrentId + " Pot: " + __request.RequestPath + " ThreadID: " + System.Environment.CurrentManagedThreadId);
             _log.WriteLine(__message + ": " + __status);
         }
 

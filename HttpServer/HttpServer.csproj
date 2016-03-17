@@ -8,7 +8,7 @@
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>Feri.MS</RootNamespace>
-    <AssemblyName>HttpServer</AssemblyName>
+    <AssemblyName>Feri.MS.HttpServer</AssemblyName>
     <DefaultLanguage>en-US</DefaultLanguage>
     <TargetPlatformIdentifier>UAP</TargetPlatformIdentifier>
     <TargetPlatformVersion>10.0.10586.0</TargetPlatformVersion>
@@ -31,7 +31,7 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <GenerateLibraryLayout>true</GenerateLibraryLayout>
-    <DocumentationFile>bin\Debug\HttpServer.XML</DocumentationFile>
+    <DocumentationFile>bin\Debug\Feri.MS.HttpServer.xml</DocumentationFile>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <PlatformTarget>AnyCPU</PlatformTarget>
@@ -52,7 +52,7 @@
     <PlatformTarget>x86</PlatformTarget>
     <UseVSHostingProcess>false</UseVSHostingProcess>
     <ErrorReport>prompt</ErrorReport>
-    <DocumentationFile>bin\x86\Debug\HttpServer.XML</DocumentationFile>
+    <DocumentationFile>bin\x86\Debug\Feri.MS.HttpServer.xml</DocumentationFile>
     <GenerateLibraryLayout>true</GenerateLibraryLayout>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x86'">
@@ -76,7 +76,7 @@
     <PlatformTarget>ARM</PlatformTarget>
     <UseVSHostingProcess>false</UseVSHostingProcess>
     <ErrorReport>prompt</ErrorReport>
-    <DocumentationFile>bin\ARM\Debug\HttpServer.XML</DocumentationFile>
+    <DocumentationFile>bin\ARM\Debug\Feri.MS.HttpServer.xml</DocumentationFile>
     <GenerateLibraryLayout>true</GenerateLibraryLayout>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|ARM'">
@@ -181,6 +181,10 @@
     <ProjectReference Include="..\DotLiquidCore\DotLiquidCore.csproj">
       <Project>{7e2d1c5b-59af-4f2a-a0aa-0fca38c1740c}</Project>
       <Name>DotLiquidCore</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\IPNetwork\IPNetwork.csproj">
+      <Project>{5ddebbb4-5876-43a4-a158-b60625de3a8b}</Project>
+      <Name>IPNetwork</Name>
     </ProjectReference>
   </ItemGroup>
   <PropertyGroup Condition=" '$(VisualStudioVersion)' == '' or '$(VisualStudioVersion)' &lt; '14.0' ">
