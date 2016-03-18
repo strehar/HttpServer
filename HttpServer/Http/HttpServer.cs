@@ -410,7 +410,7 @@ namespace Feri.MS.Http
                     __streamInitError = true;
                     //return;
                 }
-                else
+                if ((__streamInit) && (!__streamInitError))
                 {
                     // Authentication management
                     if (_authenticationRequired)
@@ -485,6 +485,7 @@ namespace Feri.MS.Http
             // Write debug and log
             Debug.WriteLineIf(_debug, "TaskID: " + Task.CurrentId + " Pot: " + __request.RequestPath + " ThreadID: " + System.Environment.CurrentManagedThreadId);
             _log.WriteLine(__message + ": " + __status);
+            socket.Dispose();
         }
 
         /// <summary>
