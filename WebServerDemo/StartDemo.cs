@@ -64,7 +64,7 @@ namespace WebServerDemo
 
             // User Authentication
             _ws.AuthenticationRequired = true;
-            _ws.UserManager.AddUser("user", "password1");
+            _ws.UserManager.AddUser("user", "password");
 
             // JSON
             _ws.AddPath("/data.json", _json.Listen);
