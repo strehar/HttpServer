@@ -20,6 +20,7 @@ using Feri.MS.Http;
 using Feri.MS.Http.ContentSource;
 using Feri.MS.Http.Json;
 using Feri.MS.Http.Template;
+using Feri.MS.Http.Util;
 using System.Net;
 using WebResources;
 

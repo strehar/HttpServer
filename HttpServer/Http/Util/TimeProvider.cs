@@ -16,6 +16,7 @@
 */
 #endregion
 
+using Feri.MS.Parts.I2C.RealTimeClock;
 using System;
 
 namespace Feri.MS.Http.Util
@@ -26,12 +27,39 @@ namespace Feri.MS.Http.Util
     /// </summary>
     public class TimeProvider
     {
+        static bool _RTCPresent = false;
         /// <summary>
         /// 
         /// </summary>
-        public TimeProvider()
+        static TimeProvider()
         {
+            CheckForRTC();
+        }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns></returns>
+        public static DS1307 GetRTC()
+        {
+            return DS1307.Create();
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public static void CheckForRTC()
+        {
+            DS1307 _rtc = DS1307.Create();
+            try
+            {
+                _rtc.GetTime();
+                _RTCPresent = true;
+            }
+            catch
+            {
+                _RTCPresent = false;
+            }
         }
 
         /// <summary>
@@ -40,7 +68,40 @@ namespace Feri.MS.Http.Util
         /// <returns></returns>
         public static DateTime GetTime()
         {
-            return DateTime.UtcNow;
+            if (_RTCPresent)
+            {
+                DS1307 _rtc = DS1307.Create();
+                if (_rtc.Ready())
+                {
+                    DateTime _time = _rtc.GetTime();
+                    return _time.ToUniversalTime();
+                }
+                else
+                {
+                    return DateTime.UtcNow;
+                }
+            }
+            else
+            {
+                return DateTime.UtcNow;
+            }
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="time"></param>
+        public static void SetTime(DateTime time)
+        {
+            if (_RTCPresent)
+            {
+                DS1307 _rtc = DS1307.Create();
+                _rtc.SetTime(time);
+            }
+            else
+            {
+                //SET System time. somehow.
+            }
         }
 
         /// <summary>

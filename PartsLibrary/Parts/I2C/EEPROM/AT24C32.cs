@@ -21,17 +21,76 @@ using System.Threading.Tasks;
 using Windows.Devices.Enumeration;
 using Windows.Devices.I2c;
 using Feri.MS.Parts.Exceptions;
+using System.Collections.Generic;
+using System.Diagnostics;
 
+#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
 namespace Feri.MS.Parts.I2C.EEPROM
 {
+    internal class AT24C32Helper
+    {
+        internal I2cDevice I2cController { get; set; }
+        internal AT24C32 Part { get; set; }
+        internal int Address { get; set; }
+        internal int ReferenceCount { get; set; } = 0;
+    }
     class AT24C32 : IDisposable
     {
+        private static Dictionary<int, AT24C32Helper> _initialized { get; set; } = new Dictionary<int, AT24C32Helper>();
+        public I2cDevice I2cController { get; private set; }
+        private bool _isDisposed = false;
+        public bool _debug = false;
+
         private bool IsInitialized { get; set; }
-        public int Address { get; set; } = 0;
+        public int Address { get; private set; } = 0;
 
-        private I2cDevice _i2cController;
+        private AT24C32(int address)
+        {
+            Address = address;
+        }
 
-        private DeviceInformationCollection FindI2cControllers()
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="address"></param>
+        /// <param name="i2cControllerDeviceId"></param>
+        /// <returns></returns>
+        public static AT24C32 Create(int address = 0x50, string i2cControllerDeviceId = null)
+        {
+            // Adresa je 1010 000
+            AT24C32 _part;
+            //check if address exists
+            if (!_initialized.ContainsKey(address))
+            {
+                // there is none. DoMagic();
+                if (string.IsNullOrEmpty(i2cControllerDeviceId))
+                {
+                    i2cControllerDeviceId = FindI2cControllers()[0].Id;
+                }
+
+                I2cConnectionSettings i2cSettings = new I2cConnectionSettings(address);
+                i2cSettings.BusSpeed = I2cBusSpeed.StandardMode;
+
+                Task<I2cDevice> controlerInitTask = Task.Run(async () => await I2cDevice.FromIdAsync(i2cControllerDeviceId, i2cSettings));
+                I2cDevice _i2cController = controlerInitTask.Result;
+
+                _part = new AT24C32(address);
+                AT24C32Helper helper = new AT24C32Helper();
+                helper.Address = address;
+                helper.Part = _part;
+                helper.I2cController = _i2cController;
+
+                _initialized.Add(address, helper);
+            }
+            else
+            {
+                _part = _initialized[address].Part;
+            }
+            _initialized[address].ReferenceCount++;
+            return _part;
+        }
+
+        private static DeviceInformationCollection FindI2cControllers()
         {
             string advancedQuerySyntaxString = I2cDevice.GetDeviceSelector();
             Task<DeviceInformationCollection> initTask = Task.Run(async () => await DeviceInformation.FindAllAsync(advancedQuerySyntaxString));
@@ -43,33 +102,145 @@ namespace Feri.MS.Parts.I2C.EEPROM
             return controllerDeviceIds;
         }
 
-        public void Initialize()
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="address"></param>
+        /// <returns></returns>
+        public byte ReadAddress(int address)
         {
-            Initialize(FindI2cControllers()[0].Id);
-            throw new NotImplementedException();
-        }
-
-        public void Initialize(string i2cControllerDeviceId)
-        {
-            if (IsInitialized)
+            if (_isDisposed)
             {
-                throw new InvalidOperationException("The I2C controller is already initialized.");
+                throw new ObjectDisposedException("AT24C32");
             }
 
-            // Adresa je PCF8574: 0100+A2+A1+A0  PCF8574A: 0111+A2+A1+A0
-            if (Address == 0) Address = 0x38;
-            I2cConnectionSettings i2cSettings = new I2cConnectionSettings(Address);
-            i2cSettings.BusSpeed = I2cBusSpeed.StandardMode;
+            byte[] readBuffer;
+            byte[] writeBuffer;
 
-            Task<I2cDevice> controlerInitTask = Task.Run(async () => await I2cDevice.FromIdAsync(i2cControllerDeviceId, i2cSettings));
-            _i2cController = controlerInitTask.Result;
+            readBuffer = new byte[1];
+            writeBuffer = new byte[2];
+            byte[] _tmp = BitConverter.GetBytes(address);
+            if (BitConverter.IsLittleEndian)
+            {
+                Array.Reverse(_tmp);
+            }
+            writeBuffer[0] = _tmp[0];
+            writeBuffer[1] = _tmp[1];
 
-            IsInitialized = true;
+            _initialized[Address].I2cController.WriteRead(writeBuffer, readBuffer);
+
+            return readBuffer[0];
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="address"></param>
+        /// <param name="data"></param>
+        public void WriteAddress(int address, byte data)
+        {
+            if (_isDisposed)
+            {
+                throw new ObjectDisposedException("AT24C32");
+            }
+
+            byte[] writeBuffer;
+
+            writeBuffer = new byte[3];
+            byte[] _tmp = BitConverter.GetBytes(address);
+            if (BitConverter.IsLittleEndian)
+            {
+                Array.Reverse(_tmp);
+            }
+            writeBuffer[0] = _tmp[0];
+            writeBuffer[1] = _tmp[1];
+            writeBuffer[3] = data;
+
+            _initialized[Address].I2cController.Write(writeBuffer);
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="address"></param>
+        /// <param name="pageSize"></param>
+        /// <returns></returns>
+        public byte[] ReadPage(int address, int pageSize)
+        {
+            if (_isDisposed)
+            {
+                throw new ObjectDisposedException("AT24C32");
+            }
+            if ((address > 4096) || (pageSize < 1) || (pageSize > 4096) || (pageSize + address > 4096))
+                throw new ArgumentException("Invalid argument");
+
+            byte[] readBuffer;
+            byte[] writeBuffer;
+
+            readBuffer = new byte[pageSize];
+            writeBuffer = new byte[2];
+            byte[] _tmp = BitConverter.GetBytes(address);
+            if (BitConverter.IsLittleEndian)
+            {
+                Array.Reverse(_tmp);
+            }
+            writeBuffer[0] = _tmp[0];
+            writeBuffer[1] = _tmp[1];
+
+            _initialized[Address].I2cController.WriteRead(writeBuffer, readBuffer);
+
+            return readBuffer;
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="address"></param>
+        /// <param name="data"></param>
+        public void WritePage(int address, byte[] data)
+        {
+            if (_isDisposed)
+            {
+                throw new ObjectDisposedException("AT24C32");
+            }
+            if ((address > 4096) || (address + data.Length > 4096))
+                throw new ArgumentException("Invalid argument");
+
+            byte[] writeBuffer;
+
+            writeBuffer = new byte[data.Length+2];
+            byte[] _tmp = BitConverter.GetBytes(address);
+            if (BitConverter.IsLittleEndian)
+            {
+                Array.Reverse(_tmp);
+            }
+            writeBuffer[0] = _tmp[0];
+            writeBuffer[1] = _tmp[1];
+
+            for (int i = 0; i < data.Length; i++)
+                writeBuffer[i + 2] = data[i];
+
+            _initialized[Address].I2cController.Write(writeBuffer);
         }
 
         #region IDisposable Support
         public void Dispose()
         {
+            // Clean up. If there is reference to the key, and there are more then one, reduce reference. if it's the last one, remove from the static directory of parts.
+            if (_initialized.ContainsKey(Address))
+            {
+                if (_initialized[Address].ReferenceCount > 1)
+                {
+                    _initialized[Address].ReferenceCount--;
+                }
+                else
+                {
+                    _initialized[Address].I2cController.Dispose();
+                    _initialized.Remove(Address);
+                }
+            }
+            _isDisposed = true;
+            Debug.WriteLineIf(_debug, "Disposing of part with address: " + Address);
             //GC.SuppressFinalize(this);
         }
         #endregion

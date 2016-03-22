@@ -90,9 +90,9 @@ namespace Feri.MS.Http.Security
                                 _server.IPFilter.AddBlackList(_firstStage[request.HttpConnection.RemoteHost].IPAddress, 128);
 
                             _firstStage[request.HttpConnection.RemoteHost].Time = TimeProvider.GetTime().AddMinutes(FirstStageBanTimerMinutes);
-                            Debug.WriteLineIf(SetDebug, "First stage ban ip " + request.HttpConnection.RemoteHost + " on " + (_firstStage[request.HttpConnection.RemoteHost].Counter + 1) + " try. Time is " + _firstStage[request.HttpConnection.RemoteHost].Time + ".");
+                            Debug.WriteLineIf(SetDebug, "First stage ban ip " + request.HttpConnection.RemoteHost + " on " + _firstStage[request.HttpConnection.RemoteHost].Counter + " try. Time is " + _firstStage[request.HttpConnection.RemoteHost].Time + ".");
                             _server.Log.WriteLine(TimeProvider.GetTime().ToString("R") + ": " + request.HttpConnection.RemoteHost + ": " + request.HttpConnection.LocalHost + ": " + request.HttpConnection.LocalPort + ": " + request.RequestString().TrimEnd() + ": First stage ban, timer: " + _firstStage[request.HttpConnection.RemoteHost].Time);
-                            _firstStage[request.HttpConnection.RemoteHost].Counter = 0;
+                            _firstStage[request.HttpConnection.RemoteHost].Counter = 1;
                             _firstStage[request.HttpConnection.RemoteHost].FromStage = 1;
                         }
                         else
@@ -113,9 +113,9 @@ namespace Feri.MS.Http.Security
                                 _server.IPFilter.AddBlackList(_secondStage[request.HttpConnection.RemoteHost].IPAddress, 128);
 
                             _secondStage[request.HttpConnection.RemoteHost].Time = TimeProvider.GetTime().AddMinutes(SecondStageBanTimerMinutes);
-                            Debug.WriteLineIf(SetDebug, "Second stage ban ip " + request.HttpConnection.RemoteHost + " on " + (_secondStage[request.HttpConnection.RemoteHost].Counter + 1) + " try. Time is " + _secondStage[request.HttpConnection.RemoteHost].Time + ".");
+                            Debug.WriteLineIf(SetDebug, "Second stage ban ip " + request.HttpConnection.RemoteHost + " on " + _secondStage[request.HttpConnection.RemoteHost].Counter + " try. Time is " + _secondStage[request.HttpConnection.RemoteHost].Time + ".");
                             _server.Log.WriteLine(TimeProvider.GetTime().ToString("R") + ": " + request.HttpConnection.RemoteHost + ": " + request.HttpConnection.LocalHost + ": " + request.HttpConnection.LocalPort + ": " + request.RequestString().TrimEnd() + ": Second stage ban, timer: " + _firstStage[request.HttpConnection.RemoteHost].Time);
-                            _secondStage[request.HttpConnection.RemoteHost].Counter = 0;
+                            _secondStage[request.HttpConnection.RemoteHost].Counter = 1;
                         }
                         else
                         {
@@ -126,7 +126,7 @@ namespace Feri.MS.Http.Security
                     else
                     {
                         // User is on no list, add it to 1st stage list
-                        _firstStage.Add(request.HttpConnection.RemoteHost, new HttpSecurityManagerData() { Counter = 0, IPAddress = IPAddress.Parse(request.HttpConnection.RemoteHost), Time = TimeProvider.GetTime().AddMinutes(FirstStageBanTimerMinutes), FromStage = 0 });
+                        _firstStage.Add(request.HttpConnection.RemoteHost, new HttpSecurityManagerData() { Counter = 1, IPAddress = IPAddress.Parse(request.HttpConnection.RemoteHost), Time = TimeProvider.GetTime().AddMinutes(FirstStageBanTimerMinutes), FromStage = 0 });
                         Debug.WriteLineIf(SetDebug, "Adding ban counter for ip " + request.HttpConnection.RemoteHost + " setting it to " + _firstStage[request.HttpConnection.RemoteHost].Counter + ". Time is " + _firstStage[request.HttpConnection.RemoteHost].Time + ".");
                     }
                 }
@@ -181,7 +181,7 @@ namespace Feri.MS.Http.Security
                             _secondStage[key].Time = TimeProvider.GetTime().AddMinutes(SecondStageBanTimerMinutes);
                             Debug.WriteLineIf(SetDebug, "Removing first stage ban for ip " + key + ". Moving to stage 2. Time is " + _secondStage[key].Time + ".");
                             _server.Log.WriteLine(TimeProvider.GetTime().ToString("R") + ": " + key + ": Expired first stage ban, moving to second stage. Timer: " + _secondStage[key].Time);
-                            _secondStage[key].Counter = 0;
+                            _secondStage[key].Counter = 1;
                             _firstStage.Remove(key);
                         }
                         else // if (_firstStage[key].FromStage == 0)
@@ -200,7 +200,7 @@ namespace Feri.MS.Http.Security
 
                         _firstStage.Add(key, _secondStage[key]);
                         _firstStage[key].Time = TimeProvider.GetTime().AddMinutes(FirstStageBanTimerMinutes);
-                        _firstStage[key].Counter = 0;
+                        _firstStage[key].Counter = 1;
                         _firstStage[key].FromStage = 2;
                         Debug.WriteLineIf(SetDebug, "Removing second stage ban for ip " + _secondStage[key].IPAddress.ToString() + ", moving it to first stage, setting counter to " + _firstStage[key].Counter + ". Time is " + _firstStage[key].Time + ".");
                         _server.Log.WriteLine(TimeProvider.GetTime().ToString("R") + ": " + key + ": Expired second stage ban, moving it to first stage. Timer: " + _firstStage[key].Time);

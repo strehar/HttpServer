@@ -187,6 +187,10 @@
       <Project>{5ddebbb4-5876-43a4-a158-b60625de3a8b}</Project>
       <Name>IPNetwork</Name>
     </ProjectReference>
+    <ProjectReference Include="..\PartsLibrary\PartsLibrary.csproj">
+      <Project>{218eef3d-7b99-433a-8692-46b4e29de617}</Project>
+      <Name>PartsLibrary</Name>
+    </ProjectReference>
   </ItemGroup>
   <PropertyGroup Condition=" '$(VisualStudioVersion)' == '' or '$(VisualStudioVersion)' &lt; '14.0' ">
     <VisualStudioVersion>14.0</VisualStudioVersion>

@@ -24,7 +24,7 @@ namespace Feri.MS.Http.Security
     {
         internal System.Net.IPAddress IPAddress { get; set; }
         internal DateTime Time { get; set; }
-        internal int Counter { get; set; } = 0;
+        internal int Counter { get; set; } = 1;
         internal int FromStage { get; set; } = 0;
     }
 }
