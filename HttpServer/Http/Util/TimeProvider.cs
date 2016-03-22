@@ -16,7 +16,6 @@
 */
 #endregion
 
-using Feri.MS.Parts.I2C.RealTimeClock;
 using System;
 
 namespace Feri.MS.Http.Util
@@ -27,22 +26,23 @@ namespace Feri.MS.Http.Util
     /// </summary>
     public class TimeProvider
     {
+        static IClock _rtc = null;
         static bool _RTCPresent = false;
         /// <summary>
         /// 
         /// </summary>
         static TimeProvider()
         {
-            CheckForRTC();
+
         }
 
         /// <summary>
         /// 
         /// </summary>
         /// <returns></returns>
-        public static DS1307 GetRTC()
+        public static IClock GetRTC()
         {
-            return DS1307.Create();
+            return _rtc;
         }
 
         /// <summary>
@@ -50,7 +50,8 @@ namespace Feri.MS.Http.Util
         /// </summary>
         public static void CheckForRTC()
         {
-            DS1307 _rtc = DS1307.Create();
+            if (_rtc == null)
+                return;
             try
             {
                 _rtc.GetTime();
@@ -70,11 +71,9 @@ namespace Feri.MS.Http.Util
         {
             if (_RTCPresent)
             {
-                DS1307 _rtc = DS1307.Create();
-                if (_rtc.Ready())
+                if (_rtc.Ready())  // Lahko da je pauziran
                 {
-                    DateTime _time = _rtc.GetTime();
-                    return _time.ToUniversalTime();
+                    return _rtc.GetTime().ToUniversalTime();
                 }
                 else
                 {
@@ -95,7 +94,6 @@ namespace Feri.MS.Http.Util
         {
             if (_RTCPresent)
             {
-                DS1307 _rtc = DS1307.Create();
                 _rtc.SetTime(time);
             }
             else
@@ -107,9 +105,10 @@ namespace Feri.MS.Http.Util
         /// <summary>
         /// 
         /// </summary>
-        public static void RegisterTimeSource()
+        public static void RegisterTimeSource(IClock timeSource)
         {
-
+            _rtc = timeSource;
+            CheckForRTC();
         }
     }
 }

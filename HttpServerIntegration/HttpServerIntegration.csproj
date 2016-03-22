@@ -7,7 +7,7 @@
     <ProjectGuid>{C96DEB7F-9753-495D-9FCD-3A7F0D8D6D90}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Feri.MS.Integration</RootNamespace>
+    <RootNamespace>Feri.MS</RootNamespace>
     <AssemblyName>Feri.MS.Integration</AssemblyName>
     <DefaultLanguage>en-US</DefaultLanguage>
     <TargetPlatformIdentifier>UAP</TargetPlatformIdentifier>
@@ -111,22 +111,21 @@
     <None Include="project.json" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Http\Util\RTCClock.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <EmbeddedResource Include="Properties\HttpServerIntegration.rd.xml" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\DotLiquidCore\DotLiquidCore.csproj">
-      <Project>{7e2d1c5b-59af-4f2a-a0aa-0fca38c1740c}</Project>
-      <Name>DotLiquidCore</Name>
-    </ProjectReference>
     <ProjectReference Include="..\HttpServer\HttpServer.csproj">
       <Project>{483fa17c-a355-4828-bbe2-ce44cffa241a}</Project>
       <Name>HttpServer</Name>
     </ProjectReference>
+    <ProjectReference Include="..\PartsLibrary\PartsLibrary.csproj">
+      <Project>{218eef3d-7b99-433a-8692-46b4e29de617}</Project>
+      <Name>PartsLibrary</Name>
+    </ProjectReference>
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Http\Template\" />
-  </ItemGroup>
+  <ItemGroup />
   <PropertyGroup Condition=" '$(VisualStudioVersion)' == '' or '$(VisualStudioVersion)' &lt; '14.0' ">
     <VisualStudioVersion>14.0</VisualStudioVersion>
   </PropertyGroup>

@@ -137,6 +137,7 @@
     <Compile Include="Http\Security\IUserManager.cs" />
     <Compile Include="Http\Json\Json.cs" />
     <Compile Include="Http\Log\HttpLog.cs" />
+    <Compile Include="Http\Util\IClock.cs" />
     <Compile Include="Http\Util\MimeTypes.cs" />
     <Compile Include="Http\Security\IPFilter.cs" />
     <Compile Include="Http\HttpSession\Session.cs" />
@@ -186,10 +187,6 @@
     <ProjectReference Include="..\IPNetwork\IPNetwork.csproj">
       <Project>{5ddebbb4-5876-43a4-a158-b60625de3a8b}</Project>
       <Name>IPNetwork</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\PartsLibrary\PartsLibrary.csproj">
-      <Project>{218eef3d-7b99-433a-8692-46b4e29de617}</Project>
-      <Name>PartsLibrary</Name>
     </ProjectReference>
   </ItemGroup>
   <PropertyGroup Condition=" '$(VisualStudioVersion)' == '' or '$(VisualStudioVersion)' &lt; '14.0' ">

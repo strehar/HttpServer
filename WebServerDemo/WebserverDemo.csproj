@@ -167,6 +167,10 @@
       <Project>{7e2d1c5b-59af-4f2a-a0aa-0fca38c1740c}</Project>
       <Name>DotLiquidCore</Name>
     </ProjectReference>
+    <ProjectReference Include="..\HttpServerIntegration\HttpServerIntegration.csproj">
+      <Project>{c96deb7f-9753-495d-9fcd-3a7f0d8d6d90}</Project>
+      <Name>HttpServerIntegration</Name>
+    </ProjectReference>
     <ProjectReference Include="..\HttpServer\HttpServer.csproj">
       <Project>{483fa17c-a355-4828-bbe2-ce44cffa241a}</Project>
       <Name>HttpServer</Name>
