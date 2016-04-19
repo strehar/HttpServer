@@ -49,6 +49,10 @@ namespace WebServerDemo
         {
             try
             {
+                Feri.MS.Parts.I2C.MultiSensor.BME280.Create().SetCtrlMeas();
+                Feri.MS.Parts.I2C.MultiSensor.BME280.Create().Read();
+
+
                 _logTemplate["log"].Data = "";
                 string[] _toDisplay = new string[_log.Cached.Count];
                 _log.Cached.CopyTo(_toDisplay);

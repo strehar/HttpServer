@@ -21,6 +21,7 @@ using Feri.MS.Http.ContentSource;
 using Feri.MS.Http.Json;
 using Feri.MS.Http.Template;
 using Feri.MS.Http.Util;
+using Feri.MS.Parts.I2C.MultiSensor;
 using Feri.MS.Parts.I2C.RealTimeClock;
 using WebResources;
 
@@ -50,8 +51,9 @@ namespace WebServerDemo
         public void Start()
         {
             // Register RTC Clock with time provider.
-            TimeProvider.RegisterTimeSource(new RTCClock());
-            //DS1307.Create().SetTime(new System.DateTime(2016,3, 22, 18, 59, 00));
+            //TimeProvider.RegisterTimeSource(new RTCClock());
+            //DS1307.Create().SetTime(new System.DateTime(2016,3, 23, 12, 4, 00));
+
 
             // Disable debug display from HttpServer
             _ws.SetDebug = false;
