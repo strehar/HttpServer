@@ -49,7 +49,7 @@ namespace WebServerDemo
         {
             try
             {
-                Feri.MS.Parts.I2C.MultiSensor.BME280.Create().SetCtrlMeas();
+                //Feri.MS.Parts.I2C.MultiSensor.BME280.Create().SetCtrlMeas();
                 Feri.MS.Parts.I2C.MultiSensor.BME280.Create().Read();
 
 

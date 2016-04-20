@@ -73,6 +73,8 @@ namespace Feri.MS.Parts.I2C.MultiSensor
         private bool IsInitialized { get; set; }
         public int Address { get; private set; } = 0;
 
+        private double t_fine;
+
         private BME280Calibration Calibration = new BME280Calibration();
 
         private BME280(int address)
@@ -143,7 +145,7 @@ namespace Feri.MS.Parts.I2C.MultiSensor
                 throw new ObjectDisposedException("BME280");
             }
             Reset();
-            System.Threading.Tasks.Task.Delay(100);
+            Task.Delay(100);
             ReadCalibration();
             SetConfig();
             SetCtrlHum();
@@ -215,7 +217,7 @@ namespace Feri.MS.Parts.I2C.MultiSensor
 
             bits[0] = true;
             bits[1] = false;
-            bits[2] = false;
+            bits[2] = true;
 
             writeBuffer = new byte[2];
             writeBuffer[0] = 0xF2;
@@ -237,13 +239,13 @@ namespace Feri.MS.Parts.I2C.MultiSensor
             BitArray bits = new BitArray(8);
 
             bits[0] = true;
-            bits[1] = false;
+            bits[1] = true;
             bits[2] = true;
             bits[3] = false;
-            bits[4] = false;
+            bits[4] = true;
             bits[5] = true;
             bits[6] = false;
-            bits[7] = false;
+            bits[7] = true;
 
             writeBuffer = new byte[2];
             writeBuffer[0] = 0xF4;
@@ -275,13 +277,17 @@ namespace Feri.MS.Parts.I2C.MultiSensor
 
             _initialized[Address].I2cController.WriteRead(writeBuffer, readBuffer);
 
-            t_humidity = readBuffer[7] + (readBuffer[6] << 8);
-            t_temperature = (readBuffer[5] >> 4) + (readBuffer[4] << 4) + (readBuffer[3] << 12);
-            t_pressure = (readBuffer[2] >> 4) + (readBuffer[1] << 4) + (readBuffer[0] << 12);
+            t_pressure = (readBuffer[0] << 12) + (readBuffer[1] << 4) + (readBuffer[2] >> 4);
+            t_temperature = (readBuffer[3] << 12) + (readBuffer[4] << 4) + (readBuffer[5] >> 4);
+            t_humidity = (readBuffer[6] << 8) + readBuffer[7];
 
             data.Temperature = CompensateTemperature(t_temperature);
+            data.Pressure = CompensatePressure(t_pressure);
+            data.Humidity = CompensateHumidity(t_humidity);
 
-            Debug.WriteLine("Temperatura: " + data.Temperature);
+            Debug.WriteLine("Temperatura: " + data.Temperature + " C.");
+            Debug.WriteLine("Pritisk: " + data.Pressure / 100 + " hpa.");
+            Debug.WriteLine("Vlažnost: " + data.Humidity + " %.");
 
             return data;
 
@@ -327,7 +333,7 @@ namespace Feri.MS.Parts.I2C.MultiSensor
             // Manual, page 22, 23
             Calibration.dig_H2 = readBuffer[0] + (readBuffer[1] << 8);
             Calibration.dig_H3 = readBuffer[2];
-            Calibration.dig_H4 = (readBuffer[3] << 8) + (readBuffer[4] & 0xF);
+            Calibration.dig_H4 = (readBuffer[3] << 4) + (readBuffer[4] & 0xF);
             Calibration.dig_H5 = (readBuffer[4] >> 4) + (readBuffer[5] << 4);
             Calibration.dig_H6 = readBuffer[6];
         }
@@ -340,22 +346,48 @@ namespace Feri.MS.Parts.I2C.MultiSensor
             double T;
 
             var1 = (temperature / 16384.0 - Calibration.dig_T1 / 1024.0) * Calibration.dig_T2;
-            var2 = ((temperature / 131072.0 - Calibration.dig_T1 / 8192.0) * (temperature / 131072.0 - Calibration.dig_T1 / 8192.0)) * Calibration.dig_T3;
-            T = (var1 + var2) / 5120.0;
-
-            return T;
+            var2 = (temperature / 131072.0 - Calibration.dig_T1 / 8192.0) * (temperature / 131072.0 - Calibration.dig_T1 / 8192.0) * Calibration.dig_T3;
+            t_fine = (var1 + var2);
+            t_fine = t_fine - (2 * 5120);  // Sesnor seems to have offset of 2 C.
+            T = (t_fine) / 5120.0;
+            return Math.Round(T, 2, MidpointRounding.AwayFromZero);
         }
 
         public double CompensateHumidity(int humidity)
         {
             //Manual page 49
-            return 0;
+            double var_H;
+            var_H = t_fine - 76800.0;
+            var_H = (humidity - ((Calibration.dig_H4) * 64.0 + (Calibration.dig_H5) / 16384.0 * var_H)) * ((Calibration.dig_H2) / 65536.0 * (1.0 + (Calibration.dig_H6) / 67108864.0 * var_H * (1.0 + (Calibration.dig_H3) / 67108864.0 * var_H)));
+            var_H = var_H * (1.0 - (Calibration.dig_H1) * var_H / 524288.0);
+            if (var_H > 100.0)
+                var_H = 100.0;
+            else if (var_H < 0.0)
+                var_H = 0.0;
+            return Math.Round(var_H, 2, MidpointRounding.AwayFromZero);
         }
 
         public double CompensatePressure(int pressure)
         {
             //Manual page 49
-            return 0;
+            double var1, var2, p;
+            var1 = t_fine / 2.0 - 64000.0;
+            var2 = var1 * var1 * (Calibration.dig_P6) / 32768.0;
+            var2 = var2 + var1 * (Calibration.dig_P5) * 2.0;
+            var2 = (var2 / 4.0) + ((Calibration.dig_P4) * 65536.0);
+            var1 = ((Calibration.dig_P3) * var1 * var1 / 524288.0 + (Calibration.dig_P2) * var1) / 524288.0;
+            var1 = (1.0 + var1 / 32768.0) * (Calibration.dig_P1);
+            if (var1 == 0.0)
+            {
+                return 0; // avoid exception caused by division by zero
+            }
+            p = 1048576.0 - pressure;
+            p = (p - (var2 / 4096.0)) * 6250.0 / var1;
+            var1 = (Calibration.dig_P9) * p * p / 2147483648.0;
+            var2 = p * (Calibration.dig_P8) / 32768.0;
+            p = p + (var1 + var2 + (Calibration.dig_P7)) / 16.0;
+            p = p - (100 * 100); // Sensor seems to have offset of 100 hpa
+            return Math.Round(p, 1, MidpointRounding.AwayFromZero);
         }
         #region IDisposable Support
         public void Dispose()
