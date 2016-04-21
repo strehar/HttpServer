@@ -47,6 +47,7 @@ namespace WebServerDemo
         TemplateDemo _templateDemo = new TemplateDemo();
         DotLiquidDemo _liquidDemo = new DotLiquidDemo();
         LogDisplayDemo _logDemo = new LogDisplayDemo();
+        WeatherDemo _WeatherDemo = new WeatherDemo();
 
         public void Start()
         {
@@ -92,6 +93,7 @@ namespace WebServerDemo
             _templateDemo.Start(_ws, _template);
             _liquidDemo.Start(_ws);
             _logDemo.Start(_ws);
+            _WeatherDemo.Start(_ws);
 
             // Start server on default port (8000)
             //_ws.Start();

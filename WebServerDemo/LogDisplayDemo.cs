@@ -49,16 +49,10 @@ namespace WebServerDemo
         {
             try
             {
-                Feri.MS.Parts.I2C.MultiSensor.BME280Data data = Feri.MS.Parts.I2C.MultiSensor.BME280.Create().Read();
-                Debug.WriteLine("Temperatura: " + data.Temperature + " C.");
-                Debug.WriteLine("Pritisk: " + data.Pressure / 100 + " hpa.");
-                Debug.WriteLine("Vlažnost: " + data.Humidity + " %.");
-
-
                 _logTemplate["log"].Data = "";
                 string[] _toDisplay = new string[_log.Cached.Count];
                 _log.Cached.CopyTo(_toDisplay);
-                for (int i = _toDisplay.Length-1; i >= 0; i--)
+                for (int i = _toDisplay.Length - 1; i >= 0; i--)
                     _logTemplate["log"].Data += _toDisplay[i] + "<br>\n";
                 _logTemplate.ProcessAction();
                 response.Write(_logTemplate.GetByte(), _ws.GetMimeType.GetMimeFromFile("/templateLog.html"));
