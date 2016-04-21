@@ -33,6 +33,12 @@ namespace Feri.MS.Parts.I2C.MultiSensor
         public double Pressure { get; set; }
         public double Humidity { get; set; }
     }
+    public enum BME280Mode
+    {
+        SLEEP,
+        ONESHOT,
+        NORMAL
+    };
     internal class BME280Helper
     {
         internal I2cDevice I2cController { get; set; }
@@ -65,29 +71,25 @@ namespace Feri.MS.Parts.I2C.MultiSensor
     }
     public class BME280 : IDisposable
     {
-        private static Dictionary<int, BME280Helper> _initialized { get; set; } = new Dictionary<int, BME280Helper>();
-        public I2cDevice I2cController { get; private set; }
         private bool _isDisposed = false;
+        private double t_fine;
+        private BME280Calibration Calibration = new BME280Calibration();
+        private BME280Mode mode = BME280Mode.NORMAL;
         public bool _debug = false;
 
+        private static Dictionary<int, BME280Helper> _initialized { get; set; } = new Dictionary<int, BME280Helper>();
+        public I2cDevice I2cController { get; private set; }
         private bool IsInitialized { get; set; }
         public int Address { get; private set; } = 0;
-
-        private double t_fine;
-
-        private BME280Calibration Calibration = new BME280Calibration();
+        public int CompensateTemperature { get; set; } = -2;
+        public int CompensateHumidity { get; set; } = 0;
+        public int CompensatePressure { get; set; } = -100;
 
         private BME280(int address)
         {
             Address = address;
         }
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="address"></param>
-        /// <param name="i2cControllerDeviceId"></param>
-        /// <returns></returns>
         public static BME280 Create(int address = 0x76, string i2cControllerDeviceId = null)
         {
             // Adresa je 1101000
@@ -168,7 +170,42 @@ namespace Feri.MS.Parts.I2C.MultiSensor
             _initialized[Address].I2cController.Write(writeBuffer);
         }
 
-        public void SetConfig()
+        public void SetMode(BME280Mode operationMode = BME280Mode.NORMAL)
+        {
+            byte[] _data = new byte[1] { GetCtrlMeas() };
+            BitArray bitData;
+
+            switch (mode)
+            {
+                case BME280Mode.NORMAL:
+                    mode = operationMode;
+                    bitData = new BitArray(_data[0]);
+                    bitData[0] = true;
+                    bitData[1] = true;
+                    ((ICollection)bitData).CopyTo(_data, 0);
+                    break;
+
+                case BME280Mode.ONESHOT:
+                    mode = operationMode;
+                    bitData = new BitArray(_data[0]);
+                    bitData[0] = true;
+                    bitData[1] = false;
+                    ((ICollection)bitData).CopyTo(_data, 0);
+                    break;
+
+                case BME280Mode.SLEEP:
+                    mode = operationMode;
+                    bitData = new BitArray(_data[0]);
+                    bitData[0] = false;
+                    bitData[1] = false;
+                    ((ICollection)bitData).CopyTo(_data, 0);
+                    break;
+            }
+
+            SetCtrlMeas(_data[0]);
+        }
+
+        private void SetConfig()
         {
             if (_isDisposed)
             {
@@ -176,7 +213,6 @@ namespace Feri.MS.Parts.I2C.MultiSensor
             }
 
             byte[] writeBuffer;
-            byte[] readBuffer;
 
             BitArray bits = new BitArray(8);
 
@@ -188,16 +224,71 @@ namespace Feri.MS.Parts.I2C.MultiSensor
             bits[6] = true;
             bits[7] = false;
 
-            readBuffer = new byte[1];
+            writeBuffer = new byte[1];
+
+            ((ICollection)bits).CopyTo(writeBuffer, 0);
+
+            SetConfig(writeBuffer[0]);
+        }
+
+        public void SetConfig(byte data)
+        {
+            if (_isDisposed)
+            {
+                throw new ObjectDisposedException("BME280");
+            }
+
+            byte[] writeBuffer;
+
             writeBuffer = new byte[2];
             writeBuffer[0] = 0xF5;
-
-            ((ICollection)bits).CopyTo(writeBuffer, 1);
+            writeBuffer[1] = data;
 
             _initialized[Address].I2cController.Write(writeBuffer);
         }
 
-        public void SetCtrlHum()
+        public byte GetConfig()
+        {
+            if (_isDisposed)
+            {
+                throw new ObjectDisposedException("BME280");
+            }
+
+            byte[] writeBuffer;
+            byte[] readBuffer;
+
+            readBuffer = new byte[1];
+            writeBuffer = new byte[1];
+            writeBuffer[0] = 0xF5;
+
+            _initialized[Address].I2cController.WriteRead(writeBuffer, readBuffer);
+
+            return readBuffer[0];
+        }
+
+        private void SetCtrlHum()
+        {
+            if (_isDisposed)
+            {
+                throw new ObjectDisposedException("BME280");
+            }
+
+            byte[] writeBuffer;
+
+            BitArray bits = new BitArray(8);
+
+            bits[0] = true;
+            bits[1] = false;
+            bits[2] = true;
+
+            writeBuffer = new byte[1];
+
+            ((ICollection)bits).CopyTo(writeBuffer, 0);
+
+            SetCtrlHum(writeBuffer[0]);
+        }
+
+        public void SetCtrlHum(byte data)
         {
             if (_isDisposed)
             {
@@ -214,10 +305,12 @@ namespace Feri.MS.Parts.I2C.MultiSensor
             _initialized[Address].I2cController.WriteRead(writeBuffer, readBuffer);
 
             BitArray bits = new BitArray(readBuffer);
+            writeBuffer[0] = data;
+            BitArray dataBits = new BitArray(writeBuffer);
 
-            bits[0] = true;
-            bits[1] = false;
-            bits[2] = true;
+            bits[0] = dataBits[0];
+            bits[1] = dataBits[1];
+            bits[2] = dataBits[2];
 
             writeBuffer = new byte[2];
             writeBuffer[0] = 0xF2;
@@ -227,7 +320,26 @@ namespace Feri.MS.Parts.I2C.MultiSensor
             _initialized[Address].I2cController.Write(writeBuffer);
         }
 
-        public void SetCtrlMeas()
+        public byte GetCtrlHum()
+        {
+            if (_isDisposed)
+            {
+                throw new ObjectDisposedException("BME280");
+            }
+
+            byte[] writeBuffer;
+            byte[] readBuffer;
+
+            readBuffer = new byte[1];
+            writeBuffer = new byte[1];
+            writeBuffer[0] = 0xF2;
+
+            _initialized[Address].I2cController.WriteRead(writeBuffer, readBuffer);
+
+            return readBuffer[0];
+        }
+
+        private void SetCtrlMeas()
         {
             if (_isDisposed)
             {
@@ -247,12 +359,46 @@ namespace Feri.MS.Parts.I2C.MultiSensor
             bits[6] = false;
             bits[7] = true;
 
+            writeBuffer = new byte[1];
+
+            ((ICollection)bits).CopyTo(writeBuffer, 0);
+
+            SetCtrlMeas(writeBuffer[0]);
+        }
+
+        public void SetCtrlMeas(byte data)
+        {
+            if (_isDisposed)
+            {
+                throw new ObjectDisposedException("BME280");
+            }
+
+            byte[] writeBuffer;
+
             writeBuffer = new byte[2];
             writeBuffer[0] = 0xF4;
-
-            ((ICollection)bits).CopyTo(writeBuffer, 1);
+            writeBuffer[1] = data;
 
             _initialized[Address].I2cController.Write(writeBuffer);
+        }
+
+        public byte GetCtrlMeas()
+        {
+            if (_isDisposed)
+            {
+                throw new ObjectDisposedException("BME280");
+            }
+
+            byte[] writeBuffer;
+            byte[] readBuffer;
+
+            readBuffer = new byte[1];
+            writeBuffer = new byte[1];
+            writeBuffer[0] = 0xF4;
+
+            _initialized[Address].I2cController.WriteRead(writeBuffer, readBuffer);
+
+            return readBuffer[0];
         }
 
         public BME280Data Read()
@@ -260,6 +406,20 @@ namespace Feri.MS.Parts.I2C.MultiSensor
             if (_isDisposed)
             {
                 throw new ObjectDisposedException("BME280");
+            }
+
+            if (mode == BME280Mode.ONESHOT)
+            {
+                byte[] _data = new byte[1] { GetCtrlMeas() };
+
+                BitArray bitData = new BitArray(_data[0]);
+
+                bitData[0] = true;
+                bitData[1] = false;
+
+                ((ICollection)bitData).CopyTo(_data, 0);
+
+                SetCtrlMeas(_data[0]);
             }
 
             int t_temperature;
@@ -281,19 +441,14 @@ namespace Feri.MS.Parts.I2C.MultiSensor
             t_temperature = (readBuffer[3] << 12) + (readBuffer[4] << 4) + (readBuffer[5] >> 4);
             t_humidity = (readBuffer[6] << 8) + readBuffer[7];
 
-            data.Temperature = CompensateTemperature(t_temperature);
-            data.Pressure = CompensatePressure(t_pressure);
-            data.Humidity = CompensateHumidity(t_humidity);
-
-            Debug.WriteLine("Temperatura: " + data.Temperature + " C.");
-            Debug.WriteLine("Pritisk: " + data.Pressure / 100 + " hpa.");
-            Debug.WriteLine("Vlažnost: " + data.Humidity + " %.");
+            data.Temperature = CalculateTemperature(t_temperature);
+            data.Pressure = CalculatePressure(t_pressure);
+            data.Humidity = CalculateHumidity(t_humidity);
 
             return data;
-
         }
 
-        public void ReadCalibration()
+        private void ReadCalibration()
         {
             if (_isDisposed)
             {
@@ -338,7 +493,7 @@ namespace Feri.MS.Parts.I2C.MultiSensor
             Calibration.dig_H6 = readBuffer[6];
         }
 
-        public double CompensateTemperature(int temperature)
+        private double CalculateTemperature(int temperature)
         {
             //Manual page 49
             double var1;
@@ -348,18 +503,19 @@ namespace Feri.MS.Parts.I2C.MultiSensor
             var1 = (temperature / 16384.0 - Calibration.dig_T1 / 1024.0) * Calibration.dig_T2;
             var2 = (temperature / 131072.0 - Calibration.dig_T1 / 8192.0) * (temperature / 131072.0 - Calibration.dig_T1 / 8192.0) * Calibration.dig_T3;
             t_fine = (var1 + var2);
-            t_fine = t_fine - (2 * 5120);  // Sesnor seems to have offset of 2 C.
+            t_fine = t_fine + (CompensateTemperature * 5120);  // Sesnor seems to have offset of 2 C.
             T = (t_fine) / 5120.0;
             return Math.Round(T, 2, MidpointRounding.AwayFromZero);
         }
 
-        public double CompensateHumidity(int humidity)
+        private double CalculateHumidity(int humidity)
         {
             //Manual page 49
             double var_H;
             var_H = t_fine - 76800.0;
             var_H = (humidity - ((Calibration.dig_H4) * 64.0 + (Calibration.dig_H5) / 16384.0 * var_H)) * ((Calibration.dig_H2) / 65536.0 * (1.0 + (Calibration.dig_H6) / 67108864.0 * var_H * (1.0 + (Calibration.dig_H3) / 67108864.0 * var_H)));
             var_H = var_H * (1.0 - (Calibration.dig_H1) * var_H / 524288.0);
+            var_H = var_H + CompensateHumidity;  // compensate sendor
             if (var_H > 100.0)
                 var_H = 100.0;
             else if (var_H < 0.0)
@@ -367,7 +523,7 @@ namespace Feri.MS.Parts.I2C.MultiSensor
             return Math.Round(var_H, 2, MidpointRounding.AwayFromZero);
         }
 
-        public double CompensatePressure(int pressure)
+        private double CalculatePressure(int pressure)
         {
             //Manual page 49
             double var1, var2, p;
@@ -386,9 +542,10 @@ namespace Feri.MS.Parts.I2C.MultiSensor
             var1 = (Calibration.dig_P9) * p * p / 2147483648.0;
             var2 = p * (Calibration.dig_P8) / 32768.0;
             p = p + (var1 + var2 + (Calibration.dig_P7)) / 16.0;
-            p = p - (100 * 100); // Sensor seems to have offset of 100 hpa
+            p = p + (CompensatePressure * 100); // Sensor seems to have offset of 100 hpa
             return Math.Round(p, 1, MidpointRounding.AwayFromZero);
         }
+
         #region IDisposable Support
         public void Dispose()
         {

@@ -49,8 +49,10 @@ namespace WebServerDemo
         {
             try
             {
-                //Feri.MS.Parts.I2C.MultiSensor.BME280.Create().SetCtrlMeas();
-                Feri.MS.Parts.I2C.MultiSensor.BME280.Create().Read();
+                Feri.MS.Parts.I2C.MultiSensor.BME280Data data = Feri.MS.Parts.I2C.MultiSensor.BME280.Create().Read();
+                Debug.WriteLine("Temperatura: " + data.Temperature + " C.");
+                Debug.WriteLine("Pritisk: " + data.Pressure / 100 + " hpa.");
+                Debug.WriteLine("Vlažnost: " + data.Humidity + " %.");
 
 
                 _logTemplate["log"].Data = "";
