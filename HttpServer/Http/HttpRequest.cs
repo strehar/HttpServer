@@ -42,7 +42,6 @@ namespace Feri.MS.Http
     public class HttpRequest
     {
         #region Declarations
-        private const int BufferSize = 8192;
 
         private Stream _output;
 
@@ -79,6 +78,10 @@ namespace Feri.MS.Http
             {
                 return _output;
             }
+            set
+            {
+                _output = value;
+            }
         }
 
         /// <summary>
@@ -89,6 +92,10 @@ namespace Feri.MS.Http
             get
             {
                 return _requestType;
+            }
+            internal set
+            {
+                _requestType = value;
             }
         }
 
@@ -101,6 +108,10 @@ namespace Feri.MS.Http
             {
                 return _requestPath;
             }
+            internal set
+            {
+                _requestPath = value;
+            }
         }
 
         /// <summary>
@@ -111,6 +122,10 @@ namespace Feri.MS.Http
             get
             {
                 return _parameters;
+            }
+            internal set
+            {
+                _parameters = value;
             }
         }
 
@@ -123,6 +138,10 @@ namespace Feri.MS.Http
             {
                 return _headers;
             }
+            internal set
+            {
+                _headers = value;
+            }
         }
 
         /// <summary>
@@ -134,6 +153,10 @@ namespace Feri.MS.Http
             {
                 return _requestSize;
             }
+            internal set
+            {
+                _requestSize = value;
+            }
         }
 
         /// <summary>
@@ -144,6 +167,10 @@ namespace Feri.MS.Http
             get
             {
                 return _httpConnection;
+            }
+            internal set
+            {
+                _httpConnection = value;
             }
         }
 
@@ -203,21 +230,44 @@ namespace Feri.MS.Http
             {
                 return _cookies;
             }
+            internal set
+            {
+                _cookies = value;
+            }
         }
 
         /// <summary>
         /// 
         /// </summary>
         /// <returns></returns>
-        public string RequestString()
+        public string RequestString
         {
-            return _requestString;
+            get
+            {
+                return _requestString;
+            }
+            internal set
+            {
+                _requestString = value;
+            }
         }
 
         /// <summary>
         /// 
         /// </summary>
         public string AuthenticatedUser { get; internal set; }
+
+        internal string RawRequest
+        {
+            get
+            {
+                return _rawrequest;
+            }
+            set
+            {
+                _rawrequest = value;
+            }
+        }
         #endregion
 
         /// <summary>
@@ -279,7 +329,8 @@ namespace Feri.MS.Http
                     _tmpSession = _sessionManager.GetSession(_cookies["SessionID"].Value);
                     if (_tmpSession == null)
                         return null;
-                    else {
+                    else
+                    {
                         _cookies["SessionID"].Expire = _tmpTime;
                         _cookies["SessionID"].Path = "/";
                         _tmpSession.Expires = _tmpTime;
@@ -308,223 +359,6 @@ namespace Feri.MS.Http
             return true;
         }
 
-        /// <summary>
-        /// Metod parses the provided Http request stream and creates parameters, headers and cookies.
-        /// It is internal method for use by HttpServre class.
-        /// </summary>
-        /// <param name="data">Raw http stream</param>
-        /// <returns>True if stream parsed OK, false if something went wrong. Problem can be determined from class state.</returns>
-        internal bool Init(StreamSocket data)
-        {
-            // preberemo stream, zgradimo array haderjev in parametrov, ter input Stream in output stream ter response objekt.
-            try
-            {
 
-                string[] tmpParam;
-
-                // this works for text only
-                StringBuilder requestBuilder = new StringBuilder();
-                using (Stream _input = data.InputStream.AsStreamForRead())
-                {
-                    byte[] _data = new byte[BufferSize];
-                    IBuffer buffer = _data.AsBuffer();
-                    int dataRead = BufferSize;
-                    while (dataRead == BufferSize)
-                    {
-                        dataRead = _input.Read(_data, 0, BufferSize);
-                        requestBuilder.Append(Encoding.UTF8.GetString(_data, 0, _data.Length));
-                    }
-                }
-                // end this
-
-                _httpConnection = new HttpConnection(data);
-
-                _rawrequest = requestBuilder.ToString().TrimEnd('\0');
-
-                _requestSize = _rawrequest.Length;
-
-                string[] requestBody = _rawrequest.Split('\n');
-
-                _requestString = requestBody[0];
-
-                string[] requestHeaderParts = requestBody[0].Split(' ');
-                if (!(requestHeaderParts.Length > 1))
-                {
-                    Debug.WriteLineIf(_debug, "Malformed request.");
-                    Debug.WriteLineIf(_debug, "Request: " + requestBuilder + ".");
-                    return false;
-                }
-
-                _requestType = requestHeaderParts[0];
-                string[] _requestParts = requestHeaderParts[1].Split('?');
-
-                // parametri
-                _requestPath = _requestParts[0];
-                if (_requestParts.Length > 1)
-                {
-                    foreach (string par in _requestParts[1].Split('&'))
-                    {
-                        tmpParam = par.Split(new char[] { '=' }, 2);
-
-                        if (!_parameters.ContainsKey(tmpParam[0].Trim()))
-                        {
-                            if (tmpParam.Length > 1)
-                            {
-                                _parameters.Add(WebUtility.UrlDecode(tmpParam[0].Trim()), WebUtility.UrlDecode(tmpParam[1]));
-                            }
-                            else
-                            {
-                                _parameters.Add(WebUtility.UrlDecode(tmpParam[0].Trim()), null);
-                            }
-                        }
-                    }
-                }
-
-                // aributi
-                foreach (string par in requestBody)
-                {
-                    string[] headers = par.Split(new char[] { ':' }, 2);
-                    if (headers.Length > 1)
-                    {
-                        if (!_headers.ContainsKey(headers[0].Trim()))
-                        {
-                            _headers.Add(WebUtility.UrlDecode(headers[0].Trim()), WebUtility.UrlDecode(headers[1].Trim()));
-                            if (headers[0].Trim().Equals("Cookie", StringComparison.OrdinalIgnoreCase))
-                            {
-                                ProcessCookie(headers[1].Trim());
-                            }
-                        }
-                    }
-                }
-
-                // If type = POST, find string \r, then parse parameters if supportsed type, else report unsupported type.
-
-                if (_requestType.Equals("POST"))
-                {
-                    if (_headers.ContainsKey("Content-Type"))
-                    {
-                        if (_headers["Content-Type"].Equals("application/x-www-form-urlencoded"))
-                        {
-                            int lokacijaPodatkov = Array.IndexOf(requestBody, "\r") + 1;
-                            int dataLength = requestBody[lokacijaPodatkov].Length;
-                            if (_headers.ContainsKey("Content-Length"))
-                            {
-                                if (!_headers["Content-Length"].Equals(dataLength.ToString()))
-                                {
-                                    Debug.WriteLineIf(_debug, "Data size mismatch. Attribute says: " + _headers["Content-Length"] + " Data says:" + dataLength + ".");
-                                    return false;
-                                }
-                            }
-                            foreach (string par in requestBody[lokacijaPodatkov].TrimEnd().Split('&'))
-                            {
-                                tmpParam = par.Split(new char[] { '=' }, 2);
-
-                                if (!_parameters.ContainsKey(tmpParam[0].Trim()))
-                                {
-                                    if (tmpParam.Length > 1)
-                                    {
-                                        _parameters.Add(WebUtility.UrlDecode(tmpParam[0].Trim()), WebUtility.UrlDecode(tmpParam[1]));
-                                    }
-                                    else
-                                    {
-                                        _parameters.Add(WebUtility.UrlDecode(tmpParam[0].Trim()), null);
-                                    }
-                                }
-                            }
-                        }
-                        else
-                        {
-                            // Unsupported POST request type
-                            Debug.WriteLineIf(_debug, "Unsupported POST: " + _headers["Content-Type"] + ".");
-                            return false;
-                        }
-                    }
-                }
-
-                _output = data.OutputStream.AsStreamForWrite();
-
-                return true;
-
-            }
-            catch (Exception e)
-            {
-                Debug.WriteLine(e);
-                return false;
-            }
-        }
-
-        /// <summary>
-        /// Internal method of HttpRequest class to parse cookies from the cookie string provided by the client.
-        /// </summary>
-        /// <param name="cookie">Raw string with cookie data.</param>
-        private void ProcessCookie(string cookie)
-        {
-            try
-            {
-                string decodedCookie = WebUtility.UrlDecode(cookie);
-                char[] _tmpChars = decodedCookie.ToCharArray();
-                int _tmpLength = _tmpChars.Length;
-                // Preverimo koliko ; se pojavi v nizu. to pove koliko cookijev je za to zahtevo.
-                int cookieCount = 0;
-                for (int n = 0; n < _tmpLength; n++)
-                {
-                    if (_tmpChars[n] == ';')
-                        cookieCount++;
-                }
-
-                string[] _tmpCookieArry = decodedCookie.Split(';');
-
-                // Obdelamo vsak poslan cookie...
-                foreach (string _cookie in _tmpCookieArry)
-                {
-                    // preverimo koliko = se pojavi v nizu. Glede na to lahko sestavimo ravilni cookie.
-                    int subCookieCount = 0;
-                    char[] _subCookieChars = _cookie.ToCharArray();
-                    _tmpLength = _subCookieChars.Length;
-                    for (int n = 0; n < _tmpLength; n++)
-                    {
-                        if (_subCookieChars[n] == '=')
-                            subCookieCount++;
-                    }
-                    if (subCookieCount == 0)
-                    {
-                        // value
-                        _cookies.Add(_cookie, new HttpCookie(_cookie));
-                    }
-                    else if (subCookieCount == 1)
-                    {
-                        // name=value
-                        string[] _cookieParts = _cookie.Split(new char[] { '=' }, 2);
-                        _cookies.Add(WebUtility.UrlDecode(_cookieParts[0].Trim()), new HttpCookie(_cookieParts[0].Trim(), _cookieParts[1].Trim()));
-                    }
-                    else
-                    {
-                        // name1=value1&name2=value2&...
-                        string[] _cookieParts = _cookie.Split(new char[] { '=' }, 2);
-                        HttpCookie _tmpHttpCookie = new HttpCookie(_cookieParts[0].Trim());
-                        string[] _subCookieParts = _cookieParts[1].Split('&'); //subcookie string.
-                        foreach (string _subCookieCookieParts in _subCookieParts)
-                        {
-                            string[] _subCookie = _subCookieCookieParts.Split(new char[] { '=' }, 2);
-                            if (_subCookie.Length > 1)
-                            {
-                                if (!_tmpHttpCookie.Values.ContainsKey(_subCookie[0].Trim()))  // Ignoriramo podvojene vrednosti, upoštevamo samo prvo.
-                                {
-                                    _tmpHttpCookie.Values.Add(_subCookie[0].Trim(), _subCookie[1].Trim());
-                                }
-                            }
-                            else
-                            {
-                                _tmpHttpCookie.Values.Add(_subCookie[0].Trim(), null);
-                            }
-                        }
-                    }
-                }
-            }
-            catch (Exception e)
-            {
-                Debug.WriteLine(e);
-            }
-        }
     }
 }

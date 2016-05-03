@@ -31,6 +31,9 @@ using Feri.MS.Http.RootManager;
 using Feri.MS.Http.Util;
 using Feri.MS.Http.HttpSession;
 using System.Text;
+using Windows.Storage.Streams;
+using System.Runtime.InteropServices.WindowsRuntime;
+using System.Net;
 
 namespace Feri.MS.Http
 {
@@ -72,6 +75,8 @@ namespace Feri.MS.Http
         public delegate void serverPath(HttpRequest request, HttpResponse response);    // delegat za obdelavo http zahtev
 
         private IHttpRootManager _rootManager;
+
+        private const int BufferSize = 8192;
 
         private bool _debug = false;                      // Ali se naj izpisujejo debug informacije iz metod (precej spama)
         private bool _authenticationRequired = false;     // Ali server zahteva avtentikacijo za dostop do HTTP vmesnika. prevzeto je ne.
@@ -466,6 +471,7 @@ namespace Feri.MS.Http
                 return;
             }
 
+            // Process requests
             if (_serverPath.ContainsKey(__request.RequestPath.ToLower()))
             {
                 _serverPath[__request.RequestPath.ToLower()](__request, __response);
@@ -488,11 +494,235 @@ namespace Feri.MS.Http
         }
 
         /// <summary>
+        /// Metod parses the provided Http request stream and creates parameters, headers and cookies.
+        /// It is internal method for use by HttpServre class.
+        /// </summary>
+        /// <param name="data">Raw http stream</param>
+        /// <returns>True if stream parsed OK, false if something went wrong. Problem can be determined from class state.</returns>
+        private HttpRequest ParseData(StreamSocket data)
+        {
+            // preberemo stream, zgradimo array haderjev in parametrov, ter input Stream in output stream ter response objekt.
+            try
+            {
+
+                string[] tmpParam;
+                HttpRequest _request = new HttpRequest();
+
+                // this works for text only
+                StringBuilder requestBuilder = new StringBuilder();
+                using (Stream _input = data.InputStream.AsStreamForRead())
+                {
+                    byte[] _data = new byte[BufferSize];
+                    IBuffer buffer = _data.AsBuffer();
+                    int dataRead = BufferSize;
+                    while (dataRead == BufferSize)
+                    {
+                        dataRead = _input.Read(_data, 0, BufferSize);
+                        requestBuilder.Append(Encoding.UTF8.GetString(_data, 0, _data.Length));
+                    }
+                }
+                // end this
+
+                _request.HttpConnection = new HttpConnection(data);
+
+                _request.RawRequest = requestBuilder.ToString().TrimEnd('\0');
+
+                _request.RequestSize = _request.RawRequest.Length;
+
+                string[] requestBody = _request.RawRequest.Split('\n');
+
+                _request.RequestString = requestBody[0];
+
+                string[] requestHeaderParts = requestBody[0].Split(' ');
+                if (!(requestHeaderParts.Length > 1))
+                {
+                    Debug.WriteLineIf(_debug, "Malformed request.");
+                    Debug.WriteLineIf(_debug, "Request: " + requestBuilder + ".");
+                    return false;  // request is not in format GET /path...
+                }
+
+                _request.RequestType = requestHeaderParts[0];
+                string[] _requestParts = requestHeaderParts[1].Split('?');
+
+                // parametri
+                _request.RequestPath = _requestParts[0];
+                if (_requestParts.Length > 1)
+                {
+                    foreach (string par in _requestParts[1].Split('&'))
+                    {
+                        tmpParam = par.Split(new char[] { '=' }, 2);
+
+                        if (!_request.Parameters.ContainsKey(tmpParam[0].Trim()))
+                        {
+                            if (tmpParam.Length > 1)
+                            {
+                                _request.Parameters.Add(WebUtility.UrlDecode(tmpParam[0].Trim()), WebUtility.UrlDecode(tmpParam[1]));
+                            }
+                            else
+                            {
+                                _request.Parameters.Add(WebUtility.UrlDecode(tmpParam[0].Trim()), null);
+                            }
+                        }
+                    }
+                }
+
+                // aributi
+                foreach (string par in requestBody)
+                {
+                    string[] headers = par.Split(new char[] { ':' }, 2);
+                    if (headers.Length > 1)
+                    {
+                        if (!_request.Headers.ContainsKey(headers[0].Trim()))
+                        {
+                            _request.Headers.Add(WebUtility.UrlDecode(headers[0].Trim()), WebUtility.UrlDecode(headers[1].Trim()));
+                            if (headers[0].Trim().Equals("Cookie", StringComparison.OrdinalIgnoreCase))
+                            {
+                                _request.Cookies = ProcessCookie(headers[1].Trim());
+                            }
+                        }
+                    }
+                }
+
+                // If type = POST, find string \r, then parse parameters if supportsed type, else report unsupported type.
+
+                if (_request.RequestType.Equals("POST"))
+                {
+                    if (_request.Headers.ContainsKey("Content-Type"))
+                    {
+                        if (_request.Headers["Content-Type"].Equals("application/x-www-form-urlencoded"))
+                        {
+                            int lokacijaPodatkov = Array.IndexOf(requestBody, "\r") + 1;
+                            int dataLength = requestBody[lokacijaPodatkov].Length;
+                            if (_request.Headers.ContainsKey("Content-Length"))
+                            {
+                                if (!_request.Headers["Content-Length"].Equals(dataLength.ToString()))
+                                {
+                                    Debug.WriteLineIf(_debug, "Data size mismatch. Attribute says: " + _request.Headers["Content-Length"] + " Data says:" + dataLength + ".");
+                                    return false;  // request malformed
+                                }
+                            }
+                            foreach (string par in requestBody[lokacijaPodatkov].TrimEnd().Split('&'))
+                            {
+                                tmpParam = par.Split(new char[] { '=' }, 2);
+
+                                if (!_request.Parameters.ContainsKey(tmpParam[0].Trim()))
+                                {
+                                    if (tmpParam.Length > 1)
+                                    {
+                                        _request.Parameters.Add(WebUtility.UrlDecode(tmpParam[0].Trim()), WebUtility.UrlDecode(tmpParam[1]));
+                                    }
+                                    else
+                                    {
+                                        _request.Parameters.Add(WebUtility.UrlDecode(tmpParam[0].Trim()), null);
+                                    }
+                                }
+                            }
+                        }
+                        else
+                        {
+                            // Unsupported POST request type
+                            Debug.WriteLineIf(_debug, "Unsupported POST: " + _request.Headers["Content-Type"] + ".");
+                            return false; // Unsupported post
+                        }
+                    }
+                }
+
+                _request.Output = data.OutputStream.AsStreamForWrite();
+
+                return _request;
+
+            }
+            catch (Exception e)
+            {
+                Debug.WriteLine(e);
+                return false;  // internal server error
+            }
+        }
+
+        /// <summary>
+        /// Internal method of HttpRequest class to parse cookies from the cookie string provided by the client.
+        /// </summary>
+        /// <param name="cookie">Raw string with cookie data.</param>
+        private Dictionary<string, HttpCookie> ProcessCookie(string cookie)
+        {
+            try
+            {
+                Dictionary<string, HttpCookie> _cookies = new Dictionary<string, HttpCookie>();
+
+                string decodedCookie = WebUtility.UrlDecode(cookie);
+                char[] _tmpChars = decodedCookie.ToCharArray();
+                int _tmpLength = _tmpChars.Length;
+                // Preverimo koliko ; se pojavi v nizu. to pove koliko cookijev je za to zahtevo.
+                int cookieCount = 0;
+                for (int n = 0; n < _tmpLength; n++)
+                {
+                    if (_tmpChars[n] == ';')
+                        cookieCount++;
+                }
+
+                string[] _tmpCookieArry = decodedCookie.Split(';');
+
+                // Obdelamo vsak poslan cookie...
+                foreach (string _cookie in _tmpCookieArry)
+                {
+                    // preverimo koliko = se pojavi v nizu. Glede na to lahko sestavimo ravilni cookie.
+                    int subCookieCount = 0;
+                    char[] _subCookieChars = _cookie.ToCharArray();
+                    _tmpLength = _subCookieChars.Length;
+                    for (int n = 0; n < _tmpLength; n++)
+                    {
+                        if (_subCookieChars[n] == '=')
+                            subCookieCount++;
+                    }
+                    if (subCookieCount == 0)
+                    {
+                        // value
+                        _cookies.Add(_cookie, new HttpCookie(_cookie));
+                    }
+                    else if (subCookieCount == 1)
+                    {
+                        // name=value
+                        string[] _cookieParts = _cookie.Split(new char[] { '=' }, 2);
+                        _cookies.Add(WebUtility.UrlDecode(_cookieParts[0].Trim()), new HttpCookie(_cookieParts[0].Trim(), _cookieParts[1].Trim()));
+                    }
+                    else
+                    {
+                        // cookiename=name1=value1&name2=value2&...
+                        string[] _cookieParts = _cookie.Split(new char[] { '=' }, 2);  // cookiename in vrednosti...
+                        HttpCookie _tmpHttpCookie = new HttpCookie(_cookieParts[0].Trim());
+                        string[] _subCookieParts = _cookieParts[1].Split('&'); //subcookie string.
+                        foreach (string _subCookieCookieParts in _subCookieParts)
+                        {
+                            string[] _subCookie = _subCookieCookieParts.Split(new char[] { '=' }, 2);
+                            if (_subCookie.Length > 1)
+                            {
+                                if (!_tmpHttpCookie.Values.ContainsKey(_subCookie[0].Trim()))  // Ignoriramo podvojene vrednosti, upoštevamo samo prvo.
+                                {
+                                    _tmpHttpCookie.Values.Add(_subCookie[0].Trim(), _subCookie[1].Trim());
+                                }
+                            }
+                            else
+                            {
+                                _tmpHttpCookie.Values.Add(_subCookie[0].Trim(), null);
+                            }
+                        }
+                    }
+                }
+                return _cookies;
+            }
+            catch (Exception e)
+            {
+                Debug.WriteLine(e);
+                return null;  // unable to parse cookies, internal server error?
+            }
+        }
+
+        /// <summary>
         /// Heler method for processing server or request errors-
         /// </summary>
         /// <param name="request">Current request</param>
         /// <param name="response">Current reponse assosiated with request object</param>
-        private string ProcessHttpError(HttpRequest request, HttpResponse response)
+        private string ProcessHttpError(HttpRequest request, HttpResponse response)  // fix this to avoid guesswork
         {
             if (request.Headers.ContainsKey("Content-Type"))
             {
@@ -503,7 +733,8 @@ namespace Feri.MS.Http
                     //HttpRootManager.ReturnErrorMessage(request, response, "415");
                     return "415";
                 }
-                else {
+                else
+                {
                     // če ni to, potem je napačna velikost....
                     string[] requestBody = request.ToString().Split('\n');
                     int lokacijaPodatkov = Array.IndexOf(requestBody, "\r") + 1;
@@ -517,14 +748,14 @@ namespace Feri.MS.Http
             if (request.RequestSize < 10)
             {
                 // We recived too small request. It happens. If in debug mode write debug line, else ignore
-                Debug.WriteLineIf(_debug, "Stream malformed: " + request.RequestType + ": " + request.RequestString() + ": " + request.RequestSize + ".");
+                Debug.WriteLineIf(_debug, "Stream malformed: " + request.RequestType + ": " + request.RequestString + ": " + request.RequestSize + ".");
                 return string.Empty;
             }
             else
             {
                 // request is not too small, but something went wrong. we don't know what. print server error 500.
                 //HttpRootManager.ReturnErrorMessage(request, response, "500");
-                Debug.WriteLineIf(_debug, "Something went wrong. Stream type: " + request.RequestType + ": " + request.RequestString() + ": " + request.RequestSize + ".");
+                Debug.WriteLineIf(_debug, "Something went wrong. Stream type: " + request.RequestType + ": " + request.RequestString + ": " + request.RequestSize + ".");
                 return "500";
             }
         }
