@@ -348,7 +348,6 @@ namespace Feri.MS.Http
             try
             {
                 await Task.Factory.StartNew(() => ProcessRequest(socket));
-
             }
             catch (Exception e)
             {
