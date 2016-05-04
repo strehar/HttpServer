@@ -368,15 +368,16 @@ namespace Feri.MS.Http
         /// <param name="socket">StreamSocket with connection from the client.</param>
         private void ProcessRequest(StreamSocket socket)
         {
-            bool __streamInit;
             HttpRequest __request = null;
             HttpResponse __response = null;
             Dictionary<string, string> __headers = new Dictionary<string, string>();
+
             string[] __supportedMethods = new string[] { "GET", "POST" };
             string __tmpKey = null;
-
             string __status = null;
             string __message = null;
+
+            bool __streamInit;
             bool __ipFilterError = false;
             bool __streamInitError = false;
             bool __authenticationError = false;
@@ -398,13 +399,12 @@ namespace Feri.MS.Http
                 // Create request and response objects
                 __request = new HttpRequest();
                 __request._debug = _debug;
+                __request.SessionManager = _sessionManager;
 
-                __streamInit = __request.Init(socket);
+                __streamInit = ParseData(socket, ref __request);
 
                 __response = new HttpResponse(__request);
                 __response._debug = _debug;
-
-                __request.SessionManager = _sessionManager;
 
                 // Error management
                 if (!__streamInit)
@@ -451,6 +451,7 @@ namespace Feri.MS.Http
                 }
             }
 
+            // Process errors
             if (__ipFilterError)
             {
                 __message = TimeProvider.GetTime().ToString("R") + ": " + socket.Information.RemoteAddress.ToString() + ": " + socket.Information.LocalAddress.ToString() + ": " + socket.Information.LocalPort + ": ";
@@ -459,7 +460,7 @@ namespace Feri.MS.Http
                 HttpRootManager.ReturnErrorMessage(socket, __status);
                 return;
             }
-            __message = TimeProvider.GetTime().ToString("R") + ": " + __request.HttpConnection.RemoteHost + ": " + __request.HttpConnection.LocalHost + ": " + __request.HttpConnection.LocalPort + ": " + __request.RequestString().TrimEnd();
+            __message = TimeProvider.GetTime().ToString("R") + ": " + __request.HttpConnection.RemoteHost + ": " + __request.HttpConnection.LocalHost + ": " + __request.HttpConnection.LocalPort + ": " + __request.RequestString.TrimEnd();
             if (__streamInitError || __authenticationError || __methodError)
             {
                 if (!string.IsNullOrEmpty(__status))
@@ -493,20 +494,12 @@ namespace Feri.MS.Http
             socket.Dispose();
         }
 
-        /// <summary>
-        /// Metod parses the provided Http request stream and creates parameters, headers and cookies.
-        /// It is internal method for use by HttpServre class.
-        /// </summary>
-        /// <param name="data">Raw http stream</param>
-        /// <returns>True if stream parsed OK, false if something went wrong. Problem can be determined from class state.</returns>
-        private HttpRequest ParseData(StreamSocket data)
+        private bool ParseData(StreamSocket data, ref HttpRequest _request)
         {
             // preberemo stream, zgradimo array haderjev in parametrov, ter input Stream in output stream ter response objekt.
             try
             {
-
                 string[] tmpParam;
-                HttpRequest _request = new HttpRequest();
 
                 // this works for text only
                 StringBuilder requestBuilder = new StringBuilder();
@@ -524,13 +517,9 @@ namespace Feri.MS.Http
                 // end this
 
                 _request.HttpConnection = new HttpConnection(data);
-
                 _request.RawRequest = requestBuilder.ToString().TrimEnd('\0');
-
                 _request.RequestSize = _request.RawRequest.Length;
-
                 string[] requestBody = _request.RawRequest.Split('\n');
-
                 _request.RequestString = requestBody[0];
 
                 string[] requestHeaderParts = requestBody[0].Split(' ');
@@ -584,7 +573,6 @@ namespace Feri.MS.Http
                 }
 
                 // If type = POST, find string \r, then parse parameters if supportsed type, else report unsupported type.
-
                 if (_request.RequestType.Equals("POST"))
                 {
                     if (_request.Headers.ContainsKey("Content-Type"))
@@ -604,7 +592,6 @@ namespace Feri.MS.Http
                             foreach (string par in requestBody[lokacijaPodatkov].TrimEnd().Split('&'))
                             {
                                 tmpParam = par.Split(new char[] { '=' }, 2);
-
                                 if (!_request.Parameters.ContainsKey(tmpParam[0].Trim()))
                                 {
                                     if (tmpParam.Length > 1)
@@ -628,9 +615,7 @@ namespace Feri.MS.Http
                 }
 
                 _request.Output = data.OutputStream.AsStreamForWrite();
-
-                return _request;
-
+                return true;
             }
             catch (Exception e)
             {

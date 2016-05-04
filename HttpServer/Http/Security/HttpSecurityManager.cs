@@ -91,7 +91,7 @@ namespace Feri.MS.Http.Security
 
                             _firstStage[request.HttpConnection.RemoteHost].Time = TimeProvider.GetTime().AddMinutes(FirstStageBanTimerMinutes);
                             Debug.WriteLineIf(SetDebug, "First stage ban ip " + request.HttpConnection.RemoteHost + " on " + _firstStage[request.HttpConnection.RemoteHost].Counter + " try. Time is " + _firstStage[request.HttpConnection.RemoteHost].Time + ".");
-                            _server.Log.WriteLine(TimeProvider.GetTime().ToString("R") + ": " + request.HttpConnection.RemoteHost + ": " + request.HttpConnection.LocalHost + ": " + request.HttpConnection.LocalPort + ": " + request.RequestString().TrimEnd() + ": First stage ban, timer: " + _firstStage[request.HttpConnection.RemoteHost].Time);
+                            _server.Log.WriteLine(TimeProvider.GetTime().ToString("R") + ": " + request.HttpConnection.RemoteHost + ": " + request.HttpConnection.LocalHost + ": " + request.HttpConnection.LocalPort + ": " + request.RequestString.TrimEnd() + ": First stage ban, timer: " + _firstStage[request.HttpConnection.RemoteHost].Time);
                             _firstStage[request.HttpConnection.RemoteHost].Counter = 1;
                             _firstStage[request.HttpConnection.RemoteHost].FromStage = 1;
                         }
@@ -114,7 +114,7 @@ namespace Feri.MS.Http.Security
 
                             _secondStage[request.HttpConnection.RemoteHost].Time = TimeProvider.GetTime().AddMinutes(SecondStageBanTimerMinutes);
                             Debug.WriteLineIf(SetDebug, "Second stage ban ip " + request.HttpConnection.RemoteHost + " on " + _secondStage[request.HttpConnection.RemoteHost].Counter + " try. Time is " + _secondStage[request.HttpConnection.RemoteHost].Time + ".");
-                            _server.Log.WriteLine(TimeProvider.GetTime().ToString("R") + ": " + request.HttpConnection.RemoteHost + ": " + request.HttpConnection.LocalHost + ": " + request.HttpConnection.LocalPort + ": " + request.RequestString().TrimEnd() + ": Second stage ban, timer: " + _firstStage[request.HttpConnection.RemoteHost].Time);
+                            _server.Log.WriteLine(TimeProvider.GetTime().ToString("R") + ": " + request.HttpConnection.RemoteHost + ": " + request.HttpConnection.LocalHost + ": " + request.HttpConnection.LocalPort + ": " + request.RequestString.TrimEnd() + ": Second stage ban, timer: " + _firstStage[request.HttpConnection.RemoteHost].Time);
                             _secondStage[request.HttpConnection.RemoteHost].Counter = 1;
                         }
                         else
