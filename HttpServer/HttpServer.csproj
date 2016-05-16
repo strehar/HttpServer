@@ -119,6 +119,7 @@
   <ItemGroup>
     <Compile Include="Http\ContentSource\AssemblyData.cs" />
     <Compile Include="Http\ContentSource\FileContent.cs" />
+    <Compile Include="Http\HttpVirtualServer.cs" />
     <Compile Include="Http\Security\HttpSecurityManager.cs" />
     <Compile Include="Http\RootManager\DefaultHttpRootManager.cs" />
     <Compile Include="Http\ContentSource\EmbeddedContent.cs" />

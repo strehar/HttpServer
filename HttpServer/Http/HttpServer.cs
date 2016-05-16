@@ -88,7 +88,7 @@ namespace Feri.MS.Http
 
         private IUserManager _userManager;                // Razred skrbi za dodajanje, odvzemanje in avtentikacijo uporabnikov
         private IIPFilter _IPFilter;                      // Razred skrbi za preverjanje IP naslovov uporabnikov in vzdrženje White in Black list
-        private IHttpSecurityManager _securityManager;
+        private IHttpSecurityManager _securityManager;    // Razred skrbi za preverjanje poskusov dostopa in blokado IP naslova v primeru prevečih nepravilnih poskusov. Dela v povezavi z user managerjem.
         #endregion
 
         #region Properties
