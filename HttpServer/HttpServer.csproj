@@ -119,6 +119,7 @@
   <ItemGroup>
     <Compile Include="Http\ContentSource\AssemblyData.cs" />
     <Compile Include="Http\ContentSource\FileContent.cs" />
+    <Compile Include="Http\HttpVirtualServer.cs" />
     <Compile Include="Http\Security\HttpSecurityManager.cs" />
     <Compile Include="Http\RootManager\DefaultHttpRootManager.cs" />
     <Compile Include="Http\ContentSource\EmbeddedContent.cs" />
@@ -188,6 +189,11 @@
       <Project>{5ddebbb4-5876-43a4-a158-b60625de3a8b}</Project>
       <Name>IPNetwork</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <SDKReference Include="WindowsIoT, Version=10.0.10586.0">
+      <Name>Windows IoT Extensions for the UWP</Name>
+    </SDKReference>
   </ItemGroup>
   <PropertyGroup Condition=" '$(VisualStudioVersion)' == '' or '$(VisualStudioVersion)' &lt; '14.0' ">
     <VisualStudioVersion>14.0</VisualStudioVersion>
