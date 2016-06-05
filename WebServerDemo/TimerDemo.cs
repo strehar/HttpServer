@@ -85,7 +85,7 @@ namespace WebServerDemo
                         state = "Off";
                         _ws.HttpRootManager.UpdateExtensionTemplateData("shtml", "led", new TemplateAction() { Pattern = "LED", Data = "Off" });
                         //pin.Write(GpioPinValue.Low);
-                        //_ports.WritePin(PortNumber.PORT_ONE, false);    // Uncomment for sensors
+                        _ports.WritePin(PortNumber.PORT_ONE, false);    // Uncomment for sensors
                     }
                     else
                     {
@@ -94,7 +94,7 @@ namespace WebServerDemo
                         state = "On";
                         _ws.HttpRootManager.UpdateExtensionTemplateData("shtml", "led", new TemplateAction() { Pattern = "LED", Data = "On" });
                         //pin.Write(GpioPinValue.High);
-                        //_ports.WritePin(PortNumber.PORT_ONE, true);    // Uncomment for sensors
+                        _ports.WritePin(PortNumber.PORT_ONE, true);    // Uncomment for sensors
                     }
                     Debug.WriteLineIf(_debug, "State changed to: " + state);
                 }

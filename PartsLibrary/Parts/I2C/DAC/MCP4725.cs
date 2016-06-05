@@ -21,17 +21,70 @@ using System.Threading.Tasks;
 using Windows.Devices.Enumeration;
 using Windows.Devices.I2c;
 using Feri.MS.Parts.Exceptions;
+using System.Diagnostics;
+using System.Collections.Generic;
 
 namespace Feri.MS.Parts.I2C.DAC
 {
+    internal class MCP4725Helper
+    {
+        internal I2cDevice I2cController { get; set; }
+        internal MCP4725 Part { get; set; }
+        internal int Address { get; set; }
+        internal int ReferenceCount { get; set; } = 0;
+    }
     class MCP4725 : IDisposable
     {
+        public bool _debug = false;
+
         private bool IsInitialized { get; set; }
+
+        public I2cDevice I2cController { get; private set; }
+        private bool _isDisposed = false;
+        private static Dictionary<int, MCP4725Helper> _initialized { get; set; } = new Dictionary<int, MCP4725Helper>();
         public int Address { get; set; } = 0;
 
-        private I2cDevice _i2cController;
+        private MCP4725(int address)
+        {
+            Address = address;
+        }
 
-        private DeviceInformationCollection FindI2cControllers()
+        public static MCP4725 Create(int address = 0x48, string i2cControllerDeviceId = null)
+        {
+            // Adresa je 1001+A2+A1+A0
+            MCP4725 _part;
+            //check if address exists
+            if (!_initialized.ContainsKey(address))
+            {
+                // there is none. DoMagic();
+                if (string.IsNullOrEmpty(i2cControllerDeviceId))
+                {
+                    i2cControllerDeviceId = FindI2cControllers()[0].Id;
+                }
+
+                I2cConnectionSettings i2cSettings = new I2cConnectionSettings(address);
+                i2cSettings.BusSpeed = I2cBusSpeed.StandardMode;
+
+                Task<I2cDevice> controlerInitTask = Task.Run(async () => await I2cDevice.FromIdAsync(i2cControllerDeviceId, i2cSettings));
+                I2cDevice _i2cController = controlerInitTask.Result;
+
+                _part = new MCP4725(address);
+                MCP4725Helper helper = new MCP4725Helper();
+                helper.Address = address;
+                helper.Part = _part;
+                helper.I2cController = _i2cController;
+
+                _initialized.Add(address, helper);
+            }
+            else
+            {
+                _part = _initialized[address].Part;
+            }
+            _initialized[address].ReferenceCount++;
+            return _part;
+        }
+
+        private static DeviceInformationCollection FindI2cControllers()
         {
             string advancedQuerySyntaxString = I2cDevice.GetDeviceSelector();
             Task<DeviceInformationCollection> initTask = Task.Run(async () => await DeviceInformation.FindAllAsync(advancedQuerySyntaxString));
@@ -43,34 +96,24 @@ namespace Feri.MS.Parts.I2C.DAC
             return controllerDeviceIds;
         }
 
-        public void Initialize()
-        {
-            Initialize(FindI2cControllers()[0].Id);
-            throw new NotImplementedException();
-        }
-
-        public void Initialize(string i2cControllerDeviceId)
-        {
-            if (IsInitialized)
-            {
-                throw new InvalidOperationException("The I2C controller is already initialized.");
-            }
-
-            // Adresa je PCF8574: 0100+A2+A1+A0  PCF8574A: 0111+A2+A1+A0
-            if (Address == 0) Address = 0x38;
-            I2cConnectionSettings i2cSettings = new I2cConnectionSettings(Address);
-            i2cSettings.BusSpeed = I2cBusSpeed.StandardMode;
-
-            Task<I2cDevice> controlerInitTask = Task.Run(async () => await I2cDevice.FromIdAsync(i2cControllerDeviceId, i2cSettings));
-            _i2cController = controlerInitTask.Result;
-
-            IsInitialized = true;
-        }
-
         #region IDisposable Support
         public void Dispose()
         {
-            //GC.SuppressFinalize(this);
+            // Clean up. If there is reference to the key, and there are more then one, reduce reference. if it's the last one, remove from the static directory of parts.
+            if (_initialized.ContainsKey(Address))
+            {
+                if (_initialized[Address].ReferenceCount > 1)
+                {
+                    _initialized[Address].ReferenceCount--;
+                }
+                else
+                {
+                    _initialized[Address].I2cController.Dispose();
+                    _initialized.Remove(Address);
+                }
+            }
+            _isDisposed = true;
+            Debug.WriteLineIf(_debug, "Disposing of part with address: " + Address);
         }
         #endregion
     }

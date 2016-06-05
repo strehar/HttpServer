@@ -76,7 +76,7 @@ namespace WebServerDemo
                         _templateDemo["maualLed"].Data = "On";
                         _ws.HttpRootManager.UpdateExtensionTemplateData("shtml", "manualLed", new TemplateAction() { Pattern = "MANUALLED", Data = "On" });
                         //pin2.Write(GpioPinValue.High);
-                        //_ports.WritePin(PortNumber.PORT_TWO, true);   // Uncomment for sensors
+                        _ports.WritePin(PortNumber.PORT_TWO, true);   // Uncomment for sensors
                     }
                     else if (request.Parameters["state"].Equals("Off", StringComparison.OrdinalIgnoreCase))
                     {
@@ -85,7 +85,7 @@ namespace WebServerDemo
                         _templateDemo["maualLed"].Data = "Off";
                         _ws.HttpRootManager.UpdateExtensionTemplateData("shtml", "manualLed", new TemplateAction() { Pattern = "MANUALLED", Data = "Off" });
                         //pin2.Write(GpioPinValue.Low);
-                        //_ports.WritePin(PortNumber.PORT_TWO, false);   // Uncomment for sensors
+                        _ports.WritePin(PortNumber.PORT_TWO, false);   // Uncomment for sensors
                     }
                     Debug.WriteLineIf(_debug, "State changed to: " + stateLed);
                 }

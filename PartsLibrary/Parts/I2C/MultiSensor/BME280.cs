@@ -81,9 +81,9 @@ namespace Feri.MS.Parts.I2C.MultiSensor
         public I2cDevice I2cController { get; private set; }
         private bool IsInitialized { get; set; }
         public int Address { get; private set; } = 0;
-        public int CompensateTemperature { get; set; } = -2;
+        public int CompensateTemperature { get; set; } = 0;
         public int CompensateHumidity { get; set; } = 0;
-        public int CompensatePressure { get; set; } = -100;
+        public int CompensatePressure { get; set; } = -111;
 
         private BME280(int address)
         {
@@ -542,7 +542,7 @@ namespace Feri.MS.Parts.I2C.MultiSensor
             var1 = (Calibration.dig_P9) * p * p / 2147483648.0;
             var2 = p * (Calibration.dig_P8) / 32768.0;
             p = p + (var1 + var2 + (Calibration.dig_P7)) / 16.0;
-            p = p + (CompensatePressure * 100); // Sensor seems to have offset of 100 hpa
+            p = p + (CompensatePressure * 100); // Compensate sensor in hpa
             return Math.Round(p, 1, MidpointRounding.AwayFromZero);
         }
 
