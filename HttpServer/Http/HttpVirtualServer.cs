@@ -16,6 +16,7 @@
 */
 #endregion
 
+using Feri.MS.Http.ContentSource;
 using Feri.MS.Http.HttpSession;
 using Feri.MS.Http.Log;
 using Feri.MS.Http.RootManager;
@@ -42,14 +43,99 @@ namespace Feri.MS.Http
 
         private IUserManager _userManager;                // Razred skrbi za dodajanje, odvzemanje in avtentikacijo uporabnikov
         private HttpServer _httpServer;
-         
+
+        private IHttpRootManager _rootManager;
+        private IHttpLog _log;
+
+        private IIPFilter _IPFilter;                      // Razred skrbi za preverjanje IP naslovov uporabnikov in vzdrženje White in Black list
+        private IHttpSecurityManager _securityManager;    // Razred skrbi za preverjanje poskusov dostopa in blokado IP naslova v primeru prevečih nepravilnih poskusov. Dela v povezavi z user managerjem.
+
         #endregion
         #region Properties
         public List<string> ServerName { get; set; }
         public string ServerRootPath { get; set; }
-        public IHttpRootManager RootManager { get; set; }
         public bool DebugEnabled { get; set; } = false;                      // Ali se naj izpisujejo debug informacije iz metod (precej spama)
-        public IHttpLog Log { get; set; }             // Glavni razred, ki skrbi za logiranje dogodkov preko http protokola.
+
+        public bool AuthenticationRequired
+        {
+            get
+            {
+                return _authenticationRequired;
+            }
+
+            set
+            {
+                _authenticationRequired = value;
+                if (_authenticationRequired)
+                    if (_userManager == null)
+                        UserManager = new UserManager();  // If it's null, we call thru UserManager property, to perform lifeclycle management.
+            }
+        }
+
+        public IUserManager UserManager
+        {
+            get
+            {
+                if (_userManager == null)
+                {
+                    _userManager = new UserManager();
+                    _userManager.Start();
+                }
+                return _userManager;
+            }
+
+            set
+            {
+                if (value == null)
+                {
+                    _userManager?.Stop();
+                    _userManager = new UserManager();
+                    _userManager.Start();
+                }
+                else
+                {
+                    _userManager?.Stop();
+                    _userManager = value;
+                    _userManager.Start();
+                }
+            }
+        }
+
+        public IHttpRootManager HttpRootManager
+        {
+            get
+            {
+                if (_rootManager == null)
+                {
+                    _rootManager = new DefaultHttpRootManager();
+                    _rootManager.AddSource(new EmbeddedContent(this.GetType()));
+                    _rootManager.Start(this);
+                }
+                return _rootManager;
+            }
+            set
+            {
+                if (_rootManager != null)
+                {
+                    _rootManager.Stop();
+                }
+                _rootManager = value;
+                _rootManager.Start(this);
+            }
+        }
+
+        public IHttpLog Log
+        {
+            get
+            {
+                return _log;
+            }
+
+            set
+            {
+                _log = value;
+            }
+        }
         #endregion
 
         public void Start(HttpServer listenerClass)
@@ -68,6 +154,8 @@ namespace Feri.MS.Http
             string __tmpKey = null;
             string __status = null;
 
+            // Check authentication...
+
             // Process requests
             try
             {
@@ -83,7 +171,7 @@ namespace Feri.MS.Http
                 }
                 else
                 {
-                    __status = RootManager.Listen(request, response); //ni registrirane poti, kličemo rootmanager, ter preberemo status
+                    __status = HttpRootManager.Listen(request, response); //ni registrirane poti, kličemo rootmanager, ter preberemo status
                 }
             }
             catch (Exception e)

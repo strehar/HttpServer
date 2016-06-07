@@ -60,8 +60,8 @@ namespace Feri.MS.Http
     public class HttpServer : IDisposable
     {
         #region Definitions
-        Dictionary<string, serverPath> _serverPath = new Dictionary<string, serverPath>();               // Registrirane http poti (url) in metode ki se kličejo za obdelavo te zahteve
-        Dictionary<string, HttpTimer> _timerji = new Dictionary<string, HttpTimer>();                            // registrirani timerji, ki so na sistemu in se prožijo
+        //Dictionary<string, serverPath> _serverPath = new Dictionary<string, serverPath>();               // Registrirane http poti (url) in metode ki se kličejo za obdelavo te zahteve
+        //Dictionary<string, HttpTimer> _timerji = new Dictionary<string, HttpTimer>();                            // registrirani timerji, ki so na sistemu in se prožijo
 
         Dictionary<string, StreamSocketListener> listeners = new Dictionary<string, StreamSocketListener>();                    // Socket listener za prejem zahtev, je flobalna spremenljivka zato da .net runtime ve da mora obdržati proces živ v kombinaciji z taskInstance.GetDeferral(); v glavnem razredu
 
@@ -72,21 +72,21 @@ namespace Feri.MS.Http
         /// </summary>
         /// <param name="request"></param>
         /// <param name="response"></param>
-        public delegate void serverPath(HttpRequest request, HttpResponse response);    // delegat za obdelavo http zahtev
+        //public delegate void serverPath(HttpRequest request, HttpResponse response);    // delegat za obdelavo http zahtev
 
-        private IHttpRootManager _rootManager;
+        //private IHttpRootManager _rootManager;
 
         private const int BufferSize = 8192;
 
         private bool _debug = false;                      // Ali se naj izpisujejo debug informacije iz metod (precej spama)
-        private bool _authenticationRequired = false;     // Ali server zahteva avtentikacijo za dostop do HTTP vmesnika. prevzeto je ne.
+        //private bool _authenticationRequired = false;     // Ali server zahteva avtentikacijo za dostop do HTTP vmesnika. prevzeto je ne.
         private bool _ipFilterEnabled = false;
 
-        private SessionManager _sessionManager = new SessionManager(); // Skrbi za seje. Poda se kot referenca novim HttRequest in HttpResponse objektom.
+        //private SessionManager _sessionManager = new SessionManager(); // Skrbi za seje. Poda se kot referenca novim HttRequest in HttpResponse objektom.
 
         private IHttpLog _log;             // Glavni razred, ki skrbi za logiranje dogodkov preko http protokola.
 
-        private IUserManager _userManager;                // Razred skrbi za dodajanje, odvzemanje in avtentikacijo uporabnikov
+        //private IUserManager _userManager;                // Razred skrbi za dodajanje, odvzemanje in avtentikacijo uporabnikov
         private IIPFilter _IPFilter;                      // Razred skrbi za preverjanje IP naslovov uporabnikov in vzdrženje White in Black list
         private IHttpSecurityManager _securityManager;    // Razred skrbi za preverjanje poskusov dostopa in blokado IP naslova v primeru prevečih nepravilnih poskusov. Dela v povezavi z user managerjem.
         #endregion
@@ -114,21 +114,21 @@ namespace Feri.MS.Http
         /// <summary>
         /// 
         /// </summary>
-        public bool AuthenticationRequired
-        {
-            get
-            {
-                return _authenticationRequired;
-            }
+        //public bool AuthenticationRequired
+        //{
+        //    get
+        //    {
+        //        return _authenticationRequired;
+        //    }
 
-            set
-            {
-                _authenticationRequired = value;
-                if (_authenticationRequired)
-                    if (_userManager == null)
-                        UserManager = new UserManager();  // If it's null, we call thru UserManager property, to perform lifeclycle management.
-            }
-        }
+        //    set
+        //    {
+        //        _authenticationRequired = value;
+        //        if (_authenticationRequired)
+        //            if (_userManager == null)
+        //                UserManager = new UserManager();  // If it's null, we call thru UserManager property, to perform lifeclycle management.
+        //    }
+        //}
 
         /// <summary>
         /// 
@@ -160,34 +160,34 @@ namespace Feri.MS.Http
         /// <summary>
         /// 
         /// </summary>
-        public IUserManager UserManager
-        {
-            get
-            {
-                if (_userManager == null)
-                {
-                    _userManager = new UserManager();
-                    _userManager.Start();
-                }
-                return _userManager;
-            }
+        //public IUserManager UserManager
+        //{
+        //    get
+        //    {
+        //        if (_userManager == null)
+        //        {
+        //            _userManager = new UserManager();
+        //            _userManager.Start();
+        //        }
+        //        return _userManager;
+        //    }
 
-            set
-            {
-                if (value == null)
-                {
-                    _userManager?.Stop();
-                    _userManager = new UserManager();
-                    _userManager.Start();
-                }
-                else
-                {
-                    _userManager?.Stop();
-                    _userManager = value;
-                    _userManager.Start();
-                }
-            }
-        }
+        //    set
+        //    {
+        //        if (value == null)
+        //        {
+        //            _userManager?.Stop();
+        //            _userManager = new UserManager();
+        //            _userManager.Start();
+        //        }
+        //        else
+        //        {
+        //            _userManager?.Stop();
+        //            _userManager = value;
+        //            _userManager.Start();
+        //        }
+        //    }
+        //}
 
         /// <summary>
         /// 
@@ -224,28 +224,28 @@ namespace Feri.MS.Http
         /// <summary>
         /// 
         /// </summary>
-        public IHttpRootManager HttpRootManager
-        {
-            get
-            {
-                if (_rootManager == null)
-                {
-                    _rootManager = new DefaultHttpRootManager();
-                    _rootManager.AddSource(new EmbeddedContent(this.GetType()));
-                    _rootManager.Start(this);
-                }
-                return _rootManager;
-            }
-            set
-            {
-                if (_rootManager != null)
-                {
-                    _rootManager.Stop();
-                }
-                _rootManager = value;
-                _rootManager.Start(this);
-            }
-        }
+        //public IHttpRootManager HttpRootManager
+        //{
+        //    get
+        //    {
+        //        if (_rootManager == null)
+        //        {
+        //            _rootManager = new DefaultHttpRootManager();
+        //            _rootManager.AddSource(new EmbeddedContent(this.GetType()));
+        //            _rootManager.Start(this);
+        //        }
+        //        return _rootManager;
+        //    }
+        //    set
+        //    {
+        //        if (_rootManager != null)
+        //        {
+        //            _rootManager.Stop();
+        //        }
+        //        _rootManager = value;
+        //        _rootManager.Start(this);
+        //    }
+        //}
 
         /// <summary>
         /// 
