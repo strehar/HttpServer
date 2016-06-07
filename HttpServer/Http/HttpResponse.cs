@@ -190,7 +190,7 @@ namespace Feri.MS.Http
             catch (Exception e)
             {
                 // Something went wrong with request processing and connection is not open or connection was closed by teh client before we could send a response.
-                System.Diagnostics.Debug.WriteLine("Connection was closed in Write() method (" + e.Message + ").");
+                System.Diagnostics.Debug.WriteLineIf(_debug, "Connection was closed in Write() method (" + e.Message + ").");
             }
         }
 
