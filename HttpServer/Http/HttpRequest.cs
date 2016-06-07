@@ -317,6 +317,7 @@ namespace Feri.MS.Http
             // preberemo stream, zgradimo array haderjev in parametrov, ter input Stream in output stream ter response objekt.
             try
             {
+                _output = data.OutputStream.AsStreamForWrite();
 
                 string[] tmpParam;
 
@@ -438,8 +439,6 @@ namespace Feri.MS.Http
                         }
                     }
                 }
-
-                _output = data.OutputStream.AsStreamForWrite();
 
                 return true;
 
