@@ -181,9 +181,17 @@ namespace Feri.MS.Http
             _header.Append("Connection: close" + _eol + _eol);
 
             byte[] headerArray = Encoding.UTF8.GetBytes(_header.ToString());
-            _stream.Write(headerArray, 0, headerArray.Length);
-            _stream.Write(data, 0, data.Length);
-            _stream.Flush();
+            try
+            {
+                _stream.Write(headerArray, 0, headerArray.Length);
+                _stream.Write(data, 0, data.Length);
+                _stream.Flush();
+            }
+            catch (Exception e)
+            {
+                // Something went wrong with request processing and connection is not open or connection was closed by teh client before we could send a response.
+                System.Diagnostics.Debug.WriteLine("Connection was closed in Write() method (" + e.Message + ").");
+            }
         }
 
         /// <summary>
@@ -199,7 +207,7 @@ namespace Feri.MS.Http
             {
                 if (s.StartsWith("   "))
                 {
-                    _exceptionText.Append("&nbsp;&nbsp;&nbsp;"+s.TrimStart()+ "</br>\n");
+                    _exceptionText.Append("&nbsp;&nbsp;&nbsp;" + s.TrimStart() + "</br>\n");
                 }
                 else
                 {
