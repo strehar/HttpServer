@@ -277,7 +277,8 @@ namespace Feri.MS.Http
                     _tmpSession = _sessionManager.GetSession(_cookies["SessionID"].Value);
                     if (_tmpSession == null)
                         return null;
-                    else {
+                    else
+                    {
                         _cookies["SessionID"].Expire = _tmpTime;
                         _cookies["SessionID"].Path = "/";
                         _tmpSession.Expires = _tmpTime;
@@ -321,22 +322,37 @@ namespace Feri.MS.Http
 
                 // this works for text only
                 StringBuilder requestBuilder = new StringBuilder();
-                using (Stream _input = data.InputStream.AsStreamForRead())
+                try
                 {
-                    byte[] _data = new byte[BufferSize];
-                    IBuffer buffer = _data.AsBuffer();
-                    int dataRead = BufferSize;
-                    while (dataRead == BufferSize)
+                    using (Stream _input = data.InputStream.AsStreamForRead())
                     {
-                        dataRead = _input.Read(_data, 0, BufferSize);
-                        requestBuilder.Append(Encoding.UTF8.GetString(_data, 0, _data.Length));
+                        byte[] _data = new byte[BufferSize];
+                        IBuffer buffer = _data.AsBuffer();
+                        int dataRead = BufferSize;
+                        while (dataRead == BufferSize)
+                        {
+                            dataRead = _input.Read(_data, 0, BufferSize);
+                            requestBuilder.Append(Encoding.UTF8.GetString(_data, 0, _data.Length));
+                        }
                     }
+                    // end this
+
+                    _output = data.OutputStream.AsStreamForWrite();
+
+                    _httpConnection = new HttpConnection(data);
                 }
-                // end this
+                catch (Exception e)
+                {
+                    Debug.WriteLineIf(_debug, "Client closed stream during read, some data could be lost (" + e.Message + ").");
+                    _output = null;
+                    _httpConnection = new HttpConnection();
+                    _httpConnection._localHost = new Windows.Networking.HostName("Read Error");
+                    _httpConnection._remoteHost = new Windows.Networking.HostName("Read Error");
+                    _httpConnection._localPort = "0";
+                    _httpConnection._remotePort = "0";
 
-                _output = data.OutputStream.AsStreamForWrite();
-
-                _httpConnection = new HttpConnection(data);
+                    return false;
+                }
 
                 _rawrequest = requestBuilder.ToString().TrimEnd('\0');
 

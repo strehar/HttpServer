@@ -26,10 +26,10 @@ namespace Feri.MS.Http
     /// </summary>
     public class HttpConnection
     {
-        private HostName _localHost;
-        private HostName _remoteHost;
-        private string _remotePort;
-        private string _localPort;
+        internal HostName _localHost;
+        internal HostName _remoteHost;
+        internal string _remotePort;
+        internal string _localPort;
 
         /// <summary>
         /// 
@@ -42,6 +42,14 @@ namespace Feri.MS.Http
             _remoteHost = data.Information.RemoteAddress;
             _localPort = data.Information.LocalPort;
             _remotePort = data.Information.RemotePort;
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public HttpConnection()
+        {
+
         }
 
         /// <summary>

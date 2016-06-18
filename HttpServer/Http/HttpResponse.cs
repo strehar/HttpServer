@@ -34,6 +34,7 @@ namespace Feri.MS.Http
         // Todo atributi (headers), redirekti, ...
 
         #region Declarations
+        private string serverVersion = "MihaServer/0.2.0.4 (Windows RT)";
         private Stream _stream;
         private Dictionary<string, string> _headers = new Dictionary<string, string>();
         private Dictionary<string, HttpCookie> _cookies = new Dictionary<string, HttpCookie>();
@@ -173,7 +174,7 @@ namespace Feri.MS.Http
                 _header.Append(_eol);
             }
             _header.Append("Status: " + statusCode + _eol);
-            _header.Append("Server: MihaServer/0.1 (Windows RT)" + _eol);
+            _header.Append("Server: " + serverVersion + _eol);
             _header.Append("X-Powered-By: WindowsRT" + _eol);
             _header.Append("TSV: !" + _eol);
             _header.Append("Content-Type: " + contentType + _eol);
