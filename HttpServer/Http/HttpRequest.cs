@@ -346,11 +346,44 @@ namespace Feri.MS.Http
                     Debug.WriteLineIf(_debug, "Client closed stream during read, some data could be lost (" + e.Message + ").");
                     _output = null;
                     _httpConnection = new HttpConnection();
-                    _httpConnection._localHost = new Windows.Networking.HostName("Read Error");
-                    _httpConnection._remoteHost = new Windows.Networking.HostName("Read Error");
-                    _httpConnection._localPort = "0";
-                    _httpConnection._remotePort = "0";
 
+                    if (data != null)
+                        if (data.Information != null)
+                        {
+                            if (data.Information.LocalAddress != null)
+                                _httpConnection._localHost = data.Information.LocalAddress;
+                            else
+                                _httpConnection._localHost = new Windows.Networking.HostName("Read Error");
+
+                            if (data.Information.RemoteAddress != null)
+                                _httpConnection._remoteHost = data.Information.RemoteAddress;
+                            else
+                                _httpConnection._remoteHost = new Windows.Networking.HostName("Read Error");
+
+                            if (data.Information.LocalPort != null)
+                                _httpConnection._localPort = data.Information.LocalPort;
+                            else
+                                _httpConnection._localPort = "0";
+
+                            if (data.Information.RemotePort != null)
+                                _httpConnection._remotePort = data.Information.RemotePort;
+                            else
+                                _httpConnection._remotePort = "0";
+                        }
+                        else
+                        {
+                            _httpConnection._localHost = new Windows.Networking.HostName("Read Error");
+                            _httpConnection._remoteHost = new Windows.Networking.HostName("Read Error");
+                            _httpConnection._localPort = "0";
+                            _httpConnection._remotePort = "0";
+                        }
+                    else
+                    {
+                        _httpConnection._localHost = new Windows.Networking.HostName("Read Error");
+                        _httpConnection._remoteHost = new Windows.Networking.HostName("Read Error");
+                        _httpConnection._localPort = "0";
+                        _httpConnection._remotePort = "0";
+                    }
                     return false;
                 }
 
