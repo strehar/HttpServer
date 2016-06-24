@@ -255,10 +255,10 @@ namespace Feri.MS.Http
         public HttpServer()
         {
             _log.Open();
-            _log._debug = true;
+            //_log._debug = true;
             _mimeType._debug = _debug;
             _sessionManager._debug = _debug;
-            //_log._debug = _debug;
+            _log._debug = _debug;
             AddTimer("SessionCleanupTimer", 60000, _sessionManager.SessionCleanupTimer);
         }
 
@@ -269,6 +269,8 @@ namespace Feri.MS.Http
         /// </summary>
         public void Start(string serviceName = "8000")
         {
+            Windows.Foundation.IAsyncAction result = null;
+
             if (string.IsNullOrEmpty(serviceName))
             {
                 throw new InvalidDataException("Invalid service name in Start(string)");
@@ -278,18 +280,25 @@ namespace Feri.MS.Http
                 listener = new StreamSocketListener();
                 listener.ConnectionReceived += (sender, args) => ProcessRequestAsync(args.Socket);
 #pragma warning disable CS4014
-                listener.BindServiceNameAsync(serviceName);
-#pragma warning restore CS4014
-            }
-            catch (System.Runtime.InteropServices.COMException e)
-            {
-                Debug.WriteLineIf(_debug, "An existing connection was forcibly closed by the remote host (" + e.HResult + "; " + SocketError.GetStatus(e.HResult) + ").");
+                result = listener.BindServiceNameAsync(serviceName);
 
+#pragma warning restore CS4014
             }
             catch (UnauthorizedAccessException e)
             {
                 Debug.WriteIf(_debug, "Missing capability, please modify Package.appxmanifest in your main project to include Internet (client) and Internet (Client&Server).");
                 throw new UnauthorizedAccessException("Missing capability, please modify Package.appxmanifest in your main project to include Internet (client) and Internet (Client&Server) capabilities.", e);
+            }
+            catch (Exception e)
+            {
+                Debug.WriteLine("Error occured in connection from remote host (" + e.HResult + "; " + SocketError.GetStatus(e.HResult) + ").");
+                return;
+            }
+
+            if (result.ErrorCode != null)
+            {
+                Debug.WriteLine("Error when binding to port " + serviceName + " Error code: " + result.ErrorCode.HResult);
+                throw new Exception("Error while binding to the port.", result.ErrorCode);
             }
 
         }
