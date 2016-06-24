@@ -291,7 +291,7 @@ namespace Feri.MS.Http
             }
             catch (Exception e)
             {
-                Debug.WriteLine("Error occured in connection from remote host (" + e.HResult + "; " + SocketError.GetStatus(e.HResult) + ").");
+                Debug.WriteLine("Error occured in connection from remote host (" + e.Message + ").");
                 return;
             }
 
