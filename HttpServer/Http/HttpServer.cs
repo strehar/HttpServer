@@ -273,11 +273,24 @@ namespace Feri.MS.Http
             {
                 throw new InvalidDataException("Invalid service name in Start(string)");
             }
-            listener = new StreamSocketListener();
-            listener.ConnectionReceived += (sender, args) => ProcessRequestAsync(args.Socket);
+            try
+            {
+                listener = new StreamSocketListener();
+                listener.ConnectionReceived += (sender, args) => ProcessRequestAsync(args.Socket);
 #pragma warning disable CS4014
-            listener.BindServiceNameAsync(serviceName);
+                listener.BindServiceNameAsync(serviceName);
 #pragma warning restore CS4014
+            }
+            catch (System.Runtime.InteropServices.COMException e)
+            {
+                Debug.WriteLineIf(_debug, "An existing connection was forcibly closed by the remote host (" + e.HResult + "; " + SocketError.GetStatus(e.HResult) + ").");
+
+            }
+            catch (UnauthorizedAccessException e)
+            {
+                Debug.WriteIf(_debug, "Missing capability, please modify Package.appxmanifest in your main project to include Internet (client) and Internet (Client&Server).");
+                throw new UnauthorizedAccessException("Missing capability, please modify Package.appxmanifest in your main project to include Internet (client) and Internet (Client&Server) capabilities.", e);
+            }
 
         }
 
@@ -401,7 +414,8 @@ namespace Feri.MS.Http
                     HttpRootManager.ReturnErrorMessage(request, response, "415");
                     return;
                 }
-                else {
+                else
+                {
                     // če ni to, potem je napačna velikost....
                     string[] requestBody = request.ToString().Split('\n');
                     int lokacijaPodatkov = Array.IndexOf(requestBody, "\r") + 1;
